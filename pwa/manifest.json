@@ -1,0 +1,9 @@
+{
+  "name": "AirSentinel Cameroun",
+  "short_name": "AirSentinel",
+  "description": "Qualite de l air au Cameroun",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1A6B3C",
+  "theme_color": "#1A6B3C"
+}
