@@ -55,7 +55,7 @@ def render(profil):
                            font=dict(color=th["text"],size=13)),
                 legend=dict(font=dict(color=th["text2"],size=11), bgcolor="rgba(0,0,0,0)"))
             fig.update_xaxes(**GRID); fig.update_yaxes(**GRID)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
 
     with tabs[1]:
         ci2, cc = st.columns([1,2])
@@ -114,6 +114,6 @@ def render(profil):
         fig.update_layout(**PL,height=310,showlegend=False,
             title=dict(text=f"{T['bloc3_monthly_title']} · {ctx['scope_label']}",font=dict(color=th["text"],size=13)))
         fig.update_xaxes(**GRID); fig.update_yaxes(**GRID)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     sources_bar(f"XGBoost + LightGBM · Prophet · {T['sources_who']}", th)

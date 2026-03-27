@@ -50,48 +50,42 @@ def render(profil):
             autres = agg[agg["ville"] != ctx["ville_sel"]]
             sel    = agg[agg["ville"] == ctx["ville_sel"]]
             if len(autres) > 0:
-                fig.add_trace(go.Scattergeo(
+                fig.add_trace(go.Scattermapbox(
                     lat=autres["lat"], lon=autres["lon"], mode="markers",
-                    marker=dict(size=8, color="rgba(107,122,150,0.35)",
-                                line=dict(width=0.5,color="rgba(255,255,255,0.08)")),
+                    marker=dict(size=8, color="rgba(107,122,150,0.55)",
+                                allowrecolor=False),
                     hoverinfo="skip", showlegend=False))
             if len(sel) > 0:
-                fig.add_trace(go.Scattergeo(
+                fig.add_trace(go.Scattermapbox(
                     lat=sel["lat"], lon=sel["lon"], mode="markers+text",
                     marker=dict(size=24, color=sel["pm2_5_moyen"],
                         colorscale=[[0,th["green"]],[0.4,th["amber"]],[0.7,th["coral"]],[1,th["red"]]],
-                        cmin=5, cmax=80, colorbar=dict(title="PM2.5",thickness=12),
-                        line=dict(width=2.5,color=th["teal"])),
+                        cmin=5, cmax=80, colorbar=dict(title="PM2.5",thickness=20, len=1.0, y=0.5)),
                     text=sel["ville"], textposition="top center",
-                    textfont=dict(size=13,color=th["teal"]),
+                    textfont=dict(size=14, color=th["teal"]),
                     hovertemplate="<b>%{text}</b><br>PM2.5 : %{marker.color:.1f} µg/m³<extra></extra>"))
                 geo_center = dict(lat=float(sel["lat"].values[0]),lon=float(sel["lon"].values[0]))
-                geo_scale = 28
+                geo_zoom = 8.5
         else:
-            fig.add_trace(go.Scattergeo(
+            fig.add_trace(go.Scattermapbox(
                 lat=agg["lat"], lon=agg["lon"], mode="markers+text",
-                marker=dict(size=agg["pm2_5_moyen"].clip(8,30), color=agg["pm2_5_moyen"],
+                marker=dict(size=agg["pm2_5_moyen"].clip(10,25), color=agg["pm2_5_moyen"],
                     colorscale=[[0,th["green"]],[0.4,th["amber"]],[0.7,th["coral"]],[1,th["red"]]],
-                    cmin=5, cmax=80, colorbar=dict(title="PM2.5 µg/m³",thickness=12),
-                    line=dict(width=0.5,color="rgba(255,255,255,0.2)")),
+                    cmin=5, cmax=80, colorbar=dict(title="PM2.5 µg/m³",thickness=20, len=1.0, y=0.5)),
                 text=agg["ville"], textposition="top center",
-                textfont=dict(size=9,color=th["text2"]),
+                textfont=dict(size=10,color="#1e293b", weight="bold"),
                 hovertemplate="<b>%{text}</b><br>PM2.5 : %{marker.color:.1f} µg/m³<br>IRS : %{customdata:.3f}<extra></extra>",
                 customdata=agg["IRS"]))
-            geo_center = dict(lat=5.5,lon=12.3); geo_scale=12
+            geo_center = dict(lat=7.5, lon=12.8); geo_zoom = 4.85
 
         fig.update_layout(
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor=th["plot_bg"],
-            font=dict(color=th["text2"],size=12), margin=dict(l=10,r=10,t=44,b=10),
-            height=380,
+            font=dict(color=th["text2"],size=12), margin=dict(l=0,r=0,t=44,b=0),
+            height=650,
             title=dict(text=f"{T['bloc1_map_title']} · {ctx['scope_label']}",
-                       font=dict(color=th["text"],size=14)),
-            geo=dict(scope="africa", center=geo_center, projection_scale=geo_scale,
-                     showland=True, landcolor=th["bg_tertiary"],
-                     showocean=True, oceancolor=th["bg_primary"] if th["name"]=="dark" else "#c8e6fa",
-                     showcountries=True, countrycolor=th["border_soft"],
-                     showframe=False, bgcolor="rgba(0,0,0,0)"))
-        st.plotly_chart(fig, use_container_width=True)
+                       font=dict(color=th["text"],size=14), y=0.98),
+            mapbox=dict(style="open-street-map", center=geo_center, zoom=geo_zoom))
+        st.plotly_chart(fig, width="stretch")
 
     with col_side:
         img_card(IMAGES["carte_banner"], 90, T["bloc1_satellite_label"],
@@ -150,7 +144,7 @@ def render(profil):
         fig_reg.update_layout(**PL, height=300, showlegend=False,
             title=dict(text=lbl, font=dict(color=th["text"],size=13)))
         fig_reg.update_xaxes(**GRID); fig_reg.update_yaxes(gridcolor="rgba(0,0,0,0)")
-        st.plotly_chart(fig_reg, use_container_width=True)
+        st.plotly_chart(fig_reg, width="stretch")
 
     with cb:
         # Tendance PM2.5 sur les 12 derniers mois
@@ -170,7 +164,7 @@ def render(profil):
         fig_tend.update_layout(**PL, height=300, showlegend=False,
             title=dict(text=lbl2, font=dict(color=th["text"],size=13)))
         fig_tend.update_xaxes(**GRID); fig_tend.update_yaxes(**GRID)
-        st.plotly_chart(fig_tend, use_container_width=True)
+        st.plotly_chart(fig_tend, width="stretch")
 
     # ── Ligne 2 : Top 3 polluants + Top 5 villes critiques ───────────────────
     cc, cd = st.columns(2)
@@ -265,7 +259,7 @@ def render(profil):
             title=dict(text=lbl5, font=dict(color=th["text"],size=13)),
             legend=dict(font=dict(color=th["text2"],size=10),bgcolor="rgba(0,0,0,0)"))
         fig_ep.update_xaxes(**GRID); fig_ep.update_yaxes(gridcolor="rgba(0,0,0,0)")
-        st.plotly_chart(fig_ep, use_container_width=True)
+        st.plotly_chart(fig_ep, width="stretch")
 
     with cf:
         # Tableau tous les polluants

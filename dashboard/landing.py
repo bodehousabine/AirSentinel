@@ -161,7 +161,7 @@ def render_landing():
         # Bouton entrée
         btn_label = "🚀  Accéder au Dashboard  →" if lang == "fr" else "🚀  Open Dashboard  →"
         st.markdown('<div class="landing-btn">', unsafe_allow_html=True)
-        enter = st.button(btn_label, key="enter_dashboard", use_container_width=True)
+        enter = st.button(btn_label, key="enter_dashboard", width="stretch")
         st.markdown('</div>', unsafe_allow_html=True)
 
         # Footer équipe

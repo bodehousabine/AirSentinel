@@ -61,7 +61,7 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     if st.button("← " + ("Accueil" if _T == get_t("fr") else "Home"),
-                 key="btn_home", use_container_width=True):
+                 key="btn_home", width="stretch"):
         st.session_state["page"] = "landing"
         st.rerun()
 

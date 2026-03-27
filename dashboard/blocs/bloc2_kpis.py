@@ -56,7 +56,7 @@ def render(profil):
             title=dict(text=f"{T['bloc2_chart1_title']} · {ctx['scope_label']}",
                        font=dict(color=th["text"],size=13)))
         fig1.update_xaxes(**GRID); fig1.update_yaxes(**GRID)
-        st.plotly_chart(fig1, use_container_width=True)
+        st.plotly_chart(fig1, width="stretch")
     with c2:
         fig2 = go.Figure()
         fig2.add_trace(go.Histogram(x=df["IRS"], nbinsx=40,
@@ -70,6 +70,6 @@ def render(profil):
             title=dict(text=f"{T['bloc2_chart2_title']} · {ctx['scope_label']}",
                        font=dict(color=th["text"],size=13)))
         fig2.update_xaxes(**GRID); fig2.update_yaxes(**GRID)
-        st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(fig2, width="stretch")
 
     sources_bar(f"{T['sources_who']}", th)

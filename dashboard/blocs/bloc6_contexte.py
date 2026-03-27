@@ -27,7 +27,7 @@ def render(profil):
         fig.update_layout(**PL,height=240,showlegend=True,
             title=dict(text=f"{T['bloc6_chart1_title']} · {ctx['scope_annees']}",font=dict(color=th["text"],size=13)),
             legend=dict(font=dict(color=th["text2"],size=10),bgcolor="rgba(0,0,0,0)"))
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     with c2:
         df_brut=ctx["df_brut"]
         villes_sel  = st.session_state.get("ville_sel_list",  "ALL")
@@ -48,7 +48,7 @@ def render(profil):
                        f" · {ctx['scope_ville']}",font=dict(color=th["text"],size=13)),
             legend=dict(font=dict(color=th["text2"],size=11),bgcolor="rgba(0,0,0,0)"))
         fig.update_xaxes(**GRID); fig.update_yaxes(**GRID)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     with c3:
         eps={"Zone sahélienne":[42,28,35],"Zone équatoriale":[8,12,15],"Zone côtière":[5,8,10],"Zone montagne":[15,10,8],"Zone savane":[25,20,22]}
         zones=list(eps.keys())
@@ -61,7 +61,7 @@ def render(profil):
             title=dict(text=T["bloc6_chart3_title"],font=dict(color=th["text"],size=13)),
             legend=dict(font=dict(color=th["text2"],size=10),bgcolor="rgba(0,0,0,0)"))
         fig.update_xaxes(**GRID); fig.update_yaxes(gridcolor="rgba(0,0,0,0)")
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     st.markdown(f"<div style='font-size:12px;font-weight:500;color:{th['text']};margin:16px 0 12px;'>"
                 f"{T['bloc6_seasons_title']}</div>", unsafe_allow_html=True)
@@ -93,6 +93,6 @@ def render(profil):
         yaxis2=dict(title="Ozone µg/m³",overlaying="y",side="right",gridcolor="rgba(0,0,0,0)"))
     fig_uv.update_xaxes(**GRID)
     fig_uv.update_yaxes(title_text="UV index",**GRID)
-    st.plotly_chart(fig_uv, use_container_width=True)
+    st.plotly_chart(fig_uv, width="stretch")
 
     sources_bar(f"{T['sources_cecc']} · {T['sources_bauer']} · {T['sources_barker']} · {T['sources_who']}", th)

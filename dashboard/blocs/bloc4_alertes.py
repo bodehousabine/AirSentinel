@@ -109,5 +109,5 @@ def render(profil):
         title=dict(text=f"{T['bloc4_chart_title']} · {ctx['scope_label']}",font=dict(color=th["text"],size=13)),
         legend=dict(font=dict(color=th["text2"],size=11),bgcolor="rgba(0,0,0,0)"))
     fig.update_xaxes(**GRID); fig.update_yaxes(**GRID)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
     sources_bar(f"{T['sources_cecc']} · {T['sources_barker']} · {T['sources_bauer']}", th)
