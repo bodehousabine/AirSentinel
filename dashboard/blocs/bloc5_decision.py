@@ -116,9 +116,9 @@ def _rec_content(profil, profil_map, snk, tkey, snc, snt, ctx, th, T):
     pk = profil_map.get(profil, "citizen")
     st.markdown(f"""
     <div style="background:{th['bg_tertiary']};border:1px solid {th['border_soft']};
-                border-radius:12px;padding:20px;min-height:260px;">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;
-                    color:{th['text3']};margin-bottom:14px;">
+                border-radius:10px;padding:12px 16px;">
+        <div style="font-size:9px;text-transform:uppercase;letter-spacing:.1em;
+                    color:{th['text3']};margin-bottom:10px;">
             {T['bloc5_rec_header']} · {profil} · {ctx['scope_label']}
         </div>
     """, unsafe_allow_html=True)
@@ -311,6 +311,7 @@ def render(profil):
         with col_rec:
             _rec_content(profil, profil_map, snk_s, tkey_s, snc_s, snt_s, ctx, th, T)
 
+        # Populations vulnérables — pleine largeur sous les colonnes
         _vuln_section(snk_s, lang, th)
 
     sources_bar(f"{T['sources_who']} · ACP 42 villes · Ceccherini 2017", th)
