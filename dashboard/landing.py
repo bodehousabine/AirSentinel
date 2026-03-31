@@ -147,21 +147,10 @@ def render_landing():
                             margin-top:3px;letter-spacing:.06em;">{lbl}</div>
             </div>"""
 
-        badges_html = (
-            '<div style="display:flex;justify-content:center;gap:12px;'
-            'flex-wrap:wrap;margin-bottom:38px;">'
-            + badge("40",     lbl_villes)
-            + badge("10",     lbl_regions)
-            + badge("50 760", lbl_obs)
-            + badge("4",      lbl_pred)
-            + "</div>"
-        )
-        st.markdown(badges_html, unsafe_allow_html=True)
-
         # Bouton entrée
         btn_label = "🚀  Accéder au Dashboard  →" if lang == "fr" else "🚀  Open Dashboard  →"
         st.markdown('<div class="landing-btn">', unsafe_allow_html=True)
-        enter = st.button(btn_label, key="enter_dashboard", use_container_width=True)
+        enter = st.button(btn_label, key="enter_dashboard", width="stretch")
         st.markdown('</div>', unsafe_allow_html=True)
 
         # Footer équipe
