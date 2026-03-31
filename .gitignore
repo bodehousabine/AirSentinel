@@ -1,6 +1,7 @@
 *.xlsx
 *.csv
 *.pkl
+*.parquet
 __pycache__/
 *.pyc
 .env
