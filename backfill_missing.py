@@ -286,8 +286,8 @@ def main():
     print('=' * 65)
 
     # Charger dataset existant
-    print(f'\n📂 Chargement de {PATH_DATASET}...')
-    df_historique = pd.read_excel(PATH_DATASET)
+    print(f'\n📂 Chargement de {PATH_PARQUET}...')
+    df_historique = pd.read_parquet(PATH_PARQUET)
     df_historique['date'] = pd.to_datetime(df_historique['date'])
     print(f'✅ Dataset chargé : {len(df_historique):,} lignes')
     print(f'   Période actuelle : {df_historique["date"].min().date()} → {df_historique["date"].max().date()}')
@@ -379,15 +379,15 @@ def main():
         df_historique = df_historique.sort_values(['ville', 'date']).reset_index(drop=True)
 
         # Sauvegarder toutes les 10 jours
-        if i_jour % 10 == 0 or i_jour == len(dates_manquantes):
+        if True:
             print(f'  💾 Sauvegarde... ({len(df_historique):,} lignes)', end=' ')
-            df_historique.to_excel(PATH_DATASET, index=False)
+            #df_historique.to_excel(PATH_DATASET, index=False)
             df_historique.to_parquet(PATH_PARQUET, index=False)
             print('✅')
 
     # Sauvegarde finale
     print(f'\n💾 Sauvegarde finale...')
-    df_historique.to_excel(PATH_DATASET, index=False)
+    #df_historique.to_excel(PATH_DATASET, index=False)
     df_historique.to_parquet(PATH_PARQUET, index=False)
 
     print(f'\n✅ Dataset mis à jour : {len(df_historique):,} lignes')
