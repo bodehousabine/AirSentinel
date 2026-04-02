@@ -113,6 +113,23 @@ def build_css(th: dict, img_url: str) -> str:
     @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap');
 
     * {{ box-sizing: border-box; }}
+    
+    /* ── Animations Sentinel Mode ── */
+    @keyframes sentinel-pulse {{
+        0%   {{ border-color: rgba(239, 68, 68, 0.4); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }}
+        70%  {{ border-color: rgba(239, 68, 68, 0.9); box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }}
+        100% {{ border-color: rgba(239, 68, 68, 0.4); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }}
+    }}
+    .sentinel-pulse {{
+        animation: sentinel-pulse 2s infinite ease-in-out;
+    }}
+
+    /* Lueurs par niveau de risque */
+    .glow-red {{ box-shadow: 0 0 25px rgba(239, 68, 68, 0.45) !important; }}
+    .glow-amber {{ box-shadow: 0 0 20px rgba(245, 158, 11, 0.35) !important; }}
+    .glow-coral {{ box-shadow: 0 0 22px rgba(249, 115, 22, 0.40) !important; }}
+    .glow-green {{ box-shadow: 0 0 15px rgba(16, 185, 129, 0.20) !important; }}
+
     html, body, .stApp {{ font-family: 'Inter', sans-serif; color: {th['text']}; }}
 
     /* ── Fond avec image + overlay ── */

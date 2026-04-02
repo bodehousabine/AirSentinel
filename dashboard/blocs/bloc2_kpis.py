@@ -1,12 +1,11 @@
-"""blocs/bloc2_kpis.py — KPIs · bilingue + thème"""
 import streamlit as st
 import plotly.graph_objects as go
-from utils import get_context, banner, img_card, kpi_box, sources_bar, empty_state
+from utils import get_context, banner, img_card, kpi_box, sources_bar, empty_state, POLLUANTS, risk_color
 from assets import IMAGES
 
 def render(profil):
     ctx = get_context()
-    df=ctx["df"]; th=ctx["th"]; T=ctx["T"]
+    df=ctx["df"]; th=ctx["th"]; T=ctx["T"]; lang=ctx["lang"]
 
     col_b, col_img = st.columns([2,1])
     with col_b:
@@ -42,7 +41,8 @@ def render(profil):
               font=dict(color=th["text2"], size=12), margin=dict(l=44,r=20,t=44,b=36))
     GRID = dict(gridcolor=th["grid_color"], linecolor=th["line_color"], zeroline=False)
 
-    c1,c2 = st.columns(2)
+    # ── Ligne 1 : Tendance mensuelle + Saisonnalité ──────────────────────
+    c1, c2 = st.columns(2)
     with c1:
         men = df.groupby(df["date"].dt.to_period("M"))["pm2_5_moyen"].mean().reset_index()
         men["date"] = men["date"].dt.to_timestamp()
@@ -57,19 +57,72 @@ def render(profil):
                        font=dict(color=th["text"],size=13)))
         fig1.update_xaxes(**GRID); fig1.update_yaxes(**GRID)
         st.plotly_chart(fig1, width="stretch")
-    with c2:
-        fig2 = go.Figure()
-        fig2.add_trace(go.Histogram(x=df["IRS"], nbinsx=40,
-            marker_color=th["teal"], opacity=0.78))
-        for pv,lb,lc in [(float(ctx["p50"]),f"p50={ctx['p50']:.3f}",th["green"]),
-                         (float(ctx["p75"]),f"p75={ctx['p75']:.3f}",th["amber"]),
-                         (float(ctx["p90"]),f"p90={ctx['p90']:.3f}",th["red"])]:
-            fig2.add_vline(x=pv, line=dict(color=lc,width=1.5,dash="dot"),
-                annotation_text=lb, annotation_font_color=lc, annotation_font_size=10)
-        fig2.update_layout(**PL, height=260, showlegend=False,
-            title=dict(text=f"{T['bloc2_chart2_title']} · {ctx['scope_label']}",
-                       font=dict(color=th["text"],size=13)))
-        fig2.update_xaxes(**GRID); fig2.update_yaxes(**GRID)
-        st.plotly_chart(fig2, width="stretch")
 
-    sources_bar(f"{T['sources_who']}", th)
+    with c2:
+        lbl_s = "Saisonnalité PM2.5 · Moyenne mensuelle" if lang == "fr" else "PM2.5 Seasonality · Monthly average"
+        tend_men = df.groupby(df["date"].dt.month)["pm2_5_moyen"].mean().reset_index()
+        tend_men.columns = ["mois", "pm2_5_moyen"]
+        mois_n = ["Jan", "Fév", "Mar", "Avr", "Mai", "Jun", "Jul", "Aoû", "Sep", "Oct", "Nov", "Déc"] if lang == "fr" else \
+                   ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        tend_men["mois_label"] = tend_men["mois"].apply(lambda m: mois_n[m-1])
+
+        fig_s = go.Figure()
+        fig_s.add_trace(go.Scatter(x=tend_men["mois_label"], y=tend_men["pm2_5_moyen"], mode="lines+markers",
+            line=dict(color=th["blue"], width=3, shape='spline'),
+            marker=dict(size=7, color=th["blue"], line=dict(color=th["bg3"], width=1.5)),
+            fill="tozeroy", fillcolor="rgba(14,165,233,0.07)"))
+        fig_s.add_hline(y=15, line=dict(color=th["red"], width=1, dash="dash"),
+            annotation_text="OMS", annotation_font_color=th["red"], annotation_font_size=9)
+        fig_s.update_layout(**PL, height=280, showlegend=False,
+            title=dict(text=lbl_s, font=dict(color=th["text"], size=12)))
+        fig_s.update_xaxes(**GRID, tickfont=dict(size=9))
+        fig_s.update_yaxes(**GRID)
+        st.plotly_chart(fig_s, width="stretch")
+
+    # ── Ligne 2 : Seuils OMS ────────────────────────────
+    lbl6 = "Concentrations · Seuils OMS" if lang == "fr" else "Concentrations · WHO thresholds"
+    c_bdr, c_txt, c_t3, c_tert = th["border_soft"], th["text"], th["text3"], th["bg_tertiary"]
+    header = (
+        f'<div style="display:grid;grid-template-columns:20px 1fr 1fr 1fr 1fr;'
+        f'gap:15px;padding:8px 0;border-bottom:2px solid {c_bdr};font-size:12px;'
+        f'text-transform:uppercase;letter-spacing:.05em;color:{c_t3};font-weight:700;">'
+        '<div></div><div>Polluant</div>'
+        '<div style="text-align:right;">Conc.</div>'
+        '<div style="text-align:right;">OMS</div>'
+        '<div style="text-align:center;">État</div></div>'
+    )
+    rows_data = []
+    for p in POLLUANTS:
+        if p["col"] in df.columns:
+            moy = float(df[p["col"]].mean())
+            rc = risk_color(moy, p["seuil"], th)
+            ratio = moy / p["seuil"]
+            badge = "✅" if moy <= p["seuil"] else ("⚠️" if moy <= p["seuil"] * 1.5 else "🔴")
+            nom_p = p["nom_fr"] if lang == "fr" else p["nom_en"]
+            
+            rows_data.append({
+                "ratio": ratio,
+                "html": (
+                    f'<div style="display:grid;grid-template-columns:20px 1fr 1fr 1fr 1fr;'
+                    f'gap:15px;padding:15px 0;border-bottom:1px solid {c_bdr}33;align-items:center;">'
+                    f'<div style="width:10px;height:10px;border-radius:50%;background:{rc};"></div>'
+                    f'<div style="font-size:14px;font-weight:600;color:{c_txt};">{nom_p}</div>'
+                    f'<div style="font-size:14px;color:{rc};font-weight:700;text-align:right;font-family:monospace;">{moy:.1f}</div>'
+                    f'<div style="font-size:13px;color:{c_t3};text-align:right;font-family:monospace;">{p["seuil"]}</div>'
+                    f'<div style="font-size:18px;text-align:center;">{badge}</div></div>'
+                )
+            })
+
+    # Tri par ratio décroissant
+    rows_data.sort(key=lambda x: x["ratio"], reverse=True)
+    rows_p = [r["html"] for r in rows_data]
+
+    html_poll = (
+        f'<div style="background:{c_tert};border:1px solid {c_bdr};border-radius:10px;'
+        'padding:15px 20px;height:auto;box-sizing:border-box;">'
+        f'<div style="font-size:14px;font-weight:700;color:{c_txt};margin-bottom:12px;">⚗️ {lbl6}</div>'
+        + header + "".join(rows_p) + '</div>'
+    )
+    st.markdown(html_poll, unsafe_allow_html=True)
+
+    sources_bar(f"{T['sources_who']} · {T['sources_cecc']} · {T['sources_bauer']}", th)

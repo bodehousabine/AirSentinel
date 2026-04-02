@@ -136,7 +136,7 @@ with st.sidebar:
 
 st.markdown(build_css(th, IMAGES["bg_app"]), unsafe_allow_html=True)
 
-banner(img_url=IMAGES["header_banner"], height=235, title=T["header_title"], subtitle=T["header_subtitle"], th=th, accent=th["teal"], tint_hex="#00d4b1", tint_strength=0.30)
+
 
 ctx = get_context()
 nc, nt, _ = irs_level(ctx["irs_moy"], ctx["p50"], ctx["p75"], ctx["p90"], T, th)

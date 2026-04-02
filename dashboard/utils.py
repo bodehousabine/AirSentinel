@@ -13,32 +13,30 @@ from translations import get_t
 MOIS_FR = ["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"]
 MOIS_EN = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
 
-# ── 40 villes réelles du dataset ──────────────────────────────────────────────
+# ── 40 villes réelles du dataset (Normalisées sans accents pour la correspondance) ──
 VILLES = [
-    "Yaoundé","Douala","Garoua","Maroua","Bamenda","Bafoussam",
-    "Ngaoundéré","Bertoua","Ebolowa","Limbe","Kumba","Nkongsamba",
-    "Edéa","Loum","Mbalmayo","Bafia","Kribi","Sangmélima","Dschang",
-    "Mbouda","Foumban","Tibati","Meiganga","Ngaoundal","Banyo",
-    "Garoua-Boulaï","Abong-Mbang","Yokadouma","Obala",
-    "Monatélé","Evodoula","Mfou","Soa","Eseka","Nanga-Eboko",
-    "Ntui","Mbandjock","Bélabo","Mokolo"
+    "Abong-Mbang", "Akonolinga", "Ambam", "Bafia", "Bafoussam", "Bamenda", "Batouri", "Bertoua", "Buea", "Douala",
+    "Dschang", "Ebolowa", "Edea", "Foumban", "Garoua", "Guider", "Kousseri", "Kribi", "Kumba", "Kumbo",
+    "Limbe", "Loum", "Mamfe", "Maroua", "Mbalmayo", "Mbengwi", "Mbouda", "Meiganga", "Mokolo", "Ngaoundere",
+    "Nkongsamba", "Poli", "Sangmelima", "Tibati", "Tignere", "Touboro", "Wum", "Yagoua", "Yaounde", "Yokadouma"
 ]
 REGIONS = ["Centre","Littoral","Nord","Extreme-Nord","Nord-Ouest",
            "Ouest","Adamaoua","Est","Sud","Sud-Ouest"]
 COORDS = {
-    "Yaoundé":(3.848,11.502),"Douala":(4.048,9.704),"Garoua":(9.301,13.395),
-    "Maroua":(10.591,14.316),"Bamenda":(5.959,10.145),"Bafoussam":(5.478,10.417),
-    "Ngaoundéré":(7.322,13.584),"Bertoua":(4.579,13.684),"Ebolowa":(2.900,11.153),
-    "Limbe":(4.015,9.190),"Kumba":(4.636,9.447),"Nkongsamba":(4.950,9.934),
-    "Edéa":(3.801,10.132),"Loum":(4.717,9.733),"Mbalmayo":(3.516,11.502),
-    "Bafia":(4.750,11.230),"Kribi":(2.940,9.910),"Sangmélima":(2.930,11.980),
-    "Dschang":(5.447,10.059),"Mbouda":(5.633,10.253),"Foumban":(5.726,10.916),
-    "Tibati":(6.469,12.629),"Meiganga":(6.520,14.298),"Ngaoundal":(6.456,13.372),
-    "Banyo":(6.750,11.817),"Garoua-Boulaï":(5.884,14.554),"Abong-Mbang":(3.991,13.179),
-    "Yokadouma":(3.517,15.050),"Obala":(4.167,11.533),"Monatélé":(4.267,11.200),
-    "Evodoula":(3.967,11.333),"Mfou":(3.717,11.633),"Soa":(3.983,11.550),
-    "Eseka":(3.650,10.767),"Nanga-Eboko":(4.683,12.367),"Ntui":(4.450,11.633),
-    "Mbandjock":(4.450,11.900),"Bélabo":(4.933,13.300),"Mokolo":(10.733,13.800),
+    "Abong-Mbang":(3.98,13.18),"Akonolinga":(3.77,12.25),"Ambam":(2.38,11.28),
+    "Bafia":(4.75,11.23),"Bafoussam":(5.48,10.42),"Bamenda":(5.96,10.15),
+    "Batouri":(4.43,14.37),"Bertoua":(4.58,13.68),"Buea":(4.15,9.23),
+    "Douala":(4.05,9.70),"Dschang":(5.45,10.06),"Ebolowa":(2.90,11.15),
+    "Edea":(3.80,10.13),"Foumban":(5.73,10.92),"Garoua":(9.30,13.40),
+    "Guider":(9.93,13.95),"Kousseri":(12.08,15.03),"Kribi":(2.94,9.91),
+    "Kumba":(4.64,9.45),"Kumbo":(6.20,10.67),"Limbe":(4.02,9.19),
+    "Loum":(4.72,9.73),"Mamfe":(5.75,9.32),"Maroua":(10.59,14.32),
+    "Mbalmayo":(3.52,11.50),"Mbengwi":(6.02,10.00),"Mbouda":(5.63,10.25),
+    "Meiganga":(6.52,14.30),"Mokolo":(10.73,13.80),"Ngaoundere":(7.32,13.58),
+    "Nkongsamba":(4.95,9.93),"Poli":(8.48,13.23),"Sangmelima":(2.93,11.98),
+    "Tibati":(6.47,12.63),"Tignere":(7.37,12.65),"Touboro":(7.77,15.37),
+    "Wum":(6.38,10.07),"Yagoua":(10.33,15.23),"Yaounde":(3.85,11.50),
+    "Yokadouma":(3.52,15.05)
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -366,16 +364,25 @@ def season_card(img_url, periode, titre, detail, accent, th, tint_hex=None):
 
 def kpi_box(value, label, sublabel, color, th):
     r, g, b = _rgb(color)
+    # Mapping des classes de lueur selon la couleur
+    glow_class = ""
+    if color == th.get("red"):    glow_class = "glow-red"
+    if color == th.get("amber"):  glow_class = "glow-amber"
+    if color == th.get("coral"):  glow_class = "glow-coral"
+    if color == th.get("green"):  glow_class = "glow-green"
+
     st.markdown(f"""
-    <div style="background:linear-gradient(145deg,{th['bg_tertiary']} 0%,{th['bg_elevated']} 100%);
-                border:1px solid rgba({r},{g},{b},0.22);border-top:2px solid {color};
+    <div class="{glow_class}" style="background:linear-gradient(145deg,{th['bg_tertiary']} 0%,{th['bg_elevated']} 100%);
+                border:1px solid rgba({r},{g},{b},0.35);border-top:3px solid {color};
                 border-radius:12px;padding:16px 12px;text-align:center;height:106px;
                 display:flex;flex-direction:column;justify-content:center;
-                box-shadow:0 2px 16px rgba({r},{g},{b},0.08);">
-        <div style="font-size:20px;font-weight:600;color:{color};
-                    margin-bottom:4px;line-height:1.15;">{value}</div>
-        <div style="font-size:11px;font-weight:500;color:{th['text']};">{label}</div>
-        <div style="font-size:10px;color:{th['text3']};margin-top:3px;">{sublabel}</div>
+                transition: all 0.3s ease;">
+        <div style="font-size:24px;font-weight:700;color:{color};
+                    margin-bottom:4px;line-height:1.15;text-shadow:0 2px 10px rgba({r},{g},{b},0.3);">
+            {value}
+        </div>
+        <div style="font-size:11px;font-weight:600;color:{th['text']};text-transform:uppercase;letter-spacing:0.05em;">{label}</div>
+        <div style="font-size:10px;color:{th['text3']};margin-top:3px;font-family:'DM Mono',monospace;">{sublabel}</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -412,3 +419,20 @@ def irs_color(val, p50, p75, p90):
     c, l, nk = irs_level(val, p50, p75, p90, T, th)
     emoji = {"faible": "🟢", "modere": "🟡", "eleve": "🟠", "critique": "🔴"}[nk]
     return c, f"{emoji} {l}", nk
+
+
+# ── POLLUANTS & SEUILS ────────────────────────────────────────────────────────
+POLLUANTS = [
+    {"col":"pm2_5_moyen", "nom_fr":"PM2.5",  "nom_en":"PM2.5",  "seuil":15,   "unite":"µg/m³", "color":"#f87171"},
+    {"col":"pm10_moyen",  "nom_fr":"PM10",   "nom_en":"PM10",   "seuil":45,   "unite":"µg/m³", "color":"#fb923c"},
+    {"col":"no2_moyen",   "nom_fr":"NO₂",    "nom_en":"NO₂",    "seuil":25,   "unite":"µg/m³", "color":"#fbbf24"},
+    {"col":"so2_moyen",   "nom_fr":"SO₂",    "nom_en":"SO₂",    "seuil":40,   "unite":"µg/m³", "color":"#a78bfa"},
+    {"col":"ozone_moyen", "nom_fr":"Ozone",  "nom_en":"Ozone",  "seuil":100,  "unite":"µg/m³", "color":"#38bdf8"},
+    {"col":"co_moyen",    "nom_fr":"CO",     "nom_en":"CO",     "seuil":10,  "unite":"mg/m³", "color":"#34d399"},
+]
+
+def risk_color(val, seuil, th):
+    if val <= seuil:             return th["green"]
+    if val <= seuil * 1.5:      return th["amber"]
+    if val <= seuil * 2.5:      return th["coral"]
+    return                             th["red"]
