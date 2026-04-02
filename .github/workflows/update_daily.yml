@@ -3,7 +3,7 @@ name: 📅 AirSentinel — Mise à jour quotidienne
 on:
   schedule:
     # Tous les jours à 00h00 UTC (08h00 heure Cameroun)
-    - cron: '0 0 * * *'
+    - cron: '0 3 * * *'
   workflow_dispatch:
     # Permet aussi de lancer manuellement depuis GitHub
 
