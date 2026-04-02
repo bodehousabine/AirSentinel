@@ -286,13 +286,15 @@ def _rgb(hex_color):
     return int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
 
 
-def banner(img_url, height, title, subtitle, th, accent=None, tint_hex=None, tint_strength=0.32):
+def banner(img_url, height, title, subtitle, th, accent=None, tint_hex=None, tint_strength=0.32, no_frame=False):
     ac = accent or th["teal"]; tint = tint_hex or ac; r, g, b = _rgb(tint)
+    border_style = "none" if no_frame else f"1px solid rgba({r},{g},{b},0.32)"
+    shadow_style = "none" if no_frame else f"0 6px 40px rgba({r},{g},{b},0.15)"
     st.markdown(f"""
     <div style="position:relative;width:100%;height:{height}px;border-radius:16px;
                 overflow:hidden;margin-bottom:20px;
-                border:1px solid rgba({r},{g},{b},0.32);
-                box-shadow:0 6px 40px rgba({r},{g},{b},0.15);">
+                border:{border_style};
+                box-shadow:{shadow_style};">
         <img src="{img_url}"
              style="position:absolute;inset:0;width:100%;height:100%;
                     object-fit:cover;object-position:center;
@@ -311,20 +313,22 @@ def banner(img_url, height, title, subtitle, th, accent=None, tint_hex=None, tin
                         color:{ac};margin-bottom:8px;font-family:'DM Mono',monospace;">
                 AirSentinel · IndabaX 2026
             </div>
-            <div style="font-size:23px;font-weight:600;color:#e0f2fe;line-height:1.25;
-                        text-shadow:0 2px 18px rgba(0,0,0,0.65);">{title}</div>
+            <div style="font-size:30px;font-weight:800;color:#f0f9ff;line-height:1.2;
+                        text-shadow:0 4px 24px rgba(0,0,0,0.8);"> {title}</div>
             <div style="font-size:13px;color:rgba(224,242,254,0.72);margin-top:6px;">{subtitle}</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
 
-def img_card(img_url, height, label, desc, th, accent=None, tint_hex=None, tint_strength=0.28):
+def img_card(img_url, height, label, desc, th, accent=None, tint_hex=None, tint_strength=0.28, no_frame=False):
     ac = accent or th["teal"]; tint = tint_hex or ac; r, g, b = _rgb(tint)
+    border_style = "none" if no_frame else f"1px solid rgba({r},{g},{b},0.26)"
+    shadow_style = "none" if no_frame else f"0 2px 18px rgba({r},{g},{b},0.10)"
     st.markdown(f"""
     <div style="position:relative;border-radius:12px;overflow:hidden;height:{height}px;
-                border:1px solid rgba({r},{g},{b},0.26);
-                box-shadow:0 2px 18px rgba({r},{g},{b},0.10);">
+                border:{border_style};
+                box-shadow:{shadow_style};">
         <img src="{img_url}"
              style="width:100%;height:100%;object-fit:cover;
                     filter:saturate(0.85) brightness(0.70);"
@@ -373,15 +377,20 @@ def season_card(img_url, periode, titre, detail, accent, th, tint_hex=None):
 def kpi_box(value, label, sublabel, color, th):
     r, g, b = _rgb(color)
     st.markdown(f"""
-    <div style="background:linear-gradient(145deg,{th['bg_tertiary']} 0%,{th['bg_elevated']} 100%);
-                border:1px solid rgba({r},{g},{b},0.22);border-top:2px solid {color};
-                border-radius:12px;padding:16px 12px;text-align:center;height:106px;
+    <div style="background:linear-gradient(165deg,{th['bg_tertiary']} 0%,{th['bg_elevated']} 100%);
+                border:1px solid rgba({r},{g},{b},0.3);border-top:3px solid {color};
+                border-radius:14px;padding:20px 12px;text-align:center;height:120px;
                 display:flex;flex-direction:column;justify-content:center;
-                box-shadow:0 2px 16px rgba({r},{g},{b},0.08);">
-        <div style="font-size:20px;font-weight:600;color:{color};
-                    margin-bottom:4px;line-height:1.15;">{value}</div>
-        <div style="font-size:11px;font-weight:500;color:{th['text']};">{label}</div>
-        <div style="font-size:10px;color:{th['text3']};margin-top:3px;">{sublabel}</div>
+                box-shadow:0 4px 20px rgba(0,0,0,0.2), 0 0 15px rgba({r},{g},{b},0.12);
+                transition: transform 0.2s ease-in-out;">
+        <div style="font-size:28px;font-weight:800;color:{color};
+                    margin-bottom:6px;line-height:1;
+                    text-shadow: 0 0 12px rgba({r},{g},{b},0.4);
+                    font-family:'Inter', sans-serif;">{value}</div>
+        <div style="font-size:12px;font-weight:600;color:{th['text']};
+                    text-transform:uppercase;letter-spacing:0.05em;">{label}</div>
+        <div style="font-size:10px;color:{th['text3']};margin-top:5px;
+                    opacity:0.8;">{sublabel}</div>
     </div>
     """, unsafe_allow_html=True)
 

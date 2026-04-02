@@ -7,14 +7,9 @@ def render(profil):
     ctx = get_context()
     df=ctx["df"]; th=ctx["th"]; T=ctx["T"]; lang=ctx["lang"]
 
-    col_b, col_img = st.columns([2,1])
-    with col_b:
-        banner(IMAGES["kpi_banner"], 185,
-               f"{T['bloc2_label']} · {ctx['scope_label']}",
-               T["bloc2_chart1_title"], th, accent=th["blue"], tint_hex="#0ea5e9", tint_strength=0.30)
-    with col_img:
-        img_card(IMAGES["kpi_side"], 185, "Pollution", "PM2.5 · Smog", th,
-                 tint_hex="#0ea5e9", tint_strength=0.28)
+    banner(IMAGES["kpi_banner"], 185,
+           f"{T['bloc2_label']} · {ctx['scope_label']}",
+           T["bloc2_chart1_title"], th, accent=th["blue"], tint_hex="#0ea5e9", tint_strength=0.30)
 
     if len(df) == 0: empty_state(T, th); return
 
@@ -54,7 +49,7 @@ def render(profil):
             annotation_text=T["who_threshold"], annotation_font_color=th["red"], annotation_font_size=10)
         fig1.update_layout(**PL, height=260, showlegend=False,
             title=dict(text=f"{T['bloc2_chart1_title']} · {ctx['scope_label']}",
-                       font=dict(color=th["text"],size=13)))
+                       font=dict(color=th["text"], size=16, weight="bold")))
         fig1.update_xaxes(**GRID); fig1.update_yaxes(**GRID)
         st.plotly_chart(fig1, width="stretch")
 
@@ -74,7 +69,7 @@ def render(profil):
         fig_s.add_hline(y=15, line=dict(color=th["red"], width=1, dash="dash"),
             annotation_text="OMS", annotation_font_color=th["red"], annotation_font_size=9)
         fig_s.update_layout(**PL, height=280, showlegend=False,
-            title=dict(text=lbl_s, font=dict(color=th["text"], size=12)))
+            title=dict(text=lbl_s, font=dict(color=th["text"], size=16, weight="bold")))
         fig_s.update_xaxes(**GRID, tickfont=dict(size=9))
         fig_s.update_yaxes(**GRID)
         st.plotly_chart(fig_s, width="stretch")
@@ -83,9 +78,9 @@ def render(profil):
     lbl6 = "Concentrations · Seuils OMS" if lang == "fr" else "Concentrations · WHO thresholds"
     c_bdr, c_txt, c_t3, c_tert = th["border_soft"], th["text"], th["text3"], th["bg_tertiary"]
     header = (
-        f'<div style="display:grid;grid-template-columns:20px 1fr 1fr 1fr 1fr;'
-        f'gap:15px;padding:8px 0;border-bottom:2px solid {c_bdr};font-size:12px;'
-        f'text-transform:uppercase;letter-spacing:.05em;color:{c_t3};font-weight:700;">'
+        f'<div style="display:grid;grid-template-columns:30px 1.5fr 1fr 1fr 1fr;'
+        f'gap:15px;padding:12px 0;border-bottom:2px solid {c_bdr};font-size:13px;'
+        f'text-transform:uppercase;letter-spacing:.08em;color:{c_t3};font-weight:700;">'
         '<div></div><div>Polluant</div>'
         '<div style="text-align:right;">Conc.</div>'
         '<div style="text-align:right;">OMS</div>'
@@ -103,13 +98,15 @@ def render(profil):
             rows_data.append({
                 "ratio": ratio,
                 "html": (
-                    f'<div style="display:grid;grid-template-columns:20px 1fr 1fr 1fr 1fr;'
-                    f'gap:15px;padding:15px 0;border-bottom:1px solid {c_bdr}33;align-items:center;">'
-                    f'<div style="width:10px;height:10px;border-radius:50%;background:{rc};"></div>'
-                    f'<div style="font-size:14px;font-weight:600;color:{c_txt};">{nom_p}</div>'
-                    f'<div style="font-size:14px;color:{rc};font-weight:700;text-align:right;font-family:monospace;">{moy:.1f}</div>'
-                    f'<div style="font-size:13px;color:{c_t3};text-align:right;font-family:monospace;">{p["seuil"]}</div>'
-                    f'<div style="font-size:18px;text-align:center;">{badge}</div></div>'
+                    f'<div style="display:grid;grid-template-columns:30px 1.5fr 1fr 1fr 1fr;'
+                    f'gap:15px;padding:22px 0;border-bottom:1px solid {c_bdr}33;align-items:center;">'
+                    f'<div style="width:14px;height:14px;border-radius:50%;background:{rc};'
+                    f'box-shadow:0 0 12px {rc}66;"></div>'
+                    f'<div style="font-size:16px;font-weight:700;color:{c_txt};">{nom_p}</div>'
+                    f'<div style="font-size:22px;color:{rc};font-weight:800;text-align:right;font-family:monospace;'
+                    f'text-shadow:0 0 8px {rc}33;">{moy:.1f}</div>'
+                    f'<div style="font-size:15px;color:{c_t3};text-align:right;font-family:monospace;opacity:0.7;">{p["seuil"]}</div>'
+                    f'<div style="font-size:26px;text-align:center;">{badge}</div></div>'
                 )
             })
 
@@ -120,7 +117,8 @@ def render(profil):
     html_poll = (
         f'<div style="background:{c_tert};border:1px solid {c_bdr};border-radius:10px;'
         'padding:15px 20px;height:auto;box-sizing:border-box;">'
-        f'<div style="font-size:14px;font-weight:700;color:{c_txt};margin-bottom:12px;">⚗️ {lbl6}</div>'
+        f'<div style="font-size:18px;font-weight:800;color:{c_txt};margin-bottom:16px;'
+        f'padding-bottom:10px;border-bottom:3px solid {th["blue"]};">⚗️ {lbl6}</div>'
         + header + "".join(rows_p) + '</div>'
     )
     st.markdown(html_poll, unsafe_allow_html=True)

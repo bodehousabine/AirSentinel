@@ -297,8 +297,9 @@ def render(profil):
                         font=dict(color=th['text2'], size=10),
                         bgcolor='rgba(0,0,0,0)'),
             xaxis=dict(**GRID, tickfont=dict(size=10, color=th['text'])),
-            yaxis=dict(**GRID, title='PM2.5 µg/m³', titlefont=dict(size=10),
-                       tickfont=dict(size=10, color=th['text'])),
+            yaxis=dict(**GRID,
+                    title=dict(text='PM2.5 µg/m³', font=dict(size=10)),
+                    tickfont=dict(size=10, color=th['text'])),
             hovermode='x unified',
         )
         st.plotly_chart(fig_tl, width="stretch")
