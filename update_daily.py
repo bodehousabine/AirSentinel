@@ -390,12 +390,13 @@ def main():
     print('=' * 65)
 
     # ── Charger le dataset existant ───────────────────────────────────────
-    print(f'\n📂 Chargement de {PATH_DATASET}...')
+    # Après
+    print(f'\n📂 Chargement du parquet...')
     if not os.path.exists(PATH_DATASET):
         print(f'❌ Fichier introuvable : {PATH_DATASET}')
         return
 
-    df_historique = pd.read_excel(PATH_DATASET)
+    df_historique = pd.read_parquet(PATH_DATASET.replace('.xlsx', '.parquet'))
     df_historique['date'] = pd.to_datetime(df_historique['date'])
     print(f'✅ Dataset chargé : {len(df_historique):,} lignes')
 
@@ -479,15 +480,12 @@ def main():
 
     # ── Sauvegarder ───────────────────────────────────────────────────────
     print(f'\n💾 Sauvegarde dans {PATH_DATASET}...')
-    df_updated.to_excel(PATH_DATASET, index=False)
+    #df_updated.to_excel(PATH_DATASET, index=False)
+    df_updated.to_parquet(PATH_DATASET.replace('.xlsx', '.parquet'), index=False)
     print(f'✅ Dataset mis à jour : {len(df_updated):,} lignes')
     print(f'   Nouvelles lignes ajoutées : {len(df_new_complet)}')
     print(f'   Nouvelle période : {df_updated["date"].min().date()} → {df_updated["date"].max().date()}')
     
-    # ── Sauvegarder aussi en parquet (pour le dashboard) ─────────────────
-    print('💾 Conversion en parquet...')
-    df_updated.to_parquet(PATH_DATASET.replace('.xlsx', '.parquet'), index=False)
-    print('✅ Parquet mis à jour')
     
     print('\n' + '=' * 65)
     print('  ✅ Mise à jour terminée !')
