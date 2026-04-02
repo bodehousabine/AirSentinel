@@ -3,7 +3,7 @@ utils.py — AirSentinel Cameroun
 get_context() avec lang + theme, composants visuels adaptatifs.
 OPTIMISÉ : lecture parquet (5-10x plus rapide que xlsx)
 """
-global VILLES, REGIONS
+global VILLES, REGIONS, COORDS
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -18,27 +18,29 @@ MOIS_EN = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","De
 VILLES = []  # sera chargé dynamiquement depuis le dataset
 #
 REGIONS = []
-COORDS = {
-    "Yaoundé":(3.848,11.502),"Douala":(4.048,9.704),"Garoua":(9.301,13.395),
-    "Maroua":(10.591,14.316),"Bamenda":(5.959,10.145),"Bafoussam":(5.478,10.417),
-    "Ngaoundéré":(7.322,13.584),"Bertoua":(4.579,13.684),"Ebolowa":(2.900,11.153),
-    "Limbe":(4.015,9.190),"Kumba":(4.636,9.447),"Nkongsamba":(4.950,9.934),
-    "Edéa":(3.801,10.132),"Loum":(4.717,9.733),"Mbalmayo":(3.516,11.502),
-    "Bafia":(4.750,11.230),"Kribi":(2.940,9.910),"Sangmélima":(2.930,11.980),
-    "Dschang":(5.447,10.059),"Mbouda":(5.633,10.253),"Foumban":(5.726,10.916),
-    "Tibati":(6.469,12.629),"Meiganga":(6.520,14.298),"Ngaoundal":(6.456,13.372),
-    "Banyo":(6.750,11.817),"Garoua-Boulaï":(5.884,14.554),"Abong-Mbang":(3.991,13.179),
-    "Yokadouma":(3.517,15.050),"Obala":(4.167,11.533),"Monatélé":(4.267,11.200),
-    "Evodoula":(3.967,11.333),"Mfou":(3.717,11.633),"Soa":(3.983,11.550),
-    "Eseka":(3.650,10.767),"Nanga-Eboko":(4.683,12.367),"Ntui":(4.450,11.633),
-    "Mbandjock":(4.450,11.900),"Bélabo":(4.933,13.300),"Mokolo":(10.733,13.800),
-}
+COORDS = {}
+
+POLLUANTS = [
+    {"col":"pm2_5_moyen", "nom_fr":"PM2.5",  "nom_en":"PM2.5",  "seuil":15.0,  "unite":"µg/m³", "color":"#f87171"},
+    {"col":"pm10_moyen",  "nom_fr":"PM10",   "nom_en":"PM10",   "seuil":45.0,  "unite":"µg/m³", "color":"#fb923c"},
+    {"col":"no2_moyen",   "nom_fr":"NO₂",    "nom_en":"NO₂",    "seuil":25.0,  "unite":"µg/m³", "color":"#fbbf24"},
+    {"col":"so2_moyen",   "nom_fr":"SO₂",    "nom_en":"SO₂",    "seuil":40.0,  "unite":"µg/m³", "color":"#a78bfa"},
+    {"col":"ozone_moyen", "nom_fr":"Ozone",  "nom_en":"Ozone",  "seuil":100.0, "unite":"µg/m³", "color":"#38bdf8"},
+    {"col":"co_moyen",    "nom_fr":"CO",     "nom_en":"CO",     "seuil":10.0,  "unite":"µg/m³", "color":"#34d399"},
+]
+
+def risk_color(val, seuil, th):
+    if val <= seuil:        return th["green"]
+    if val <= seuil * 1.5:  return th["amber"]
+    if val <= seuil * 2.5:  return th["coral"]
+    return                         th["red"]
 
 # ══════════════════════════════════════════════════════════════════════════════
 # DONNÉES — lecture parquet (rapide) avec fallback xlsx
 # ══════════════════════════════════════════════════════════════════════════════
 @st.cache_data(ttl=3600)
 def load_data():
+    global VILLES, REGIONS, COORDS  # ← ajoute cette ligne en PREMIÈRE ligne
     import os
 
     # ── Essai parquet (5-10x plus rapide) ────────────────────────────────
@@ -161,8 +163,11 @@ def load_data():
         )
     
     VILLES = sorted(df["ville"].unique().tolist())
-
     REGIONS = sorted(df["region"].unique().tolist())
+    COORDS  = {
+    row["ville"]: (row["latitude"], row["longitude"])
+    for _, row in df.drop_duplicates("ville")[["ville","latitude","longitude"]].iterrows()
+                }
 
     return df
     

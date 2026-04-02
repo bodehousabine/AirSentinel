@@ -191,7 +191,7 @@ def render(profil):
             )
             fig.update_xaxes(**GRID)
             fig.update_yaxes(**GRID)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
 
             # KPIs prédiction
             k1, k2, k3 = st.columns(3)
@@ -308,7 +308,7 @@ def render(profil):
                         yaxis=dict(**GRID, title="PM2.5 prédit (µg/m³)"),
                         legend=dict(font=dict(color=th["text2"], size=10), bgcolor="rgba(0,0,0,0)")
                     )
-                    st.plotly_chart(fig_sc, use_container_width=True)
+                    st.plotly_chart(fig_sc, width="stretch")
 
                 # Timeline ville de référence
                 with col_tl:
@@ -344,7 +344,7 @@ def render(profil):
                         yaxis=dict(**GRID, title="PM2.5 (µg/m³)"),
                         legend=dict(font=dict(color=th["text2"], size=10), bgcolor="rgba(0,0,0,0)")
                     )
-                    st.plotly_chart(fig_tl, use_container_width=True)
+                    st.plotly_chart(fig_tl, width="stretch")
             else:
                 st.info("Données de test 2025 insuffisantes.")
         else:
@@ -452,7 +452,7 @@ def render(profil):
         )
         fig.update_xaxes(**GRID)
         fig.update_yaxes(**GRID)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     sources_bar(
         f"Modèle Hybride Régression+ARIMA · Box & Jenkins (1976) · "
