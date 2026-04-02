@@ -3,7 +3,7 @@ utils.py — AirSentinel Cameroun
 get_context() avec lang + theme, composants visuels adaptatifs.
 OPTIMISÉ : lecture parquet (5-10x plus rapide que xlsx)
 """
-global VILLES, REGIONS, COORDS
+global VILLES, REGIONS
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -18,7 +18,6 @@ MOIS_EN = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","De
 VILLES = []  # sera chargé dynamiquement depuis le dataset
 #
 REGIONS = []
-COORDS = {}
 
 POLLUANTS = [
     {"col":"pm2_5_moyen", "nom_fr":"PM2.5",  "nom_en":"PM2.5",  "seuil":15.0,  "unite":"µg/m³", "color":"#f87171"},
@@ -26,7 +25,7 @@ POLLUANTS = [
     {"col":"no2_moyen",   "nom_fr":"NO₂",    "nom_en":"NO₂",    "seuil":25.0,  "unite":"µg/m³", "color":"#fbbf24"},
     {"col":"so2_moyen",   "nom_fr":"SO₂",    "nom_en":"SO₂",    "seuil":40.0,  "unite":"µg/m³", "color":"#a78bfa"},
     {"col":"ozone_moyen", "nom_fr":"Ozone",  "nom_en":"Ozone",  "seuil":100.0, "unite":"µg/m³", "color":"#38bdf8"},
-    {"col":"co_moyen",    "nom_fr":"CO",     "nom_en":"CO",     "seuil":10.0,  "unite":"µg/m³", "color":"#34d399"},
+    {"col":"co_moyen",    "nom_fr":"CO",     "nom_en":"CO",     "seuil":250.0,  "unite":"µg/m³", "color":"#34d399"},
 ]
 
 def risk_color(val, seuil, th):
@@ -40,7 +39,7 @@ def risk_color(val, seuil, th):
 # ══════════════════════════════════════════════════════════════════════════════
 @st.cache_data(ttl=3600)
 def load_data():
-    global VILLES, REGIONS, COORDS  # ← ajoute cette ligne en PREMIÈRE ligne
+    global VILLES, REGIONS
     import os
 
     # ── Essai parquet (5-10x plus rapide) ────────────────────────────────
@@ -97,6 +96,8 @@ def load_data():
             "us_aqi_moyen": pm * 2.5,
             "ville":   np.random.choice(villes_demo, n),
             "region":  np.random.choice(REGIONS, n),
+            "latitude":  np.tile([4.0, 3.8, 4.1], n//3 + 1)[:n],
+            "longitude": np.tile([11.5, 12.0, 9.7], n//3 + 1)[:n],
             "polluant_dominant": np.random.choice(
                 ["PM2.5", "Dust", "CO", "NO2", "Ozone"], n,
                 p=[.45, .25, .15, .10, .05]),
@@ -164,10 +165,6 @@ def load_data():
     
     VILLES = sorted(df["ville"].unique().tolist())
     REGIONS = sorted(df["region"].unique().tolist())
-    COORDS  = {
-    row["ville"]: (row["latitude"], row["longitude"])
-    for _, row in df.drop_duplicates("ville")[["ville","latitude","longitude"]].iterrows()
-                }
 
     return df
     
@@ -275,6 +272,10 @@ def get_context():
         irs_label=irs_label, irs_color=irs_col, irs_nk=irs_nk,
         lang=lang, th=th, T=T,
         mois=(MOIS_EN if lang == "en" else MOIS_FR),
+        coords={
+            row["ville"]: (row["latitude"], row["longitude"])
+            for _, row in df_brut.drop_duplicates("ville")[["ville","latitude","longitude"]].iterrows()
+        }
     )
 
 

@@ -2,7 +2,7 @@
 import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
-from utils import get_context, banner, img_card, sources_bar, empty_state, COORDS, POLLUANTS, risk_color
+from utils import get_context, banner, img_card, sources_bar, empty_state, POLLUANTS, risk_color
 from assets import IMAGES
 
 
@@ -12,6 +12,7 @@ def render(profil):
     th   = ctx["th"]
     T    = ctx["T"]
     lang = ctx["lang"]
+    COORDS = ctx["coords"]
 
     banner(IMAGES["carte_banner"], 190,
            f"{T['bloc1_label']}",
