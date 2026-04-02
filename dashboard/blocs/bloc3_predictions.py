@@ -102,7 +102,7 @@ def render(profil):
 
     # Labels
     perf_lbl  = "📊 Performance du modèle" if ctx["lang"] == "fr" else "📊 Model performance"
-    pred_lbl  = "🔮 Prédiction J+1/J+2/J+3" if ctx["lang"] == "fr" else "🔮 Forecast D+1/D+2/D+3"
+    pred_lbl  = "🔮 Prédiction J/J+1/J+2" if ctx["lang"] == "fr" else "🔮 Forecast D/D+1/D+2"
     sim_lbl   = T.get("bloc3_tab_sim", "🎛️ Simulateur")
     month_lbl = T.get("bloc3_tab_monthly", "📅 Mensuel")
 
@@ -124,7 +124,7 @@ def render(profil):
         with ci:
             df_v  = df[df["ville"] == v].sort_values("date")
             hist  = df_v.groupby("date")["pm2_5_moyen"].mean().tail(30).reset_index()
-            jours = [date.today() + timedelta(days=i) for i in range(1, 4)]
+            jours = [date.today() + timedelta(days=i) for i in range(0, 3)]
             jours_pd = pd.to_datetime(jours)
 
             # Prédiction avec le vrai modèle
@@ -183,7 +183,7 @@ def render(profil):
                 annotation_font_color=th["red"], annotation_font_size=10
             )
 
-            titre_pred = f"PM2.5 · {v} · Prédiction 72h"
+            titre_pred = f"PM2.5 · {v} · Prédiction Aujourd'hui / Demain / Après-demain"
             fig.update_layout(
                 **PL, height=340,
                 title=dict(text=titre_pred, font=dict(color=th["text"], size=13)),
@@ -195,8 +195,8 @@ def render(profil):
 
             # KPIs prédiction
             k1, k2, k3 = st.columns(3)
-            labels_j = ["J+1 · Demain", "J+2 · Après-demain", "J+3"] if ctx["lang"] == "fr" \
-                       else ["D+1 · Tomorrow", "D+2", "D+3"]
+            labels_j = ["📅 Aujourd'hui", "🔮 Demain", "🔮 Après-demain"] if ctx["lang"] == "fr" \
+                    else ["📅 Today", "🔮 Tomorrow", "🔮 Day after"]
             for col, pred_val, lbl_j, jour in zip([k1, k2, k3], preds, labels_j, jours):
                 color = th["green"] if pred_val <= 15 else th["amber"] if pred_val <= 25 \
                         else th["coral"] if pred_val <= 37.5 else th["red"]
