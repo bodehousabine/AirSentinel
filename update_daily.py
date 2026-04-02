@@ -41,7 +41,7 @@ warnings.filterwarnings('ignore')
 PATH_DATASET = 'data/processed/dataset_final.xlsx'
 
 # Date à télécharger — aujourd'hui
-AUJOURD_HUI = datetime.today().strftime('%Y-%m-%d')
+AUJOURD_HUI = (datetime.today() - timedelta(days=1)).strftime('%Y-%m-%d')
 
 print(f'📅 Mise à jour pour le : {AUJOURD_HUI}')
 
