@@ -2,17 +2,101 @@
 import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
+import pandas as pd
+import joblib
+import os
+from datetime import date
 from utils import get_context, banner, img_card, sources_bar, empty_state, POLLUANTS, risk_color
 from assets import IMAGES
+
+# ── Zones INS Cameroun (2019) ─────────────────────────────────────────────────
+ZONES_REGIONS = {
+    'Zone équatoriale':        ['Centre', 'Est', 'Sud', 'Littoral', 'Sud-Ouest', 'Ouest', 'Nord-Ouest'],
+    'Zone soudanienne':        ['Adamaoua', 'Nord'],
+    'Zone soudano-sahélienne': ['Extreme-Nord'],
+}
+
+def _get_zone(region):
+    for zone, regions in ZONES_REGIONS.items():
+        if region in regions:
+            return zone
+    return 'Zone équatoriale'
+
+@st.cache_resource
+def _load_models():
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    chemins = [
+        os.path.join(base_dir, '..', 'models'),
+        os.path.join(base_dir, '..', '..', 'models'),
+    ]
+    base = None
+    for chemin in chemins:
+        if os.path.exists(os.path.join(chemin, 'meilleur_modele.pkl')):
+            base = chemin
+            break
+    if base is None:
+        return None, None, None, None
+    try:
+        modele   = joblib.load(os.path.join(base, 'meilleur_modele.pkl'))
+        scaler   = joblib.load(os.path.join(base, 'scaler.pkl'))
+        features = joblib.load(os.path.join(base, 'features.pkl'))
+        arima    = joblib.load(os.path.join(base, 'arima_par_zone.pkl'))
+        return modele, scaler, features, arima
+    except:
+        return None, None, None, None
+
+
+@st.cache_data(ttl=3600)
+def _predire_toutes_villes(_hash, df):
+    """Prédit PM2.5 pour aujourd'hui pour toutes les villes."""
+    modele, scaler, features, arima = _load_models()
+    if not all(x is not None for x in [modele, scaler, features, arima]):
+        return None
+
+    resultats = []
+    for ville in df['ville'].unique():
+        df_v   = df[df['ville'] == ville].sort_values('date')
+        region = df_v['region'].iloc[-1] if len(df_v) > 0 else 'Centre'
+        zone   = _get_zone(region)
+        lat    = df_v['latitude'].iloc[-1] if 'latitude' in df_v.columns else 4.0
+        lon    = df_v['longitude'].iloc[-1] if 'longitude' in df_v.columns else 12.0
+        try:
+            last   = df_v[features].fillna(df_v[features].median()).tail(1)
+            last_s = scaler.transform(last)
+            p_rl   = modele.predict(last_s)[0]
+            p_arima = arima[zone].forecast(steps=1).iloc[-1]
+            pm25   = max(0, p_rl + p_arima)
+        except:
+            pm25 = float(df_v['pm2_5_moyen'].mean()) if len(df_v) > 0 else 15.0
+
+        # IRS basé sur PM2.5 prédit
+        if   pm25 <= 15:   irs = 0
+        elif pm25 <= 25:   irs = 1
+        elif pm25 <= 37.5: irs = 2
+        elif pm25 <= 50:   irs = 3
+        elif pm25 <= 75:   irs = 4
+        else:              irs = 5
+
+        resultats.append({
+            'ville':       ville,
+            'region':      region,
+            'latitude':    lat,
+            'longitude':   lon,
+            'pm2_5_moyen': pm25,
+            'IRS':         irs,
+            'date':        pd.Timestamp(date.today()),
+        })
+
+    return pd.DataFrame(resultats)
 
 
 def render(profil):
     ctx  = get_context()
-    df   = ctx["df_brut"]   # données complètes
+    df   = ctx["df_brut"]
     th   = ctx["th"]
     T    = ctx["T"]
     lang = ctx["lang"]
-    COORDS = ctx["coords"]
+    COORDS = ctx["coords"] if "coords" in ctx else {}
 
     banner(IMAGES["carte_banner"], 190,
            f"{T['bloc1_label']}",
@@ -32,9 +116,18 @@ def render(profil):
     mode_today = "Aujourd'hui" in mode or "Today" in mode
 
     if mode_today:
-        date_max  = df["date"].max()
-        df_carte  = df[df["date"] == date_max].copy()
-        periode_label = str(date_max.date())
+        # ── Données prédites pour aujourd'hui ─────────────────────────────
+        df_pred = _predire_toutes_villes(len(df), df)
+        if df_pred is not None and len(df_pred) > 0:
+            df_carte      = df_pred.copy()
+            periode_label = f"📅 {date.today().strftime('%d %b %Y')} · Prédictions"
+            source_label  = "Modèle Hybride RL+ARIMA"
+        else:
+            # Fallback sur données réelles si modèle indisponible
+            date_max      = df["date"].max()
+            df_carte      = df[df["date"] == date_max].copy()
+            periode_label = str(date_max.date())
+            source_label  = "Données réelles"
     else:
         an_min, an_max_sel = st.session_state.get(
             "annee_sel",
@@ -45,6 +138,7 @@ def render(profil):
             (df["date"].dt.year <= an_max_sel)
         ].copy()
         periode_label = f"{an_min}–{an_max_sel}"
+        source_label  = "Données réelles"
 
     with col_ville:
         villes_dispo = sorted(df_carte["ville"].unique().tolist())
@@ -57,8 +151,18 @@ def render(profil):
 
     # ── Agrégation ────────────────────────────────────────────────────────
     agg = df_carte.groupby("ville")[["pm2_5_moyen", "IRS"]].mean().reset_index()
-    agg["lat"] = agg["ville"].map(lambda v: COORDS.get(v, (4.0, 12.0))[0])
-    agg["lon"] = agg["ville"].map(lambda v: COORDS.get(v, (4.0, 12.0))[1])
+
+    # Coordonnées depuis le dataset ou COORDS
+    def get_coords(ville):
+        if ville in COORDS:
+            return COORDS[ville]
+        row = df[df['ville'] == ville]
+        if len(row) > 0 and 'latitude' in row.columns:
+            return (float(row['latitude'].iloc[0]), float(row['longitude'].iloc[0]))
+        return (4.0, 12.0)
+
+    agg["lat"] = agg["ville"].apply(lambda v: get_coords(v)[0])
+    agg["lon"] = agg["ville"].apply(lambda v: get_coords(v)[1])
 
     PL   = dict(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor=th["plot_bg"],
                 font=dict(color=th["text2"], size=12), margin=dict(l=44,r=20,t=44,b=36))
@@ -91,15 +195,14 @@ def render(profil):
                 geo_zoom   = 8.5
         else:
             fig.add_trace(go.Scattermapbox(
-                lat=agg["lat"], lon=agg["lon"], mode="markers+text",
+                lat=agg["lat"], lon=agg["lon"], mode="markers",
                 marker=dict(
                     size=agg["pm2_5_moyen"].clip(10, 25),
                     color=agg["pm2_5_moyen"],
                     colorscale=[[0,th["green"]],[0.4,th["amber"]],[0.7,th["coral"]],[1,th["red"]]],
                     cmin=5, cmax=80,
                     colorbar=dict(title="PM2.5 µg/m³", thickness=20, len=1.0, y=1, yanchor='top')),
-                text=agg["ville"], textposition="top center",
-                textfont=dict(size=10, color="#1e293b", weight="bold"),
+                text=agg["ville"],
                 hovertemplate="<b>%{text}</b><br>PM2.5 : %{marker.color:.1f} µg/m³<br>IRS : %{customdata:.3f}<extra></extra>",
                 customdata=agg["IRS"]))
             geo_center = dict(lat=7.35, lon=12.35)
@@ -123,11 +226,17 @@ def render(profil):
             'modeBarButtonsToAdd': ['zoomInMapbox', 'zoomOutMapbox', 'toggleHover']
         })
 
+        # Source des données
+        st.markdown(
+            f'<div style="font-size:10px;color:{th["text3"]};margin-top:4px;'
+            f'font-family:DM Mono,monospace;">🔬 {source_label} · WHO AQG 2021</div>',
+            unsafe_allow_html=True
+        )
+
     with col_side:
         n_dep = int((agg["pm2_5_moyen"] > 15).sum())
         pct   = f"{n_dep/max(len(agg),1)*100:.0f}%"
 
-        # Légende
         lbl_legend = "Légende · Qualité de l'Air" if lang == "fr" else "Legend · Air Quality"
         st.markdown(f"""
         <div style="background:{th['bg_tertiary']};border:1px solid {th['border_soft']};
@@ -167,8 +276,10 @@ def render(profil):
             </div>
         </div>""", unsafe_allow_html=True)
 
-        # PM2.5 par région
-        lbl = "PM2.5 moyen par région" if lang == "fr" else "Avg PM2.5 by region"
+        # PM2.5 par région — basé sur prédictions si mode aujourd'hui
+        lbl = "PM2.5 prédit par région" if (mode_today and lang == "fr") else \
+              "Avg predicted PM2.5 by region" if mode_today else \
+              "PM2.5 moyen par région" if lang == "fr" else "Avg PM2.5 by region"
         pm_reg = df_carte.groupby("region")["pm2_5_moyen"].mean().sort_values(ascending=False)
         colors = [risk_color(v, 15, th) for v in pm_reg.values]
         fig_reg = go.Figure()
@@ -187,20 +298,22 @@ def render(profil):
 
     st.markdown("<hr style='border-color:rgba(99,160,255,0.06);margin:8px 0 2px;'>", unsafe_allow_html=True)
 
-    # ══ ANALYSES ENRICHIES ════════════════════════════════════════════════════
+    # ══ ANALYSES ENRICHIES — toujours basées sur données historiques réelles ══
     titre_analyses = "Analyses détaillées · " + periode_label
     st.markdown(f"""
     <div style="font-size:16px;font-weight:600;color:{th['text']};margin-top:-10px;margin-bottom:16px;">
         📊 {titre_analyses}
     </div>""", unsafe_allow_html=True)
 
+    # Pour les analyses enrichies, utiliser les données historiques réelles
+    df_analyse = df_carte if not mode_today else df[df["date"] == df["date"].max()].copy()
+
     c1, c2 = st.columns(2)
 
     with c1:
-        # Top 3 polluants dominants
         lbl3 = "Top 3 polluants · National" if lang == "fr" else "Top 3 pollutants · National"
-        if "polluant_dominant" in df_carte.columns:
-            top3  = df_carte["polluant_dominant"].value_counts().head(3)
+        if "polluant_dominant" in df_analyse.columns:
+            top3  = df_analyse["polluant_dominant"].value_counts().head(3)
             total = top3.sum()
             medal_colors = [th["amber"], th.get("gray", "#6b7280"), th["coral"]]
             medals = ["🥇", "🥈", "🥉"]
@@ -238,13 +351,12 @@ def render(profil):
             st.markdown(html_top3, unsafe_allow_html=True)
 
     with c2:
-        # Top 5 villes en alerte critique
         lbl4 = "Top 5 villes · Alerte critique IRS" if lang == "fr" else "Top 5 cities · Critical HRI"
-        df_carte["niv_num"] = np.searchsorted(
-            [ctx["p50"], ctx["p75"], ctx["p90"]], df_carte["IRS"].values, side="right"
+        df_analyse["niv_num"] = np.searchsorted(
+            [ctx["p50"], ctx["p75"], ctx["p90"]], df_analyse["IRS"].values, side="right"
         ).clip(0, 3)
         crit_v = (
-            df_carte[df_carte["niv_num"] == 3].groupby("ville").size()
+            df_analyse[df_analyse["niv_num"] == 3].groupby("ville").size()
             .sort_values(ascending=False).head(5).reset_index()
         )
         crit_v.columns = ["ville", "n_jours"]
