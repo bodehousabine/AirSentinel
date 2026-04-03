@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { User, Home, Map as MapIcon, Bell } from "lucide-react";
+import { User, Home, Map as MapIcon, Bell, BarChart2, Brain, HeartPulse } from "lucide-react";
 import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
 
 const geoUrl = "/cameroon-regions.json";
@@ -263,21 +263,21 @@ function PWAFooter() {
         alignItems: "center",
       }}
     >
-      <Link href="/" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", color: "#00d4b1", textDecoration: "none", width: "25%" }}>
-        <Home size={22} />
-        <span style={{ fontSize: "10px", fontWeight: 600 }}>Accueil</span>
+      <Link href="/dashboard" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", color: "#00d4b1", textDecoration: "none", width: "25%" }}>
+        <MapIcon size={22} />
+        <span style={{ fontSize: "10px", fontWeight: 700 }}>Carte</span>
       </Link>
       <Link href="/dashboard" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", color: "rgba(224,242,254,0.5)", textDecoration: "none", width: "25%", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "#00d4b1"} onMouseLeave={(e) => e.currentTarget.style.color = "rgba(224,242,254,0.5)"}>
-        <MapIcon size={22} />
-        <span style={{ fontSize: "10px", fontWeight: 500 }}>Carte</span>
+        <BarChart2 size={22} />
+        <span style={{ fontSize: "10px", fontWeight: 500 }}>Statistiques</span>
       </Link>
-      <Link href="#pilliers" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", color: "rgba(224,242,254,0.5)", textDecoration: "none", width: "25%", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "#00d4b1"} onMouseLeave={(e) => e.currentTarget.style.color = "rgba(224,242,254,0.5)"}>
-        <Bell size={22} />
-        <span style={{ fontSize: "10px", fontWeight: 500 }}>Alertes</span>
+      <Link href="/dashboard" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", color: "rgba(224,242,254,0.5)", textDecoration: "none", width: "25%", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "#00d4b1"} onMouseLeave={(e) => e.currentTarget.style.color = "rgba(224,242,254,0.5)"}>
+        <Brain size={22} />
+        <span style={{ fontSize: "10px", fontWeight: 500 }}>Prédictions</span>
       </Link>
-      <Link href="/login" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", color: "rgba(224,242,254,0.5)", textDecoration: "none", width: "25%", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "#00d4b1"} onMouseLeave={(e) => e.currentTarget.style.color = "rgba(224,242,254,0.5)"}>
-        <User size={22} />
-        <span style={{ fontSize: "10px", fontWeight: 500 }}>Profil</span>
+      <Link href="/dashboard" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", color: "rgba(224,242,254,0.5)", textDecoration: "none", width: "25%", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "#00d4b1"} onMouseLeave={(e) => e.currentTarget.style.color = "rgba(224,242,254,0.5)"}>
+        <HeartPulse size={22} />
+        <span style={{ fontSize: "10px", fontWeight: 500 }}>Santé</span>
       </Link>
     </div>
   );
@@ -409,9 +409,6 @@ export default function LandingPage() {
 
         {/* CTA */}
         <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap", marginTop: "10px" }}>
-          <Link href="/register" className="btn-primary" style={{ padding: "14px 28px", fontSize: "16px" }}>
-            S'inscrire gratuitement
-          </Link>
           <a
             href="#pilliers"
             style={{
@@ -569,8 +566,8 @@ export default function LandingPage() {
               marginBottom: "24px",
             }}
           >
-            AirSentinel représente une avancée majeure pour la santé publique au Cameroun. 
-            Grâce à l&apos;intelligence artificielle, nous pouvons désormais anticiper les 
+            AirSentinel représente une avancée majeure pour la santé publique au Cameroun.
+            Grâce à l&apos;intelligence artificielle, nous pouvons désormais anticiper les
             épisodes de pollution et protéger les populations les plus vulnérables.
           </p>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "14px" }}>
@@ -606,7 +603,7 @@ export default function LandingPage() {
           position: "relative",
           zIndex: 1,
           textAlign: "center",
-          padding: "40px 24px",
+          padding: "40px 24px 100px", // 100px bottom padding to prevent overlap with the PWA footer
           borderTop: "1px solid rgba(0,212,177,0.12)",
           color: "rgba(224,242,254,0.3)",
           fontSize: "12px",
@@ -618,9 +615,12 @@ export default function LandingPage() {
           <a href="#" style={{ color: "rgba(224,242,254,0.5)", textDecoration: "none" }}>Confidentialité</a>
           <a href="#" style={{ color: "rgba(224,242,254,0.5)", textDecoration: "none" }}>Conditions</a>
         </div>
-        IndabaX Cameroon 2026 · DPA Green Tech · ISSEA · ENSP Yaoundé<br/>
+        IndabaX Cameroon 2026 · DPA Green Tech · ISSEA · ENSP Yaoundé<br />
         <span style={{ color: "rgba(0,212,177,0.55)", display: "block", marginTop: "8px" }}>17 mars → 7 avril 2026</span>
       </footer>
+
+      {/* PWA Mobile Tab Bar */}
+      <PWAFooter />
     </main>
   );
 }
