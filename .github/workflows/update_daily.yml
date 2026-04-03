@@ -1,8 +1,8 @@
-name: 📅 AirSentinel — Mise à jour quotidienne
+name: AirSentinel - Mise a jour quotidienne
 
 on:
   schedule:
-    # Tous les jours à 00h00 UTC (08h00 heure Cameroun)
+    # Tous les jours a 03h00 UTC (04h00 heure Cameroun)
     - cron: '0 3 * * *'
   workflow_dispatch:
     # Permet aussi de lancer manuellement depuis GitHub
@@ -10,30 +10,30 @@ on:
 jobs:
   update-data:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: 📥 Checkout du code
-        uses: actions/checkout@v3
+      - name: Checkout du code
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🐍 Setup Python 3.11
-        uses: actions/setup-python@v4
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: 📦 Installation des dépendances
+      - name: Installation des dependances
         run: |
           pip install openmeteo-requests requests-cache retry-requests \
-                      pandas numpy openpyxl joblib scikit-learn
+                      pandas numpy openpyxl joblib scikit-learn pyarrow
 
-      - name: 🌍 Mise à jour des données
+      - name: Mise a jour des donnees
         run: python update_daily.py
 
-      - name: 💾 Commit et push des nouvelles données
+      - name: Commit et push des nouvelles donnees
         run: |
           git config --local user.email "airsentinel@dpa-greentech.cm"
           git config --local user.name "AirSentinel Bot"
-          git add data/processed/dataset_final.xlsx
-          git diff --staged --quiet || git commit -m "📅 Mise à jour quotidienne $(date +'%Y-%m-%d')"
+          git add data/processed/dataset_final.parquet
+          git diff --staged --quiet || git commit -m "Mise a jour quotidienne $(date +'%Y-%m-%d')"
           git push
