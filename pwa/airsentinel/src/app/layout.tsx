@@ -1,0 +1,42 @@
+import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "AirSentinel Cameroun — L'IA au service d'un air plus pur",
+  description: "Visualisez, Analysez et Anticipez la Qualité de l'Air sur Tout le Territoire Camerounais",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "AirSentinel",
+  },
+  openGraph: {
+    title: "AirSentinel Cameroun",
+    description: "Plateforme IA de surveillance de la qualité de l'air au Cameroun",
+    type: "website",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#00d4b1",
+  width: "device-width",
+  initialScale: 1,
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="fr">
+      <head>
+        <link rel="apple-touch-icon" href="/LogoAir.png" />
+      </head>
+      <body className={inter.className}>{children}</body>
+    </html>
+  );
+}
