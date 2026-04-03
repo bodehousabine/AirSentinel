@@ -392,8 +392,10 @@ def main():
     # ── Charger le dataset existant ───────────────────────────────────────
     # Après
     print(f'\n📂 Chargement du parquet...')
-    if not os.path.exists(PATH_DATASET):
-        print(f'❌ Fichier introuvable : {PATH_DATASET}')
+    PATH_PARQUET = PATH_DATASET.replace('.xlsx', '.parquet')
+
+    if not os.path.exists(PATH_PARQUET):
+        print(f'❌ Fichier parquet introuvable : {PATH_PARQUET}')
         return
 
     df_historique = pd.read_parquet(PATH_DATASET.replace('.xlsx', '.parquet'))
