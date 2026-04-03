@@ -10,8 +10,8 @@ TRANSLATIONS = {
     # SIDEBAR
     # ══════════════════════════════════════════════════════════════════════════
     "sidebar_app_subtitle": {
-        "fr": "CAMEROUN · 2020–2025",
-        "en": "CAMEROON · 2020–2025",
+        "fr": "CAMEROUN",
+        "en": "CAMEROON",
     },
     "sidebar_settings_title": {
         "fr": "PARAMÈTRES",
@@ -452,10 +452,10 @@ TRANSLATIONS = {
     "bloc5_action_high":   {"fr": "Appeler du personnel de renfort",               "en": "Call for additional staff"},
     "bloc5_action_urgent": {"fr": "Activer le protocole d'urgence sanitaire",      "en": "Activate emergency health protocol"},
     # Messages maire
-    "bloc5_mayor_normal":  {"fr": ["Aucune action requise"],                                                         "en": ["No action required"]},
-    "bloc5_mayor_watch":   {"fr": ["Informer les établissements scolaires","Publier un bulletin préventif"],          "en": ["Inform schools","Publish a preventive bulletin"]},
-    "bloc5_mayor_high":    {"fr": ["Annuler événements sportifs ext.","Envoyer SMS préventif","Contacter directeurs"],"en": ["Cancel outdoor sports events","Send preventive SMS","Contact school principals"]},
-    "bloc5_mayor_urgent":  {"fr": ["SMS d'urgence aux habitants","Activer plan communal sanitaire","Fermer les écoles","Communiqué de presse immédiat"],"en": ["Emergency SMS to residents","Activate community health plan","Close schools","Immediate press release"]},
+    "bloc5_mayor_normal":  {"fr": [ "Aucune action requise"],                                                         "en": [ "No action required"]},
+    "bloc5_mayor_watch":   {"fr": [ "Informer les établissements scolaires", "Publier un bulletin préventif"],          "en": [ "Inform schools", "Publish a preventive bulletin"]},
+    "bloc5_mayor_high":    {"fr": [ "Annuler événements sportifs ext.", "Envoyer SMS préventif", "Contacter directeurs"], "en": [ "Cancel outdoor sports events", "Send preventive SMS", "Contact school principals"]},
+    "bloc5_mayor_urgent":  {"fr": [ "SMS d'urgence aux habitants", "Activer plan communal sanitaire", "Fermer les écoles", "Communiqué de presse immédiat"], "en": [ "Emergency SMS to residents", "Activate community health plan", "Close schools", "Immediate press release"]},
     # Messages citoyen
     "bloc5_citizen_faible":   {"fr": "✅ Air sain — sortez normalement",                          "en": "✅ Clean air — go out normally"},
     "bloc5_citizen_modere":   {"fr": "⚠️ Réduisez les activités intenses en extérieur",           "en": "⚠️ Reduce intense outdoor activities"},
@@ -463,9 +463,9 @@ TRANSLATIONS = {
     "bloc5_citizen_critique": {"fr": "🔴 DANGER — restez à l'intérieur, masque recommandé",       "en": "🔴 DANGER — stay indoors, mask recommended"},
     # Messages chercheur
     "bloc5_researcher_faible":   {"fr": "IRS < p50 — médiane historique",  "en": "HRI < p50 — historical median"},
-    "bloc5_researcher_modere":   {"fr": "p50–p75 — pire que 50% des jours","en": "p50–p75 — worse than 50% of days"},
-    "bloc5_researcher_eleve":    {"fr": "p75–p90 — pire que 75% · PM2.5 > 15 µg/m³ (OMS)","en": "p75–p90 — worse than 75% · PM2.5 > 15 µg/m³ (WHO)"},
-    "bloc5_researcher_critique": {"fr": "≥ p90 — situation exceptionnelle","en": "≥ p90 — exceptional situation"},
+    "bloc5_researcher_modere":   {"fr": "p50–p75 — pire que 50% des jours", "en": "p50–p75 — worse than 50% of days"},
+    "bloc5_researcher_eleve":    {"fr": "p75–p90 — pire que 75% · PM2.5 > 15 µg/m³ (OMS)", "en": "p75–p90 — worse than 75% · PM2.5 > 15 µg/m³ (WHO)"},
+    "bloc5_researcher_critique": {"fr": "≥ p90 — situation exceptionnelle", "en": "≥ p90 — exceptional situation"},
 
     # ══════════════════════════════════════════════════════════════════════════
     # BLOC 6 — CONTEXTE
@@ -548,9 +548,47 @@ TRANSLATIONS = {
     "sources_bauer":  {"fr": "Bauer et al. 2024 (PMC11523266)",        "en": "Bauer et al. 2024 (PMC11523266)"},
     "airsentinel_tag":{"fr": "AirSentinel · IndabaX 2026",             "en": "AirSentinel · IndabaX 2026"},
     "mois": {
-        "fr": ["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"],
-        "en": ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+        "fr": ["Jan", "Fév", "Mar", "Avr", "Mai", "Jun", "Jul", "Aoû", "Sep", "Oct", "Nov", "Déc"],
+        "en": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
     },
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # LANDING PAGE
+    # ══════════════════════════════════════════════════════════════════════════
+    "landing_subtitle": {
+        "fr": "CAMEROUN",
+        "en": "CAMEROON",
+    },
+    "landing_slogan": {
+        "fr": "Anticiper. Alerter. Protéger.",
+        "en": "Anticipate. Alert. Protect.",
+    },
+    "landing_desc": {
+        "fr": "Aide à la décision sanitaire par l'IA<br>40 villes · 10 régions · 50 760 observations",
+        "en": "AI health decision support system<br>40 cities · 10 regions · 50,760 observations",
+    },
+    "landing_count_villes":  {"fr": "villes",      "en": "cities"},
+    "landing_count_regions": {"fr": "régions",     "en": "regions"},
+    "landing_count_obs":     {"fr": "observations", "en": "observations"},
+    "landing_count_pred":    {"fr": "prédictions",  "en": "predictions"},
+    "landing_btn_enter": {
+        "fr": "🚀  Accéder au Dashboard  →",
+        "en": "🚀  Open Dashboard  →",
+    },
+    "landing_about_btn": {
+        "fr": "ℹ️  À Propos",
+        "en": "ℹ️  About",
+    },
+    "landing_confirm_theme": {
+        "fr": "Passer en mode {mode} ?",
+        "en": "Switch to {mode} mode?",
+    },
+    "landing_confirm_lang": {
+        "fr": "Changer pour l'{lang} ?",
+        "en": "Switch to {lang}?",
+    },
+    "landing_yes": {"fr": "Confirmer", "en": "Confirm"},
+    "landing_no": {"fr": "Annuler", "en": "Cancel"},
 }
 
 

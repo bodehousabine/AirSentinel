@@ -26,6 +26,12 @@ st.set_page_config(
 if "page" not in st.session_state:
     st.session_state["page"] = "landing"
 
+if "theme_name" not in st.session_state:
+    st.session_state["theme_name"] = "dark"
+
+if "lang" not in st.session_state:
+    st.session_state["lang"] = "fr"
+
 if st.session_state["page"] == "landing":
     entered = render_landing()
     if entered:

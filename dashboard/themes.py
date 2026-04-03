@@ -209,32 +209,100 @@ def build_css(th: dict, img_url: str) -> str:
     p, div {{ color: {th['text']}; }}
     h1, h2, h3, h4 {{ color: {th['text']} !important; }}
 
-    /* ── Sidebar filtres : lisibilité maximale dans les deux thèmes ── */
-    section[data-testid="stSidebar"] p,
-    section[data-testid="stSidebar"] div,
-    section[data-testid="stSidebar"] label,
-    section[data-testid="stSidebar"] span {{
+    /* ══════════════════════════════════════════════════════════════════
+       SIDEBAR — textes et widgets
+    ══════════════════════════════════════════════════════════════════ */
+    section[data-testid="stSidebar"],
+    section[data-testid="stSidebar"] * {{
         color: {th['text']} !important;
     }}
-    section[data-testid="stSidebar"] [data-baseweb="select"] > div {{
-        background: {'rgba(7,30,53,0.95)' if th['name']=='dark' else 'rgba(255,255,255,0.97)'} !important;
-        border-color: {th['border_soft']} !important;
+    section[data-testid="stSidebar"] [data-baseweb="select"] > div:first-child {{
+        background-color: {'#0b2540' if th['name']=='dark' else '#ffffff'} !important;
+        border: 1.5px solid {th['border_med']} !important;
+        border-radius: 8px !important;
         color: {th['text']} !important;
     }}
     section[data-testid="stSidebar"] [data-baseweb="select"] span,
-    section[data-testid="stSidebar"] [data-baseweb="select"] div {{
+    section[data-testid="stSidebar"] [data-baseweb="select"] div,
+    section[data-testid="stSidebar"] [data-baseweb="select"] p,
+    section[data-testid="stSidebar"] [data-baseweb="select"] input {{
         color: {th['text']} !important;
+        background-color: transparent !important;
     }}
-    section[data-testid="stSidebar"] [data-baseweb="tag"] {{
-        background: {'rgba(0,212,177,0.15)' if th['name']=='dark' else 'rgba(0,130,110,0.15)'} !important;
-        color: {th['teal']} !important;
-    }}
-    /* Slider labels */
-    section[data-testid="stSidebar"] [data-testid="stSlider"] p {{
-        color: {th['text2']} !important;
-    }}
-    section[data-testid="stSidebar"] .stSlider [data-testid="stTickBar"] span {{
+    section[data-testid="stSidebar"] [data-baseweb="select"] input::placeholder {{
         color: {th['text3']} !important;
+        opacity: 1 !important;
+    }}
+    section[data-testid="stSidebar"] [data-baseweb="tag"],
+    [data-testid="stMultiSelect"] [data-baseweb="tag"] {{
+        background-color: {'rgba(0,212,177,0.18)' if th['name']=='dark' else 'rgba(0,80,64,0.12)'} !important;
+        border: 1px solid {'rgba(0,212,177,0.42)' if th['name']=='dark' else 'rgba(0,80,64,0.38)'} !important;
+        border-radius: 6px !important;
+    }}
+    section[data-testid="stSidebar"] [data-baseweb="tag"] span,
+    section[data-testid="stSidebar"] [data-baseweb="tag"] svg,
+    [data-testid="stMultiSelect"] [data-baseweb="tag"] span {{
+        color: {'#00d4b1' if th['name']=='dark' else '#003828'} !important;
+        fill:  {'#00d4b1' if th['name']=='dark' else '#003828'} !important;
+    }}
+    section[data-testid="stSidebar"] [data-testid="stSlider"] p,
+    section[data-testid="stSidebar"] [data-testid="stSlider"] span,
+    section[data-testid="stSidebar"] [data-testid="stTickBarMin"],
+    section[data-testid="stSidebar"] [data-testid="stTickBarMax"] {{
+        color: {th['text3']} !important;
+    }}
+
+    /* ══════════════════════════════════════════════════════════════════
+       MENUS DÉROULANTS — portail body-level (hors sidebar)
+       BaseWeb monte les listbox dans un div portal sur le <body>.
+       Les sélecteurs sidebar ne les atteignent PAS — ciblage GLOBAL.
+    ══════════════════════════════════════════════════════════════════ */
+    [data-baseweb="popover"] > div,
+    [data-baseweb="popover"] [data-baseweb="menu"],
+    [data-baseweb="popover"] ul,
+    ul[role="listbox"],
+    div[role="listbox"],
+    [data-baseweb="menu"] {{
+        background-color: {'#071e35' if th['name']=='dark' else '#ffffff'} !important;
+        border: 1px solid {th['border_med']} !important;
+        border-radius: 10px !important;
+        box-shadow: 0 10px 36px rgba(0,0,0,{'0.35' if th['name']=='dark' else '0.16'}) !important;
+    }}
+    [data-baseweb="menu"] [role="option"],
+    [data-baseweb="menu"] li,
+    ul[role="listbox"] li,
+    div[role="listbox"] [role="option"],
+    [role="option"] {{
+        background-color: {'#071e35' if th['name']=='dark' else '#ffffff'} !important;
+        color: {'#c8e8f8' if th['name']=='dark' else '#0a1f33'} !important;
+        font-size: 13px !important;
+    }}
+    [role="option"] span,
+    [role="option"] div,
+    [role="option"] p,
+    [data-baseweb="menu"] li span,
+    [data-baseweb="menu"] li div {{
+        color: {'#c8e8f8' if th['name']=='dark' else '#0a1f33'} !important;
+        background-color: transparent !important;
+    }}
+    [role="option"]:hover,
+    [role="option"]:focus,
+    [data-baseweb="menu"] [role="option"]:hover,
+    [data-baseweb="menu"] li:hover {{
+        background-color: {'rgba(0,212,177,0.14)' if th['name']=='dark' else 'rgba(10,60,120,0.09)'} !important;
+    }}
+    [role="option"]:hover span,
+    [role="option"]:hover div,
+    [role="option"]:hover p,
+    [data-baseweb="menu"] li:hover span {{
+        color: {'#00d4b1' if th['name']=='dark' else '#002a1e'} !important;
+    }}
+    [aria-selected="true"],
+    [aria-selected="true"] span,
+    [aria-selected="true"] div {{
+        color: {'#00d4b1' if th['name']=='dark' else '#002a1e'} !important;
+        font-weight: 600 !important;
+        background-color: {'rgba(0,212,177,0.10)' if th['name']=='dark' else 'rgba(10,60,120,0.07)'} !important;
     }}
 
     /* ── Widgets ── */
@@ -267,6 +335,64 @@ def build_css(th: dict, img_url: str) -> str:
     ::-webkit-scrollbar-thumb {{
         background: {'rgba(14,165,233,0.35)' if th['name']=='dark' else 'rgba(10,60,120,0.30)'};
         border-radius: 3px;
+    }}
+
+    /* ══════════════════════════════════════════════════════════════════
+       RÈGLES CONDITIONNELLES PAR data-airsentinel-theme
+       Spécificité maximale pour les portals body-level
+    ══════════════════════════════════════════════════════════════════ */
+    body[data-airsentinel-theme="light"] [data-baseweb="popover"] > div,
+    body[data-airsentinel-theme="light"] [data-baseweb="menu"],
+    body[data-airsentinel-theme="light"] [data-baseweb="menu"] ul,
+    body[data-airsentinel-theme="light"] ul[role="listbox"],
+    body[data-airsentinel-theme="light"] div[role="listbox"] {{
+        background-color: #ffffff !important;
+        border: 1px solid rgba(10,60,120,0.30) !important;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.14) !important;
+    }}
+    body[data-airsentinel-theme="light"] [role="option"],
+    body[data-airsentinel-theme="light"] [data-baseweb="menu"] li {{
+        background-color: #ffffff !important;
+        color: #0a1f33 !important;
+    }}
+    body[data-airsentinel-theme="light"] [role="option"] *,
+    body[data-airsentinel-theme="light"] [data-baseweb="menu"] li * {{
+        color: #0a1f33 !important;
+        background-color: transparent !important;
+    }}
+    body[data-airsentinel-theme="light"] [role="option"]:hover,
+    body[data-airsentinel-theme="light"] [data-baseweb="menu"] li:hover {{
+        background-color: rgba(10,60,120,0.09) !important;
+    }}
+    body[data-airsentinel-theme="light"] [role="option"]:hover * {{
+        color: #001e10 !important;
+    }}
+
+    body[data-airsentinel-theme="dark"] [data-baseweb="popover"] > div,
+    body[data-airsentinel-theme="dark"] [data-baseweb="menu"],
+    body[data-airsentinel-theme="dark"] [data-baseweb="menu"] ul,
+    body[data-airsentinel-theme="dark"] ul[role="listbox"],
+    body[data-airsentinel-theme="dark"] div[role="listbox"] {{
+        background-color: #051525 !important;
+        border: 1px solid rgba(14,165,233,0.28) !important;
+        box-shadow: 0 10px 36px rgba(0,0,0,0.40) !important;
+    }}
+    body[data-airsentinel-theme="dark"] [role="option"],
+    body[data-airsentinel-theme="dark"] [data-baseweb="menu"] li {{
+        background-color: #051525 !important;
+        color: #c8e8f8 !important;
+    }}
+    body[data-airsentinel-theme="dark"] [role="option"] *,
+    body[data-airsentinel-theme="dark"] [data-baseweb="menu"] li * {{
+        color: #c8e8f8 !important;
+        background-color: transparent !important;
+    }}
+    body[data-airsentinel-theme="dark"] [role="option"]:hover,
+    body[data-airsentinel-theme="dark"] [data-baseweb="menu"] li:hover {{
+        background-color: rgba(0,212,177,0.13) !important;
+    }}
+    body[data-airsentinel-theme="dark"] [role="option"]:hover * {{
+        color: #00d4b1 !important;
     }}
     </style>
     """
