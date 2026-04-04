@@ -289,34 +289,34 @@ def _rgb(hex_color):
 
 def banner(img_url, height, title, subtitle, th, accent=None, tint_hex=None, tint_strength=0.32, no_frame=False):
     ac = accent or th["teal"]; tint = tint_hex or ac; r, g, b = _rgb(tint)
-    border_style = "none" if no_frame else f"1px solid rgba({r},{g},{b},0.32)"
-    shadow_style = "none" if no_frame else f"0 6px 40px rgba({r},{g},{b},0.15)"
+    border_style = "none" if no_frame else f"1px solid rgba(249,115,22,0.3)"
+    shadow_style = "none" if no_frame else f"0 8px 32px rgba(0,0,0,0.2)"
+    
+    # Hauteur fixe 120px pour l'unification visuelle
+    h = 120 
+    
     st.markdown(f"""
-    <div style="position:relative;width:100%;height:{height}px;border-radius:16px;
-                overflow:hidden;margin-bottom:20px;
+    <div style="position:relative;width:100%;height:{h}px;border-radius:12px;
+                overflow:hidden;margin-bottom:24px;
                 border:{border_style};
                 box-shadow:{shadow_style};">
         <img src="{img_url}"
              style="position:absolute;inset:0;width:100%;height:100%;
                     object-fit:cover;object-position:center;
-                    filter:saturate(0.90) brightness(0.80);"
+                    filter:brightness(0.3);"
              onerror="this.style.opacity='0'"/>
         <div style="position:absolute;inset:0;
                     background:linear-gradient(125deg,
                         rgba({r},{g},{b},{tint_strength}) 0%,
-                        rgba(2,12,24,0.68) 55%,
-                        rgba(2,12,24,0.42) 100%);"></div>
-        <div style="position:absolute;bottom:0;left:0;right:0;height:3px;
-                    background:linear-gradient(to right,{ac},transparent);"></div>
-        <div style="position:absolute;inset:0;padding:26px 32px;
+                        transparent 100%);"></div>
+        <div style="position:absolute;inset:0;padding:20px 30px;
                     display:flex;flex-direction:column;justify-content:flex-end;">
-            <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;
-                        color:{ac};margin-bottom:8px;font-family:'DM Mono',monospace;">
-                AirSentinel · IndabaX 2026
-            </div>
-            <div style="font-size:30px;font-weight:800;color:#f0f9ff;line-height:1.2;
-                        text-shadow:0 4px 24px rgba(0,0,0,0.8);"> {title}</div>
-            <div style="font-size:13px;color:rgba(224,242,254,0.72);margin-top:6px;">{subtitle}</div>
+            <div style="font-size:42px;font-weight:950;color:#f0f9ff;line-height:1;
+                        text-transform:uppercase;letter-spacing:1.5px;
+                        text-shadow:0 4px 12px rgba(0,0,0,0.5);"> {title}</div>
+            <div style="font-size:20px;color:rgba(255,255,255,0.9);
+                        font-weight:950;text-transform:uppercase;margin-top:4px;
+                        letter-spacing:0.8px;">{subtitle}</div>
         </div>
     </div>
     """, unsafe_allow_html=True)

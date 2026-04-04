@@ -79,12 +79,14 @@ def render(profil):
     lang = ctx["lang"]
     mois = ctx["mois"]
 
-    banner(
-        IMAGES["pred_banner"], 185,
-        T['bloc3_label'],
-        T["bloc3_subtitle"], th,
-        accent=th["amber"], tint_hex="#f59e0b", tint_strength=0.28
-    )
+    _b_col, _ = st.columns([1, 1])
+    with _b_col:
+        banner(
+            IMAGES["pred_banner"], 120,
+            T['bloc3_label'],
+            profil.upper(), th,
+            accent=th["amber"], tint_hex="#f59e0b", tint_strength=0.28
+        )
 
     if len(df) == 0:
         empty_state(T, th)

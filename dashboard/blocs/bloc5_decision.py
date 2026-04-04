@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 import numpy as np
 import io
 from datetime import date, timedelta
-from utils import get_context, img_card, sources_bar, empty_state, irs_level
+from utils import get_context, banner, img_card, sources_bar, empty_state, irs_level
 from assets import IMAGES
 
 _SNK_TO_KEY    = {"faible":"normal","modere":"watch","eleve":"high","critique":"urgent"}
@@ -611,18 +611,10 @@ def render(profil):
 
     # ── 2. Affichage En-tête (hcol1 et hcol3 complétés) ───────────────────────
     with hcol1:
-        st.markdown(
-            f'<div style="position:relative;border-radius:12px;overflow:hidden;height:84px;'
-            f'border:1px solid rgba(249,115,22,0.3);box-shadow:0 4px 12px rgba(0,0,0,0.1);">'
-            f'<img src="{IMAGES["sante_banner"]}"'
-            f' style="width:100%;height:100%;object-fit:cover;filter:brightness(0.35);"/>'
-            f'<div style="position:absolute;inset:0;background:linear-gradient(to right,rgba(249,115,22,0.4),transparent);"></div>'
-            f'<div style="position:absolute;bottom:0;left:0;right:0;padding:8px 12px;">'
-            f'<div style="font-size:13px;font-weight:950;color:#fff;text-transform:uppercase;letter-spacing:1px;line-height:1.1;">{dec_title}</div>'
-            f'<div style="font-size:9px;color:rgba(255,255,255,0.7);font-weight:700;text-transform:uppercase;">{profil.upper()}</div>'
-            f'</div></div>',
-            unsafe_allow_html=True
-        )
+        banner(IMAGES["sante_banner"], 120,
+               dec_title,
+               profil.upper(), th,
+               no_frame=False)
 
     with hcol3:
         # Style CSS pour rendre les boutons d'exportation très lisibles (Bleu & Gras)

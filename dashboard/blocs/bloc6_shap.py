@@ -5,7 +5,8 @@ import streamlit as st
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
-from utils import get_context, sources_bar, empty_state
+from utils import get_context, banner, sources_bar, empty_state
+from assets import IMAGES
 
 # ── Zones INS Cameroun (2019) ─────────────────────────────────────────────────
 ZONES_META = {
@@ -190,20 +191,12 @@ def render(profil):
     # ══════════════════════════════════════════════════════════════════════════
     # EN-TÊTE
     # ══════════════════════════════════════════════════════════════════════════
-    st.markdown(
-        f'<div style="background:{bg_head};'
-        f'border:1px solid {th["teal"]}44;border-left:4px solid {th["teal"]};'
-        f'border-radius:12px;padding:16px 20px;margin-bottom:20px;">'
-        f'<div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;'
-        f'color:{th["teal"]};font-family:DM Mono,monospace;margin-bottom:6px;">'
-        f'Objectif OS3 · IndabaX 2026 · INS Cameroun (2019)</div>'
-        f'<div style="font-size:16px;font-weight:600;color:{txt_main};margin-bottom:4px;">'
-        f'Profil climatique & facteurs aggravants par zone</div>'
-        f'<div style="font-size:12px;color:{txt_sub};">'
-        f'3 zones climatiques · Données {annees} · WHO AQG 2021 · NCBI NBK574591'
-        f'</div></div>',
-        unsafe_allow_html=True
-    )
+    _b_col, _ = st.columns([1, 1])
+    with _b_col:
+        banner(IMAGES["shap_banner"] if "shap_banner" in IMAGES else IMAGES["kpi_banner"], 120,
+               "PROFIL CLIMATIQUE",
+               profil.upper(), th,
+               no_frame=False)
 
     # ══════════════════════════════════════════════════════════════════════════
     # SÉLECTEUR DE ZONE

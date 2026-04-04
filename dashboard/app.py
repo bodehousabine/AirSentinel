@@ -151,13 +151,61 @@ with st.sidebar:
 st.markdown(build_css(th, IMAGES["bg_app"]), unsafe_allow_html=True)
 
 
-# ── Onglets ───────────────────────────────────────────────────────────────────
+# ── Imports des blocs ─────────────────────────────────────────────────────────
 from blocs.bloc1_carte       import render as bloc1
 from blocs.bloc2_kpis        import render as bloc2
 from blocs.bloc3_predictions import render as bloc3
 from blocs.bloc4_alertes     import render as bloc4
 from blocs.bloc5_decision    import render as bloc5
 from blocs.bloc6_shap        import render as bloc6
+
+# ── CSS premium pour les onglets ───────────────────────────────────────────────
+st.markdown("""
+<style>
+/* Conteneur des onglets — fond identique au sélecteur de villes */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 2px;
+    background: #071e35 !important;
+    border-bottom: 1px solid rgba(14,165,233,0.20);
+    padding: 4px 8px 0 8px;
+    border-radius: 10px 10px 0 0;
+}
+
+/* Chaque onglet */
+.stTabs [data-baseweb="tab"] {
+    font-family: 'Inter', 'DM Sans', sans-serif !important;
+    font-size: 13.5px !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+    color: #e2e8f0 !important; /* Texte plus brillant par defaut */
+    background: transparent !important;
+    border: none !important;
+    border-radius: 6px 6px 0 0 !important;
+    padding: 10px 20px !important;
+    transition: all 0.25s ease !important;
+}
+
+/* Hover */
+.stTabs [data-baseweb="tab"]:hover {
+    color: #e2e8f0 !important;
+    background: rgba(14,165,233,0.10) !important;
+}
+
+/* Onglet actif */
+.stTabs [aria-selected="true"] {
+    color: #f0f9ff !important;
+    background: rgba(14,165,233,0.15) !important;
+    border-bottom: 2px solid #0ea5e9 !important;
+    font-weight: 900 !important;
+}
+
+/* Cacher le highlight Streamlit par défaut */
+.stTabs [data-baseweb="tab-highlight"] {
+    display: none !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 tabs = st.tabs([
     T["tab_carte"], T["tab_kpis"], T["tab_predictions"],

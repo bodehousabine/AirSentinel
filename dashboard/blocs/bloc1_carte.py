@@ -98,10 +98,12 @@ def render(profil):
     lang = ctx["lang"]
     COORDS = ctx["coords"] if "coords" in ctx else {}
 
-    banner(IMAGES["carte_banner"], 190,
-           f"{T['bloc1_label']}",
-           T["bloc1_subtitle"], th,
-           accent=th["teal"], tint_hex="#00d4b1", tint_strength=0.32)
+    _b_col, _ = st.columns([1, 1])
+    with _b_col:
+        banner(IMAGES["carte_banner"], 120,
+               T['bloc1_label'],
+               profil.upper(), th,
+               accent=th["teal"], tint_hex="#00d4b1", tint_strength=0.32)
 
     if len(df) == 0:
         empty_state(T, th)

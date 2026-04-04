@@ -7,9 +7,11 @@ def render(profil):
     ctx = get_context()
     df=ctx["df"]; th=ctx["th"]; T=ctx["T"]; lang=ctx["lang"]
 
-    banner(IMAGES["kpi_banner"], 185,
-           f"{T['bloc2_label']} · {ctx['scope_label']}",
-           T["bloc2_chart1_title"], th, accent=th["blue"], tint_hex="#0ea5e9", tint_strength=0.30)
+    _b_col, _ = st.columns([1, 1])
+    with _b_col:
+        banner(IMAGES["kpi_banner"], 120,
+               T['bloc2_label'],
+               profil.upper(), th, accent=th["blue"], tint_hex="#0ea5e9", tint_strength=0.30)
 
     if len(df) == 0: empty_state(T, th); return
 

@@ -2,7 +2,7 @@
 import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
-from utils import get_context, sources_bar, empty_state, irs_level
+from utils import get_context, banner, sources_bar, empty_state, irs_level
 from assets import IMAGES
 
 def _render_irs_gauge(irs, ctx, th, T):
@@ -56,19 +56,14 @@ def render(profil):
     T = ctx["T"]
     p50, p75, p90 = ctx["p50"], ctx["p75"], ctx["p90"]
 
-    # ── Header & Sélecteur (Divisé en deux) ──────────────────────────────────
-    ch1, ch2 = st.columns([2.5, 1])
+    # ── Header & Sélecteur (50/50) ─────────────────────────────────────────────
+    ch1, ch2 = st.columns([1, 1])
     with ch1:
-        st.markdown(f"""
-        <div style="background:{th['bg_tertiary']};border-left:8px solid {th['red']};
-                    padding:22px 30px;border-radius:15px;box-shadow:0 8px 25px rgba(0,0,0,0.2);">
-            <div style="font-size:11px;color:{th['coral']};text-transform:uppercase;letter-spacing:.2em;margin-bottom:6px;font-weight:900;">
-                {T['bloc4_label']}
-            </div>
-            <div style="font-size:22px;font-weight:950;color:{th['text']};letter-spacing:0.5px;text-transform:uppercase;">
-                CENTRE DE SURVEILLANCE CRITIQUE DU RISQUE
-            </div>
-        </div>""", unsafe_allow_html=True)
+        banner(IMAGES["alertes_banner"], 120,
+               T['bloc4_label'],
+               profil.upper(), th,
+               no_frame=False)
+
 
     with ch2:
         villes = sorted(df_brut["ville"].unique().tolist())

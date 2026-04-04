@@ -134,36 +134,36 @@ TRANSLATIONS = {
     # TABS
     # ══════════════════════════════════════════════════════════════════════════
     "tab_carte": {
-        "fr": "🗺️  Carte interactive",
-        "en": "🗺️  Interactive map",
+        "fr": "Carte interactive",
+        "en": "Interactive map",
     },
     "tab_kpis": {
-        "fr": "📊  Indicateurs KPIs",
-        "en": "📊  Key indicators",
+        "fr": "Indicateurs KPI",
+        "en": "Key indicators",
     },
     "tab_predictions": {
-        "fr": "🔮  Prédictions",
-        "en": "🔮  Predictions",
+        "fr": "Prédictions",
+        "en": "Predictions",
     },
     "tab_alertes": {
-        "fr": "🚨  Alertes",
-        "en": "🚨  Alerts",
+        "fr": "Alertes",
+        "en": "Alerts",
     },
     "tab_decision": {
-        "fr": "🏥  Décision santé",
-        "en": "🏥  Health decisions",
+        "fr": "Décision santé",
+        "en": "Health decisions",
     },
     "tab_contexte": {
-        "fr": "🌦️  Contexte",
-        "en": "🌦️  Context",
+        "fr": "Contexte",
+        "en": "Context",
     },
 
     # ══════════════════════════════════════════════════════════════════════════
     # BLOC 1 — CARTE
     # ══════════════════════════════════════════════════════════════════════════
     "bloc1_label": {
-        "fr": "Bloc 1 — Carte interactive",
-        "en": "Block 1 — Interactive map",
+        "fr": "CARTE INTERACTIVE",
+        "en": "INTERACTIVE MAP",
     },
     "bloc1_subtitle": {
         "fr": "PM2.5 · IRS · Épisodes climatiques · Données 2020–2025",
@@ -214,8 +214,8 @@ TRANSLATIONS = {
     # BLOC 2 — KPIs
     # ══════════════════════════════════════════════════════════════════════════
     "bloc2_label": {
-        "fr": "Bloc 2 — Indicateurs clés",
-        "en": "Block 2 — Key indicators",
+        "fr": "INDICATEURS KPI",
+        "en": "KEY INDICATORS",
     },
     "bloc2_kpi_pm25_label": {
         "fr": "PM2.5 moyen",
@@ -274,8 +274,8 @@ TRANSLATIONS = {
     # BLOC 3 — PRÉDICTIONS
     # ══════════════════════════════════════════════════════════════════════════
     "bloc3_label": {
-        "fr": "Bloc 3 — Prédictions",
-        "en": "Block 3 — Predictions",
+        "fr": "PRÉDICTIONS",
+        "en": "PREDICTIONS",
     },
     "bloc3_subtitle": {
         "fr": "Court terme 24h–72h · Simulateur IRS · Calendrier mensuel",
@@ -362,8 +362,8 @@ TRANSLATIONS = {
     # BLOC 4 — ALERTES
     # ══════════════════════════════════════════════════════════════════════════
     "bloc4_label": {
-        "fr": "Bloc 4 — Alertes automatiques",
-        "en": "Block 4 — Automatic alerts",
+        "fr": "CENTRE DE SURVEILLANCE",
+        "en": "SURVEILLANCE CENTER",
     },
     "bloc4_feux_title": {
         "fr": "Feux de brousse",
@@ -416,8 +416,8 @@ TRANSLATIONS = {
     # BLOC 5 — DÉCISION SANTÉ
     # ══════════════════════════════════════════════════════════════════════════
     "bloc5_label": {
-        "fr": "Bloc 5 — Aide à la décision sanitaire",
-        "en": "Block 5 — Health decision support",
+        "fr": "DÉCISION SANITAIRE",
+        "en": "HEALTH DECISION",
     },
     "bloc5_innovation": {
         "fr": "Notre innovation · Aucune autre équipe ne propose ça",
@@ -479,8 +479,8 @@ TRANSLATIONS = {
     # BLOC 6 — CONTEXTE
     # ══════════════════════════════════════════════════════════════════════════
     "bloc6_label": {
-        "fr": "Bloc 6 — Contexte",
-        "en": "Block 6 — Context",
+        "fr": "PROFIL CLIMATIQUE",
+        "en": "CLIMATE PROFILE",
     },
     "bloc6_subtitle": {
         "fr": "Polluant dominant · Comparaison N-1 · Épisodes par zone · UV & Ozone",

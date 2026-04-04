@@ -21,6 +21,7 @@ IMAGES = {
     # Bloc 4 Alertes — feux + chaleur
     "alert_feux":    "https://images.unsplash.com/photo-1562155955-1cb2d73488d7?w=800&q=80&auto=format",
     "alert_chaleur": "https://images.unsplash.com/photo-1504701954957-2010ec3bcec1?w=800&q=80&auto=format",
+    "alertes_banner":"https://images.unsplash.com/photo-1584744982491-665216d95f8b?w=1200&q=85&auto=format",
     # Bloc 5 Santé — médecins Afrique
     "sante_banner":  "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=1200&q=85&auto=format",
     "sante_side":    "https://images.unsplash.com/photo-1559757175-5700dde675bc?w=600&q=80&auto=format",
@@ -29,6 +30,7 @@ IMAGES = {
     "ctx_harmattan": "https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=600&q=80&auto=format",
     "ctx_feux":      "https://images.unsplash.com/photo-1562155955-1cb2d73488d7?w=600&q=80&auto=format",
     "ctx_pluies":    "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=600&q=80&auto=format",
+    "shap_banner":   "https://images.unsplash.com/photo-1526779259212-939e64788e3c?w=1200&q=85&auto=format",
 }
 
 # ── Palette bleu de mer ───────────────────────────────────────────────────────
