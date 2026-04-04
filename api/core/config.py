@@ -11,7 +11,9 @@ class Settings(BaseSettings):
         "http://localhost:3000",
         "http://localhost:3001",
         "http://localhost:8501", 
-        "https://airsentinel.onrender.com"
+        "https://airsentinel.onrender.com",
+        "https://airsentinel-cameroon.vercel.app",
+        "https://project-uo7uo-7zvnt09fu-fofack-alemdjou-henri-joels-projects.vercel.app"
     ]
     
     # Dataset et ML
