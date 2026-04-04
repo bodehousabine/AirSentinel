@@ -1,113 +1,129 @@
-"""blocs/bloc4_alertes.py — Alertes · bilingue + thème"""
+"""blocs/bloc4_alertes.py — Alertes dynamiques (High-Impact Fluid Redesigned)"""
 import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
-from utils import get_context, sources_bar, empty_state
+from utils import get_context, sources_bar, empty_state, irs_level
 from assets import IMAGES
 
-def _nk(irs, p50, p75, p90):
-    if irs<p50: return "faible"
-    if irs<p75: return "modere"
-    if irs<p90: return "eleve"
-    return "critique"
-
-def _msg(profil_key, nk, T, ctx, th):
-    key = f"bloc4_msg_{nk}_{profil_key}"
-    txt = T.get(key, "—")
-    if nk in ("faible","modere") and profil_key == "researcher":
-        txt += f" · {ctx['scope_label']}"
-    return txt
+def _render_irs_gauge(irs, ctx, th, T):
+    """Affiche un indicateur en jauge (conteur de voiture) pour l'IRS."""
+    p50, p75, p90 = ctx["p50"], ctx["p75"], ctx["p90"]
+    
+    fig = go.Figure(go.Indicator(
+        mode = "gauge+number",
+        value = irs,
+        domain = {'x': [0, 1], 'y': [0, 1]},
+        number = {'font': {'size': 42, 'color': th['text'], 'weight': 'bold'}, 'valueformat': ".3f"},
+        gauge = {
+            'axis': {
+                'range': [0, 1], 
+                'tickwidth': 2, 
+                'tickcolor': th['text3'],
+                'tickvals': [0, p50, p75, p90, 1],
+                'ticktext': ["0", f"<b>{p50:.2f}</b>", f"<b>{p75:.2f}</b>", f"<b>{p90:.2f}</b>", "1"],
+                'tickmode': 'array'
+            },
+            'bar': {'color': th['text'], 'thickness': 0.15},
+            'bgcolor': "rgba(0,0,0,0.05)",
+            'borderwidth': 0,
+            'steps': [
+                {'range': [0, p50],   'color': th["green"]},
+                {'range': [p50, p75], 'color': th["amber"]},
+                {'range': [p75, p90], 'color': th["coral"]},
+                {'range': [p90, 1],   'color': th["red"]},
+            ],
+            'threshold': {
+                'line': {'color': "#fff", 'width': 4},
+                'thickness': 0.8,
+                'value': irs
+            }
+        }
+    ))
+    
+    fig.update_layout(
+        paper_bgcolor = "rgba(0,0,0,0)",
+        plot_bgcolor = "rgba(0,0,0,0)",
+        font = {'color': th['text2'], 'family': "Inter"},
+        height = 240,
+        margin = dict(l=40, r=40, t=50, b=20)
+    )
+    return fig
 
 def render(profil):
     ctx = get_context()
-    df=ctx["df"]; th=ctx["th"]; T=ctx["T"]
+    df_brut = ctx["df_brut"]
+    th = ctx["th"]
+    T = ctx["T"]
+    p50, p75, p90 = ctx["p50"], ctx["p75"], ctx["p90"]
 
-    # Bannière duo images
-    cb1,cb2 = st.columns(2)
-    for col,img,title,sub,ac,brd in [
-        (cb1,IMAGES["alert_feux"],   T["bloc4_feux_title"],   T["bloc4_feux_sub"],   th["red"],  "rgba(239,68,68,0.22)"),
-        (cb2,IMAGES["alert_chaleur"],T["bloc4_chaleur_title"],T["bloc4_chaleur_sub"],th["amber"],"rgba(245,158,11,0.22)"),
-    ]:
-        with col:
-            st.markdown(f"""
-            <div style="position:relative;border-radius:12px;overflow:hidden;height:155px;
-                        margin-bottom:16px;border:1px solid {brd};">
-                <img src="{img}" style="width:100%;height:100%;object-fit:cover;
-                           filter:saturate(0.65) brightness(0.50);"
-                     onerror="this.style.opacity='0'"/>
-                <div style="position:absolute;inset:0;background:linear-gradient(to top,
-                            rgba(2,12,24,0.90),transparent 60%);"></div>
-                <div style="position:absolute;bottom:0;left:0;right:0;padding:12px 16px;">
-                    <div style="font-size:17px;font-weight:600;color:#e0f2fe;">{title}</div>
-                    <div style="font-size:11px;color:{ac};margin-top:2px;">{sub}</div>
-                </div>
-            </div>""", unsafe_allow_html=True)
+    # ── Header & Sélecteur (Divisé en deux) ──────────────────────────────────
+    ch1, ch2 = st.columns([2.5, 1])
+    with ch1:
+        st.markdown(f"""
+        <div style="background:{th['bg_tertiary']};border-left:8px solid {th['red']};
+                    padding:22px 30px;border-radius:15px;box-shadow:0 8px 25px rgba(0,0,0,0.2);">
+            <div style="font-size:11px;color:{th['coral']};text-transform:uppercase;letter-spacing:.2em;margin-bottom:6px;font-weight:900;">
+                {T['bloc4_label']}
+            </div>
+            <div style="font-size:22px;font-weight:950;color:{th['text']};letter-spacing:0.5px;text-transform:uppercase;">
+                CENTRE DE SURVEILLANCE CRITIQUE DU RISQUE
+            </div>
+        </div>""", unsafe_allow_html=True)
 
-    # Sous-titre
-    st.markdown(
-        f"<div style='font-size:13px;color:{th['text2']};margin-bottom:16px;'>"
-        f"{T['bloc4_label']} · <b style='color:{th['text']};'>{ctx['scope_label']}</b> · "
-        f"IRS : <b style='color:{ctx['irs_color']};'>{ctx['irs_moy']:.3f} — {ctx['irs_label']}</b>"
-        f" · {profil}</div>",
-        unsafe_allow_html=True,
-    )
-    if len(df) == 0: empty_state(T, th); return
+    with ch2:
+        villes = sorted(df_brut["ville"].unique().tolist())
+        st.markdown('<div style="height:15px;"></div>', unsafe_allow_html=True)
+        ville_sel = st.selectbox("🏙️ ADMINISTRATION (VILLE) :", villes, key="v4_city_split_header")
 
-    # Mapping profil → clé
-    profil_map = {
-        T["sidebar_profile_citizen"]:    "citizen",
-        T["sidebar_profile_health"]:     "health",
-        T["sidebar_profile_mayor"]:      "mayor",
-        T["sidebar_profile_researcher"]: "researcher",
-    }
-    pk = profil_map.get(profil, "citizen")
+    # Récupérer la période Sidebar
+    an_min, an_max = st.session_state.get("annee_sel", (int(df_brut["date"].dt.year.min()), int(df_brut["date"].dt.year.max())))
+    df_alert = df_brut[(df_brut["ville"] == ville_sel) & (df_brut["date"].dt.year >= an_min) & (df_brut["date"].dt.year <= an_max)]
+    
+    if len(df_alert) == 0:
+        st.error("⚠️ AUCUNE DONNÉE DISPONIBLE."); return
 
+    irs_val = float(df_alert["IRS"].mean())
+    snc, snt, snk = irs_level(irs_val, p50, p75, p90, T, th)
+
+    # ── Jauge de Risque (Prend toute la largeur ou large centré) ─────────────
+    st.plotly_chart(_render_irs_gauge(irs_val, ctx, th, T), use_container_width=True, config={'displayModeBar': False}, key="gauge_v4_fluid")
+
+    # ── Matrice des Risques (Structure originale préservée) ──────────────────
+    st.markdown("<div style='height:20px;'></div>", unsafe_allow_html=True)
+    
     niveaux = [
-        {"nk":"faible",   "icon":"🟢","lbl":T["level_faible"],   "c":th["green"],"bg":"rgba(16,185,129,0.07)","brd":"rgba(16,185,129,0.25)"},
-        {"nk":"modere",   "icon":"🟡","lbl":T["level_modere"],   "c":th["amber"],"bg":"rgba(245,158,11,0.07)","brd":"rgba(245,158,11,0.25)"},
-        {"nk":"eleve",    "icon":"🟠","lbl":T["level_eleve"],    "c":th["coral"],"bg":"rgba(249,115,22,0.07)","brd":"rgba(249,115,22,0.28)"},
-        {"nk":"critique", "icon":"🔴","lbl":T["level_critique"], "c":th["red"],  "bg":"rgba(239,68,68,0.08)", "brd":"rgba(239,68,68,0.32)"},
+        {"nk":"faible",   "range": f"IRS < {p50:.3f}",           "icon":"🟢","lbl":T["level_faible"],   "c":th["green"],"bg":"rgba(16,185,129,0.12)"},
+        {"nk":"modere",   "icon":"🟡","lbl":T["level_modere"],   "c":th["amber"],"bg":"rgba(245,158,11,0.12)"},
+        {"nk":"eleve",    "icon":"🟠","lbl":T["level_eleve"],    "c":th["coral"],"bg":"rgba(249,115,22,0.12)"},
+        {"nk":"critique", "icon":"🔴","lbl":T["level_critique"], "c":th["red"],  "bg":"rgba(239,68,68,0.14)"},
     ]
-    seuils = [f"IRS < {ctx['p50']:.3f}",
-              f"{ctx['p50']:.3f} → {ctx['p75']:.3f}",
-              f"{ctx['p75']:.3f} → {ctx['p90']:.3f}",
-              f"≥ {ctx['p90']:.3f}"]
+
+    pk = "citizen"
+    if profil == T["sidebar_profile_health"]:     pk = "health"
+    elif profil == T["sidebar_profile_mayor"]:      pk = "mayor"
+    elif profil == T["sidebar_profile_researcher"]: pk = "researcher"
 
     cols = st.columns(4)
-    for i,(niv,seuil) in enumerate(zip(niveaux,seuils)):
-        msg   = _msg(pk, niv["nk"], T, ctx, th)
-        actif = (niv["nk"] == ctx["irs_nk"])
-        brd   = f"2px solid {niv['c']}" if actif else f"1px solid {niv['brd']}"
-        badge = (f'<span style="font-size:10px;background:{niv["c"]}22;border-radius:4px;'
-                 f'padding:2px 7px;margin-left:6px;color:{niv["c"]};">{T["bloc4_current_badge"]}</span>') if actif else ""
+    for i, niv in enumerate(niveaux):
+        msg = T.get(f"bloc4_msg_{niv['nk']}_{pk}", "—")
+        actif = (niv["nk"] == snk)
+        
+        brd_style = f"4px solid {niv['c']}" if actif else f"1px solid {th['border_soft']}"
+        opacity = "1.0" if actif else "0.80"
+        scale = "scale(1.05)" if actif else "scale(1.0)"
+        shadow = f"0 15px 45px {niv['c']}55" if actif else "0 4px 15px rgba(0,0,0,0.1)"
+
         with cols[i]:
             st.markdown(f"""
-            <div style="background:{niv['bg']};border:{brd};border-radius:12px;
-                        padding:18px 14px;height:220px;display:flex;flex-direction:column;">
-                <div style="font-size:26px;margin-bottom:7px;">{niv['icon']}</div>
-                <div style="font-size:13px;font-weight:600;color:{niv['c']};
-                            letter-spacing:.05em;margin-bottom:3px;">{niv['lbl']}{badge}</div>
-                <div style="font-size:10px;color:{th['text3']};font-family:'DM Mono',monospace;
-                            margin-bottom:10px;">{seuil}</div>
-                <div style="font-size:12px;color:{th['text']};line-height:1.55;flex:1;">{msg}</div>
+            <div style="background:{niv['bg']};border:{brd_style};border-radius:15px;
+                        padding:25px 20px;height:290px;display:flex;flex-direction:column;
+                        opacity:{opacity};transform:{scale};box-shadow:{shadow};transition:all 0.4s ease;">
+                <div style="font-size:36px;margin-bottom:12px;">{niv['icon']}</div>
+                <div style="font-size:16px;font-weight:950;color:{niv['c']};
+                            letter-spacing:.1em;margin-bottom:12px;text-transform:uppercase;">{niv['lbl']}</div>
+                <div style="font-size:13.5px;color:{th['text']};line-height:1.7;flex:1;font-weight:800;">{msg}</div>
+                {f'<div style="font-size:11px;background:{niv["c"]};color:#fff;border-radius:8px;padding:6px 14px;width:fit-content;margin-top:18px;font-weight:950;letter-spacing:1px;text-transform:uppercase;">Statut Ville</div>' if actif else ""}
             </div>""", unsafe_allow_html=True)
 
-    st.markdown("<div style='margin-top:18px;'></div>", unsafe_allow_html=True)
-
-    df2 = df.copy()
-    df2["niv_num"] = np.searchsorted([ctx["p50"],ctx["p75"],ctx["p90"]],df2["IRS"].values,side="right").clip(0,3)
-    hn = (df2.groupby([df2["date"].dt.year,"niv_num"]).size()
-             .unstack(fill_value=0).reindex(columns=[0,1,2,3],fill_value=0))
-    hn.columns = [T["level_faible"],T["level_modere"],T["level_eleve"],T["level_critique"]]
-    PL = dict(paper_bgcolor="rgba(0,0,0,0)",plot_bgcolor=th["plot_bg"],
-              font=dict(color=th["text2"],size=12),margin=dict(l=44,r=20,t=44,b=36))
-    GRID = dict(gridcolor=th["grid_color"],linecolor=th["line_color"],zeroline=False)
-    fig = go.Figure()
-    for col,pc in zip(hn.columns,[th["green"],th["amber"],th["coral"],th["red"]]):
-        fig.add_trace(go.Bar(x=hn.index,y=hn[col],name=col,marker_color=pc,opacity=0.85))
-    fig.update_layout(**PL,height=270,barmode="stack",
-        title=dict(text=f"{T['bloc4_chart_title']} · {ctx['scope_label']}",font=dict(color=th["text"],size=13)),
-        legend=dict(font=dict(color=th["text2"],size=11),bgcolor="rgba(0,0,0,0)"))
-    fig.update_xaxes(**GRID); fig.update_yaxes(**GRID)
-    st.plotly_chart(fig, width="stretch")
-    sources_bar(f"{T['sources_cecc']} · {T['sources_barker']} · {T['sources_bauer']}", th)
+    st.markdown("<div style='margin-top:40px;'></div>", unsafe_allow_html=True)
+    # Note : Sources et Diagnostic Expert supprimés

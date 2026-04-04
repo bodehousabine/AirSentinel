@@ -12,9 +12,8 @@ import streamlit as st
 from assets import IMAGES
 from themes import get_theme, build_css
 from translations import get_t
-from utils import get_context, banner, irs_level, load_data
+from utils import load_data
 from landing import render_landing
-from chatbox import render_chatbox
 
 st.set_page_config(
     page_title="AirSentinel Cameroun",
@@ -39,8 +38,8 @@ if st.session_state["page"] == "landing":
         st.rerun()
     st.stop()
 
-_th = get_theme(st.session_state.get("theme_name", "dark"))
-_T  = get_t(st.session_state.get("lang", "fr"))
+th = get_theme(st.session_state.get("theme_name", "dark"))
+T  = get_t(st.session_state.get("lang", "fr"))
 
 # ── Charger les années disponibles dynamiquement ──────────────────────────────
 _df_data = load_data()
@@ -66,39 +65,18 @@ with st.sidebar:
             <div style="font-size:17px;font-weight:600;color:#e0f2fe;">AirSentinel</div>
             <div style="font-size:10px;color:#00d4b1;letter-spacing:.16em;
                         margin-top:3px;font-family:'DM Mono',monospace;">
-                {_T['sidebar_app_subtitle']}
+                {T['sidebar_app_subtitle']}
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    if st.button("← " + ("Accueil" if _T == get_t("fr") else "Home"),
+    if st.button("← " + ("Accueil" if st.session_state["lang"] == "fr" else "Home"),
                  key="btn_home", use_container_width=True):
         st.session_state["page"] = "landing"
         st.rerun()
 
-    st.markdown(f"<hr style='border-color:{_th['border_soft']};margin:10px 0;'>", unsafe_allow_html=True)
-
-    # ── Thème + Langue ────────────────────────────────────────────────────────
-    col_th, col_lang = st.columns(2)
-    with col_th:
-        theme_labels = [_T["sidebar_theme_dark"], _T["sidebar_theme_light"]]
-        theme_vals   = ["dark", "light"]
-        cur_idx      = theme_vals.index(st.session_state.get("theme_name", "dark"))
-        choice_th    = st.selectbox(_T["sidebar_theme_label"], theme_labels, index=cur_idx, key="_theme_choice")
-        st.session_state["theme_name"] = theme_vals[theme_labels.index(choice_th)]
-
-    with col_lang:
-        lang_labels = ["Français", "English"]
-        lang_vals   = ["fr", "en"]
-        cur_lidx    = lang_vals.index(st.session_state.get("lang", "fr"))
-        choice_lang = st.selectbox(_T["sidebar_lang_label"], lang_labels, index=cur_lidx, key="_lang_choice")
-        st.session_state["lang"] = lang_vals[lang_labels.index(choice_lang)]
-
-    th = get_theme(st.session_state["theme_name"])
-    T  = get_t(st.session_state["lang"])
-
-    st.markdown(f"<hr style='border-color:{th['border_soft']};margin:12px 0;'>", unsafe_allow_html=True)
+    st.markdown(f"<hr style='border-color:{th['border_soft']};margin:10px 0;'>", unsafe_allow_html=True)
 
     # ── Profil ────────────────────────────────────────────────────────────────
     st.markdown(
@@ -116,7 +94,7 @@ with st.sidebar:
 
     st.markdown(f"<hr style='border-color:{th['border_soft']};margin:12px 0;'>", unsafe_allow_html=True)
 
-    # ── Filtre années — utilisé par KPIs uniquement ───────────────────────────
+    # ── Filtre années ─────────────────────────────────────────────────────────
     st.markdown(
         f"<div style='font-size:10px;text-transform:uppercase;letter-spacing:.1em;"
         f"color:{th['text3']};margin-bottom:8px;'>{T['sidebar_period_label']}</div>",
@@ -128,6 +106,34 @@ with st.sidebar:
         key="annee_sel",
         label_visibility="collapsed"
     )
+
+    st.markdown(f"<hr style='border-color:{th['border_soft']};margin:12px 0;'>", unsafe_allow_html=True)
+
+    # ── Paramètres (Thème & Langue) ──────────────────────────────────────────
+    st.markdown(
+        f"<div style='font-size:10px;text-transform:uppercase;letter-spacing:.1em;"
+        f"color:{th['text3']};margin-bottom:8px;'>{T['sidebar_theme_title']} & {T['sidebar_lang_title']}</div>",
+        unsafe_allow_html=True
+    )
+    
+    th_labels = [T["sidebar_theme_dark"], T["sidebar_theme_light"]]
+    th_vals   = ["dark", "light"]
+    def update_th_sb():
+        st.session_state["theme_name"] = th_vals[th_labels.index(st.session_state.sb_th_sel)]
+    st.selectbox("T", th_labels, index=th_vals.index(st.session_state["theme_name"]), 
+                 key="sb_th_sel", on_change=update_th_sb, label_visibility="collapsed")
+
+    l_labels = ["fr Français", "us English"]
+    l_vals   = ["fr", "en"]
+    def update_lang_sb():
+        st.session_state["lang"] = l_vals[l_labels.index(st.session_state.sb_lang_sel)]
+    st.selectbox("L", l_labels, index=l_vals.index(st.session_state["lang"]), 
+                 key="sb_lang_sel", on_change=update_lang_sb, label_visibility="collapsed")
+
+    st.markdown("<div style='margin-top:10px;'></div>", unsafe_allow_html=True)
+    about_label = "ℹ️ À Propos" if st.session_state["lang"] == "fr" else "ℹ️ About"
+    if st.button(about_label, key="sb_about_btn", use_container_width=True):
+        st.session_state["show_about"] = True
 
     st.markdown(f"<hr style='border-color:{th['border_soft']};margin:12px 0;'>", unsafe_allow_html=True)
 
@@ -144,30 +150,6 @@ with st.sidebar:
 # ── CSS global ────────────────────────────────────────────────────────────────
 st.markdown(build_css(th, IMAGES["bg_app"]), unsafe_allow_html=True)
 
-# ── Bannière principale ───────────────────────────────────────────────────────
-
-ctx = get_context()
-nc, nt, _ = irs_level(ctx["irs_moy"], ctx["p50"], ctx["p75"], ctx["p90"], T, th)
-
-pills = [
-    (T["header_pill_profile"], profil,                                 th["purple"]),
-    (T["header_pill_pm25"],    f"{ctx['pm25_moy']:.1f} µg/m³",         th["red"] if ctx["pm25_moy"] > 15 else th["green"]),
-    (T["header_pill_irs"],     f"{nt} ({ctx['irs_moy']:.3f})",         nc),
-    (T["header_pill_scope"],   ctx["scope_label"],                      th["blue"]),
-    (T["header_pill_source"],  "WHO AQG 2021 · NCBI NBK574591",         th["text3"]),
-]
-pills_html = "".join([
-    f'<div style="font-size:11px;background:linear-gradient(135deg,{th["bg_tertiary"]},{th["bg_elevated"]});'
-    f'border:1px solid {th["border_soft"]};padding:5px 14px;border-radius:20px;'
-    f'display:flex;align-items:center;gap:6px;">'
-    f'<span style="color:{th["text3"]}">{lbl} :</span>'
-    f'<span style="color:{vc};font-weight:500;">{val}</span></div>'
-    for lbl, val, vc in pills
-])
-st.markdown(
-    f'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px;">{pills_html}</div>',
-    unsafe_allow_html=True
-)
 
 # ── Onglets ───────────────────────────────────────────────────────────────────
 from blocs.bloc1_carte       import render as bloc1
@@ -189,4 +171,7 @@ with tabs[3]: bloc4(profil)
 with tabs[4]: bloc5(profil)
 with tabs[5]: bloc6(profil)
 
-render_chatbox()
+# 7. Modals
+if st.session_state.get("show_about", False):
+    from landing import render_about_modal
+    render_about_modal(st.session_state["lang"])

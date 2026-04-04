@@ -7,7 +7,7 @@ import streamlit as st
 from assets import IMAGES
 from themes import get_theme
 from translations import get_t
-from chatbox import render_chatbox
+
 
 
 def render_landing():
@@ -17,9 +17,7 @@ def render_landing():
     lang    = st.session_state.get("lang", "fr")
     T       = get_t(lang)
     
-    # Render chatbox early so it's not pushed off-screen
-    render_chatbox()
-
+ 
     bg_url  = IMAGES["bg_app"]
     overlay = th["bg_image_overlay"]
     text_color = th["text"]

@@ -17,6 +17,14 @@ TRANSLATIONS = {
         "fr": "PARAMÈTRES",
         "en": "SETTINGS",
     },
+    "sidebar_theme_title": {
+        "fr": "🎨 THÈME",
+        "en": "🎨 THEME",
+    },
+    "sidebar_lang_title": {
+        "fr": "🌐 LANGUE",
+        "en": "🌐 LANGUAGE",
+    },
     "sidebar_theme_label": {
         "fr": "🎨 Thème",
         "en": "🎨 Theme",

@@ -110,6 +110,11 @@ def build_css(th: dict, img_url: str) -> str:
     """
     return f"""
     <style>
+    /* ── Masquer les éléments natifs Streamlit ── */
+    [data-testid="stHeader"], footer, #MainMenu, .stAppDeployButton {{
+        display: none !important;
+    }}
+
     @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap');
 
     * {{ box-sizing: border-box; }}
