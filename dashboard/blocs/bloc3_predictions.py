@@ -79,13 +79,21 @@ def render(profil):
     lang = ctx["lang"]
     mois = ctx["mois"]
 
-    _b_col, _ = st.columns([1, 1])
+    _b_col, _sel_col = st.columns([2.4, 1])
     with _b_col:
         banner(
             IMAGES["pred_banner"], 120,
             T['bloc3_label'],
-            profil.upper(), th,
+            "", th,
             accent=th["amber"], tint_hex="#f59e0b", tint_strength=0.28
+        )
+    with _sel_col:
+        st.markdown('<div style="margin-top:34px;"></div>', unsafe_allow_html=True)
+        v_all = T["all_cities"]
+        v_list = [v_all] + sorted(df["ville"].unique().tolist())
+        v = st.selectbox(
+            "🏙️ Sélectionner une ville" if lang == "fr" else "🏙️ Select a city",
+            v_list, index=0, key="p_v"
         )
 
     if len(df) == 0:
@@ -96,6 +104,7 @@ def render(profil):
                 font=dict(color=th["text2"], size=12))
     GRID = dict(gridcolor=th["grid_color"], linecolor=th["line_color"], zeroline=False)
 
+    # Charger modèles
     modele, scaler, features, arima = _load_models()
     modeles_ok = all(x is not None for x in [modele, scaler, features, arima])
 
@@ -110,29 +119,44 @@ def render(profil):
     # ONGLET 1 — Prédiction J/J+1/J+2
     # ══════════════════════════════════════════════════════════════════════════
     with tabs[0]:
-        # Sélecteur ville en haut — pleine largeur
-        villes_dispo = sorted(df["ville"].unique().tolist())
-        v = st.selectbox(
-            "🏙️ Sélectionner une ville" if lang == "fr" else "🏙️ Select a city",
-            villes_dispo, index=0, key="p_v"
-        )
+        v_all = T["all_cities"]
+        if v == v_all:
+            # Agrégation nationale (moyenne de l'historique et des prédictions)
+            df_v = df.sort_values("date")
+            hist = df_v.groupby("date")["pm2_5_moyen"].mean().tail(60).reset_index()
+            
+            # Pour la prédiction nationale, on moyenne les prédictions par ville
+            all_villes = sorted(df["ville"].unique().tolist())
+            all_p_lists = []
+            for city in all_villes:
+                if modeles_ok:
+                    p, _ = _predire_ville(city, df, modele, scaler, features, arima)
+                    all_p_lists.append(p)
+                else:
+                    # Fallback si modèle non OK
+                    df_c = df[df["ville"] == city]
+                    base = float(df_c["pm2_5_moyen"].mean()) if len(df_c) > 0 else 15.0
+                    all_p_lists.append([base] * 3)
+            
+            preds = np.mean(all_p_lists, axis=0).tolist()
+            zone_v = "National"
+            source_pred = "Moyenne nationale (aggrégat)"
+        else:
+            df_v = df[df["ville"] == v].sort_values("date")
+            hist = df_v.groupby("date")["pm2_5_moyen"].mean().tail(60).reset_index()
 
-        df_v     = df[df["ville"] == v].sort_values("date")
-        # Historique 60 jours au lieu de 30
-        hist     = df_v.groupby("date")["pm2_5_moyen"].mean().tail(60).reset_index()
+            if modeles_ok and len(df_v) > 0:
+                preds, zone_v = _predire_ville(v, df, modele, scaler, features, arima)
+                source_pred   = f"Modèle Hybride RL+ARIMA · {zone_v}"
+            else:
+                base  = float(df_v["pm2_5_moyen"].mean()) if len(df_v) > 0 else 15.0
+                np.random.seed(hash(v) % 2**31)
+                preds       = [base * (0.88 + 0.24 * np.random.random()) for _ in range(3)]
+                zone_v      = ""
+                source_pred = "Moyenne historique (modèle non disponible)"
+
         jours    = [date.today() + timedelta(days=i) for i in range(0, 3)]
         jours_pd = pd.to_datetime(jours)
-
-        if modeles_ok and len(df_v) > 0:
-            preds, zone_v = _predire_ville(v, df, modele, scaler, features, arima)
-            source_pred   = f"Modèle Hybride RL+ARIMA · {zone_v}"
-        else:
-            base  = float(df_v["pm2_5_moyen"].mean()) if len(df_v) > 0 else 15.0
-            np.random.seed(hash(v) % 2**31)
-            preds       = [base * (0.88 + 0.24 * np.random.random()) for _ in range(3)]
-            zone_v      = ""
-            source_pred = "Moyenne historique (modèle non disponible)"
-
         mae       = 3.456
         pred_high = [p + mae for p in preds]
         pred_low  = [max(0, p - mae) for p in preds]
@@ -266,18 +290,6 @@ def render(profil):
     # ONGLET 2 — Performance du modèle
     # ══════════════════════════════════════════════════════════════════════════
     with tabs[1]:
-        perf_desc = (
-            "Performance du modèle hybride sur les données de test 2025 — "
-            "données jamais vues pendant l'entraînement."
-            if ctx["lang"] == "fr"
-            else "Hybrid model performance on 2025 test data — never seen during training."
-        )
-        st.markdown(
-            f'<div style="font-size:13px;color:{th["text2"]};margin-bottom:16px;">'
-            f'{perf_desc}'
-            f'</div>',
-            unsafe_allow_html=True
-        )
         if modeles_ok:
             @st.cache_data(ttl=3600)
             def _calc_perf():
@@ -331,18 +343,18 @@ def render(profil):
 
                 st.markdown("<div style='margin-top:24px;'></div>", unsafe_allow_html=True)
 
-                # Timeline pleine largeur — ville de référence sélectionnable
-                ville_ref = st.selectbox(
-                    "Ville de référence" if lang == "fr" else "Reference city",
-                    sorted(list(set(perf["villes"]))),
-                    index=list(sorted(set(perf["villes"]))).index("Yaounde")
-                    if "Yaounde" in set(perf["villes"]) else 0,
-                    key="perf_ville"
-                )
-                mask_v  = perf["villes"] == ville_ref
-                dates_v = perf["dates"][mask_v]
-                y_v     = perf["y_test"][mask_v]
-                p_v     = perf["pred"][mask_v]
+                # Moyenne nationale (filtre ville de référence retiré car jugé inutile)
+                df_perf_plot = pd.DataFrame({
+                    "date": perf["dates"],
+                    "y_test": perf["y_test"],
+                    "pred": perf["pred"]
+                })
+                df_avg = df_perf_plot.groupby("date").mean().reset_index()
+                
+                dates_v = df_avg["date"]
+                y_v     = df_avg["y_test"]
+                p_v     = df_avg["pred"]
+                ville_ref = "Moyenne nationale" if lang == "fr" else "National average"
 
                 fig_tl = go.Figure()
 
@@ -397,26 +409,18 @@ def render(profil):
         def _m(col, fb):
             return float(df[col].mean()) if col in df.columns and len(df) > 0 else fb
 
-        # En-tête
-        st.markdown(
-            f'<div style="background:linear-gradient(135deg,{th["bg_elevated"]},{th["bg_tertiary"]});'
-            f'border:1px solid {th["amber"]}44;border-left:4px solid {th["amber"]};'
-            f'border-radius:12px;padding:14px 20px;margin-bottom:20px;">'
-            f'<div style="font-size:14px;font-weight:600;color:{th["amber"]};margin-bottom:4px;">'
-            f'🎛️ Simulateur · Modèle Hybride RL+ARIMA</div>'
-            f'<div style="font-size:12px;color:{th["text2"]};">'
-            f'Ajustez les paramètres météo — le vrai modèle prédit le PM2.5 en temps réel</div>'
-            f'</div>',
-            unsafe_allow_html=True
-        )
+        # En-tête (Filtre ville retiré icic car on utilise celui du haut désormais)
+        v_all = T["all_cities"]
+        if v == v_all:
+             # Le simulateur nécessite une ville de référence pour le contexte zones
+             # On prend la première ville disponible si "Toutes villes" est sélectionné
+             ville_sim = sorted(df["ville"].unique().tolist())[0]
+             st.info(f"💡 Simulation basée sur le contexte de {ville_sim} (par défaut)." if lang == "fr" else 
+                     f"💡 Simulation based on context: {ville_sim} (default).")
+        else:
+             ville_sim = v
 
-        # Sélecteur ville pour le simulateur
-        villes_sim = sorted(df["ville"].unique().tolist())
-        ville_sim  = st.selectbox(
-            "🏙️ Ville de référence" if lang == "fr" else "🏙️ Reference city",
-            villes_sim, key="sim_ville"
-        )
-        df_sim = df[df["ville"] == ville_sim].sort_values("date")
+        df_sim    = df[df["ville"] == ville_sim].sort_values("date")
 
         # ── Layout UNIQUE : sliders (gauche) | jauge (droite) ───────────────
         col_sliders, col_gauge = st.columns([3, 2])
@@ -623,6 +627,7 @@ def render(profil):
     # ONGLET 4 — Calendrier mensuel impressionnant
     # ══════════════════════════════════════════════════════════════════════════
     with tabs[3]:
+        # Sélection ANNEE (Conservée comme demandé)
         col_sel1, col_sel2 = st.columns([1, 2])
         with col_sel1:
             annees_dispo = sorted(df["date"].dt.year.unique().tolist())
@@ -630,17 +635,13 @@ def render(profil):
                 "📅 Année" if lang == "fr" else "📅 Year",
                 annees_dispo, index=len(annees_dispo)-1, key="lt_a"
             )
-        with col_sel2:
-            villes_cal = ["Toutes les villes"] + sorted(df["ville"].unique().tolist()) \
-                         if lang == "fr" else \
-                         ["All cities"] + sorted(df["ville"].unique().tolist())
-            ville_cal = st.selectbox(
-                "🏙️ Ville" if lang == "fr" else "🏙️ City",
-                villes_cal, key="cal_ville"
-            )
+        
+        # Sélection Ville (Supprimée car centralisée dans l'en-tête)
+        ville_cal = v # Utilise la valeur de l'en-tête
+        v_all     = T["all_cities"]
 
         df_an = df[df["date"].dt.year == an].copy()
-        if ville_cal not in ["Toutes les villes", "All cities"]:
+        if ville_cal != v_all:
             df_an = df_an[df_an["ville"] == ville_cal]
 
         # Calcul stats mensuelles
@@ -669,8 +670,11 @@ def render(profil):
 
         # ── Calendrier visuel en grille 4×3 ──────────────────────────────
         titre_cal = f"Qualité de l'air · {an}" if lang == "fr" else f"Air Quality · {an}"
-        if ville_cal not in ["Toutes les villes", "All cities"]:
+        v_all     = T["all_cities"]
+        if ville_cal != v_all:
             titre_cal += f" · {ville_cal}"
+        else:
+            titre_cal += " · " + ("Moyenne nationale" if lang == "fr" else "National average")
 
         st.markdown(
             f'<div style="font-size:15px;font-weight:600;color:{th["text"]};'

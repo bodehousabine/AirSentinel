@@ -56,19 +56,20 @@ def render(profil):
     T = ctx["T"]
     p50, p75, p90 = ctx["p50"], ctx["p75"], ctx["p90"]
 
-    # ── Header & Sélecteur (50/50) ─────────────────────────────────────────────
-    ch1, ch2 = st.columns([1, 1])
+    # ── Header & Sélecteur (Synchronisé avec bloc3) ───────────────────────────
+    ch1, ch2 = st.columns([2.4, 1])
     with ch1:
         banner(IMAGES["alertes_banner"], 120,
                T['bloc4_label'],
                profil.upper(), th,
-               no_frame=False)
+               accent=th["teal"], tint_hex="#00d4b1", tint_strength=0.28)
 
 
     with ch2:
+        st.markdown('<div style="margin-top:34px;"></div>', unsafe_allow_html=True)
         villes = sorted(df_brut["ville"].unique().tolist())
-        st.markdown('<div style="height:15px;"></div>', unsafe_allow_html=True)
-        ville_sel = st.selectbox("🏙️ ADMINISTRATION (VILLE) :", villes, key="v4_city_split_header")
+        sel_lbl = "🏙️ ADMINISTRATION (VILLE) :" if ctx["lang"] == "fr" else "🏙️ ADMINISTRATION (CITY) :"
+        ville_sel = st.selectbox(sel_lbl, villes, key="v4_city_split_header")
 
     # Récupérer la période Sidebar
     an_min, an_max = st.session_state.get("annee_sel", (int(df_brut["date"].dt.year.min()), int(df_brut["date"].dt.year.max())))
@@ -110,14 +111,14 @@ def render(profil):
 
         with cols[i]:
             st.markdown(f"""
-            <div style="background:{niv['bg']};border:{brd_style};border-radius:15px;
-                        padding:25px 20px;height:290px;display:flex;flex-direction:column;
+            <div style="background:{niv['bg']};border:{brd_style};border-radius:12px;
+                        padding:20px 15px;height:230px;display:flex;flex-direction:column;
                         opacity:{opacity};transform:{scale};box-shadow:{shadow};transition:all 0.4s ease;">
-                <div style="font-size:36px;margin-bottom:12px;">{niv['icon']}</div>
-                <div style="font-size:16px;font-weight:950;color:{niv['c']};
-                            letter-spacing:.1em;margin-bottom:12px;text-transform:uppercase;">{niv['lbl']}</div>
-                <div style="font-size:13.5px;color:{th['text']};line-height:1.7;flex:1;font-weight:800;">{msg}</div>
-                {f'<div style="font-size:11px;background:{niv["c"]};color:#fff;border-radius:8px;padding:6px 14px;width:fit-content;margin-top:18px;font-weight:950;letter-spacing:1px;text-transform:uppercase;">Statut Ville</div>' if actif else ""}
+                <div style="font-size:30px;margin-bottom:8px;">{niv['icon']}</div>
+                <div style="font-size:14px;font-weight:950;color:{niv['c']};
+                            letter-spacing:.1em;margin-bottom:8px;text-transform:uppercase;">{niv['lbl']}</div>
+                <div style="font-size:12px;color:{th['text']};line-height:1.5;flex:1;font-weight:800;overflow:hidden;">{msg}</div>
+                {f'<div style="font-size:10px;background:{niv["c"]};color:#fff;border-radius:6px;padding:4px 10px;width:fit-content;margin-top:10px;font-weight:950;letter-spacing:0.5px;text-transform:uppercase;">Statut Ville</div>' if actif else ""}
             </div>""", unsafe_allow_html=True)
 
     st.markdown("<div style='margin-top:40px;'></div>", unsafe_allow_html=True)
