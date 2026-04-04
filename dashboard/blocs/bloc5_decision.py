@@ -398,84 +398,97 @@ def _get_reco_text(snk, profil_key):
 # ── Recommandations populations vulnérables (ORIGINAL) ───────────────────────
 VULN_FR = {
     "faible": {
-        "enfants":  "✅ Activités extérieures normales autorisées.",
-        "enceintes":"✅ Sorties normales. Aération intérieure recommandée.",
-        "ages":     "✅ Activité physique légère possible en extérieur.",
-        "asthma":   "✅ Gardez votre bronchodilatateur à portée par précaution.",
-        "agricult": "✅ Travaux agricoles sans restriction particulière.",
+        "enfants":  "✅ Excellente qualité d'air. Privilégiez les jeux et sports en plein air.",
+        "enceintes":"✅ Profitez de l'extérieur sans restriction. Aérez bien votre intérieur.",
+        "ages":     "✅ Moment idéal pour vos promenades et activités physiques régulières.",
+        "asthma":   "✅ Risque très faible. Poursuivez vos traitements de fond normalement.",
+        "agricult": "✅ Conditions de travail optimales. Aucune restriction respiratoire.",
     },
     "modere": {
-        "enfants":  "⚠️ Réduire les jeux intensifs en plein air. Favoriser les activités intérieures.",
-        "enceintes":"⚠️ Limiter les sorties prolongées. Éviter les axes très fréquentés.",
-        "ages":     "⚠️ Éviter les efforts physiques en extérieur. Surveiller la respiration.",
-        "asthma":   "⚠️ Avoir le bronchodilatateur accessible. Limiter l'exposition.",
-        "agricult": "⚠️ Porter un masque FFP2 lors des travaux. Faire des pauses fréquentes.",
+        "enfants":  "⚠️ Les enfants sensibles doivent éviter les efforts sportifs intenses.",
+        "enceintes":"⚠️ Limitez le temps passé à proximité des grands axes routiers.",
+        "ages":     "⚠️ Réduisez les efforts cardio-vasculaires prolongés en extérieur.",
+        "asthma":   "⚠️ Surveillez l'apparition de toux. Ayez vos secours sur vous.",
+        "agricult": "⚠️ Restez vigilants face aux poussières. Masque conseillé si épandage.",
     },
     "eleve": {
-        "enfants":  "🚨 Annuler les cours de sport en extérieur. Garder les enfants à l'intérieur.",
-        "enceintes":"🚨 Rester à l'intérieur. Consulter un médecin si gêne respiratoire.",
-        "ages":     "🚨 Rester à l'intérieur. Prendre les médicaments préventifs.",
-        "asthma":   "🚨 Utiliser le bronchodilatateur en prévention. Contacter le médecin.",
-        "agricult": "🚨 Interrompre les travaux aux heures chaudes. Masque FFP2 obligatoire.",
+        "enfants":  "🚨 Évitez strictement les sports extérieurs. Limitez les récréations.",
+        "enceintes":"🚨 Sorties brèves uniquement. Éloignez-vous des zones à fort trafic.",
+        "ages":     "🚨 Évitez toute sortie non essentielle. Gardez les fenêtres fermées.",
+        "asthma":   "🚨 Prenez votre traitement préventif. Ne sortez qu'en cas d'urgence.",
+        "agricult": "🚨 Décalez les travaux pénibles tôt le matin. Port d'un masque FFP2 requis.",
     },
     "critique": {
-        "enfants":  "🔴 DANGER — Ne pas sortir. Fermer fenêtres. Appeler le médecin si symptômes.",
-        "enceintes":"🔴 DANGER — Confinement strict. Consultation médicale urgente recommandée.",
-        "ages":     "🔴 DANGER — Rester confiné. Activer le suivi médical d'urgence.",
-        "asthma":   "🔴 DANGER CRITIQUE — Traitement d'urgence. Appeler le 15 si crise.",
-        "agricult": "🔴 DANGER — Cesser tout travail extérieur. Ne sortir qu'en cas d'absolue nécessité.",
+        "enfants":  "🔴 DANGER — Confinement total à l'intérieur. Aucune activité physique.",
+        "enceintes":"🔴 DANGER — Restez à domicile. Consultez au moindre doute respiratoire.",
+        "ages":     "🔴 DANGER — Confinement strict. N'aérez que très tard la nuit.",
+        "asthma":   "🔴 DANGER CRITIQUE — Risque de crise. Médicament d'urgence à portée, appelez le 15.",
+        "agricult": "🔴 DANGER — Arrêt impératif des travaux manuels extérieurs. Cabine filtrée uniquement.",
     },
 }
 VULN_EN = {
     "faible": {
-        "enfants":  "✅ Normal outdoor activities allowed.",
-        "enceintes":"✅ Normal outings. Indoor ventilation recommended.",
-        "ages":     "✅ Light physical activity possible outdoors.",
-        "asthma":   "✅ Keep bronchodilator handy as precaution.",
-        "agricult": "✅ Agricultural work without particular restriction.",
+        "enfants":  "✅ Excellent air quality. Favour outdoor play and sports.",
+        "enceintes":"✅ Enjoy outdoors without restriction. Ventilate your home well.",
+        "ages":     "✅ Perfect time for walks and regular physical outdoor activities.",
+        "asthma":   "✅ Very low risk. Continue your basic treatments normally.",
+        "agricult": "✅ Optimal field working conditions. No respiratory restrictions.",
     },
     "modere": {
-        "enfants":  "⚠️ Reduce intense outdoor play. Prefer indoor activities.",
-        "enceintes":"⚠️ Limit prolonged outings. Avoid busy roads.",
-        "ages":     "⚠️ Avoid physical exertion outdoors. Monitor breathing.",
-        "asthma":   "⚠️ Keep bronchodilator accessible. Limit exposure.",
-        "agricult": "⚠️ Wear FFP2 mask during work. Take frequent breaks.",
+        "enfants":  "⚠️ Sensitive children should limit intense outdoor sports.",
+        "enceintes":"⚠️ Limit prolonged time spent along heavy traffic roads.",
+        "ages":     "⚠️ Reduce prolonged cardiovascular efforts outdoors.",
+        "asthma":   "⚠️ Watch for signs of cough. Keep rescue inhaler at hand.",
+        "agricult": "⚠️ Stay vigilant with dust. Mask recommended if spraying.",
     },
     "eleve": {
-        "enfants":  "🚨 Cancel outdoor sports. Keep children indoors.",
-        "enceintes":"🚨 Stay indoors. See doctor if breathing difficulty.",
-        "ages":     "🚨 Stay indoors. Take preventive medications.",
-        "asthma":   "🚨 Use bronchodilator preventively. Contact doctor.",
-        "agricult": "🚨 Stop work during hot hours. FFP2 mask required.",
+        "enfants":  "🚨 Strictly avoid outdoor sports. Limit playground activities.",
+        "enceintes":"🚨 Brief outings only. Avoid high traffic and congested areas.",
+        "ages":     "🚨 Avoid non-essential outings. Keep windows closed during peaks.",
+        "asthma":   "🚨 Take preventive medication. Go out only in emergencies.",
+        "agricult": "🚨 Shift hard work to early morning. FFP2 mask is required.",
     },
     "critique": {
-        "enfants":  "🔴 DANGER — Do not go out. Close windows. Call doctor if symptoms.",
-        "enceintes":"🔴 DANGER — Strict confinement. Urgent medical consultation recommended.",
-        "ages":     "🔴 DANGER — Stay confined. Activate emergency medical monitoring.",
-        "asthma":   "🔴 CRITICAL DANGER — Emergency treatment. Call 15 if crisis.",
-        "agricult": "🔴 DANGER — Stop all outdoor work. Go out only if absolutely necessary.",
+        "enfants":  "🔴 DANGER — Strict indoor confinement. No physical activity at all.",
+        "enceintes":"🔴 DANGER — Stay home. Consult a doctor at any respiratory doubt.",
+        "ages":     "🔴 DANGER — Strict confinement. Ventilate only very late at night.",
+        "asthma":   "🔴 CRITICAL DANGER — High crisis risk. Emergency meds nearby, call 911/15.",
+        "agricult": "🔴 DANGER — Stop all outdoor manual work. Filtered cabin machinery only.",
     },
 }
 
 def _vuln_section(snk, lang, th):
     data = VULN_FR[snk] if lang == "fr" else VULN_EN[snk]
-    pops = [
-        ("👶", "ENFANTS", "enfants"),
-        ("🤰", "FEMMES", "enceintes"),
-        ("👴", "SÉNIORS", "ages"),
-        ("🫁", "ASTHME", "asthma"),
-        ("🌾", "AGRICUL.", "agricult"),
-    ]
     color_map = {"faible": th["green"], "modere": th["amber"],
                  "eleve": th["coral"], "critique": th["red"]}
     cc = color_map[snk]
-    titre = "TABLEAU D'ACTION · POPULATIONS VULNÉRABLES" if lang == "fr" else "ACTION BOARD · VULNERABLE POPULATIONS"
+
+    # Définition des icônes SVG
+    svg_child = f'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="{cc}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>'
+    svg_women = f'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="{cc}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M12 13v9"/><path d="M9 18h6"/></svg>'
+    svg_senior = f'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="{cc}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M14 15a2 2 0 0 0-4 0"/><path d="M2.5 13L5 7c.7-1.3 1.4-2 3-2"/><path d="M21.5 13L19 7c-.7-1.3-1.5-2-3-2"/></svg>'
+    svg_asthma = f'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="{cc}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v9"/><path d="M8 11c-2.5-3-5.5-2.5-5.5 1.5 0 5 3.5 9.5 9.5 9.5V11"/><path d="M16 11c2.5-3 5.5-2.5 5.5 1.5 0 5-3.5 9.5-9.5 9.5V11"/></svg>'
+    svg_agricul = f'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="{cc}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>'
+
+    pops = [
+        (svg_child, "ENFANTS", "enfants"),
+        (svg_women, "FEMMES", "enceintes"),
+        (svg_senior, "SÉNIORS", "ages"),
+        (svg_asthma, "ASTHME", "asthma"),
+        (svg_agricul, "AGRICUL.", "agricult"),
+    ]
+    nom_fr = {"faible": "NIVEAU FAIBLE (VERT)", "modere": "NIVEAU MODÉRÉ (JAUNE)", "eleve": "NIVEAU ÉLEVÉ (ORANGE)", "critique": "NIVEAU CRITIQUE (ROUGE)"}
+    nom_en = {"faible": "LOW LEVEL (GREEN)", "modere": "MODERATE LEVEL (YELLOW)", "eleve": "HIGH LEVEL (ORANGE)", "critique": "CRITICAL LEVEL (RED)"}
+    niveau_lbl = nom_fr[snk] if lang == "fr" else nom_en[snk]
+    titre = f"TABLEAU D'ACTION · POPULATIONS VULNÉRABLES — {niveau_lbl}"
     st.markdown(
-        f'<div style="margin-top:30px;padding:25px;background:{th["bg_tertiary"]};'
-        f'border:2px solid {cc}44;border-top:5px solid {cc};border-radius:15px;'
+        f'<div style="margin-top:15px;padding:15px;background:{th["bg_tertiary"]};'
+        f'border:2px solid {cc}88;border-top:5px solid {cc};border-radius:15px;'
         f'box-shadow:0 10px 40px rgba(0,0,0,0.15);">'
-        f'<div style="font-size:14px;font-weight:950;color:{cc};'
-        f'text-transform:uppercase;letter-spacing:.15em;margin-bottom:20px;">{titre}</div>',
+        f'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">'
+        f'<div style="font-size:14px;font-weight:950;color:{th["text"]};text-transform:uppercase;letter-spacing:.15em;">{titre.split("—")[0]}</div>'
+        f'<div style="background:{cc}22;color:{cc};padding:4px 10px;border-radius:6px;font-weight:900;font-size:12px;letter-spacing:1px;">{niveau_lbl}</div>'
+        f'</div>',
         unsafe_allow_html=True
     )
     cols = st.columns(len(pops))
@@ -484,11 +497,11 @@ def _vuln_section(snk, lang, th):
             msg = data[key].replace("✅", "<b>✅</b>").replace("⚠️", "<b>⚠️</b>").replace("🚨", "<b>🚨</b>").replace("🔴", "<b>🔴</b>")
             st.markdown(
                 f'<div style="background:{th["bg_elevated"]};border:1px solid {th["border_soft"]};'
-                f'border-radius:12px;padding:16px 12px;height:185px;text-align:center;'
+                f'border-radius:12px;padding:12px 10px;height:145px;text-align:center;'
                 f'box-shadow:0 4px 10px rgba(0,0,0,0.05);">'
-                f'<div style="font-size:28px;margin-bottom:10px;">{icon}</div>'
-                f'<div style="font-size:12px;font-weight:950;color:{cc};margin-bottom:12px;letter-spacing:1px;">{label}</div>'
-                f'<div style="font-size:12.5px;color:{th["text"]};line-height:1.6;text-align:left;font-weight:800;">'
+                f'<div style="font-size:28px;margin-bottom:6px;">{icon}</div>'
+                f'<div style="font-size:12px;font-weight:950;color:{cc};margin-bottom:8px;letter-spacing:1px;">{label}</div>'
+                f'<div style="font-size:12px;color:{th["text"]};line-height:1.4;text-align:left;font-weight:800;">'
                 f'{msg}</div></div>',
                 unsafe_allow_html=True
             )
@@ -517,16 +530,15 @@ def _render_exceptional_radial_gauge(irs, ctx, th):
     """Affiche un indicateur en arc pour l'IRS."""
     p50, p75, p90 = ctx["p50"], ctx["p75"], ctx["p90"]
     fig = go.Figure(go.Indicator(
-        mode = "gauge+number",
+        mode = "gauge",
         value = irs,
         domain = {'x': [0, 1], 'y': [0, 1]},
-        number = {'font': {'size': 44, 'color': th['text'], 'family':"Inter", 'weight': 'bold'}, 'valueformat': ".3f"},
         gauge = {
             'axis': {
-                'range': [0, 1], 'tickwidth': 2, 'tickcolor': th['text3'],
+                'range': [0, 1], 'tickwidth': 3, 'tickcolor': th['text'],
                 'tickvals': [0, p50, p75, p90, 1],
                 'ticktext': ["0", f"<b>{p50:.2f}</b>", f"<b>{p75:.2f}</b>", f"<b>{p90:.2f}</b>", "1"],
-                'tickfont': {"size": 11, "family": "DM Mono", "color": th["text3"], "weight": "bold"}},
+                'tickfont': {"size": 16, "family": "Arial Black, sans-serif", "color": th["text"], "weight": "bold"}},
             'bar': {'color': th['text'], 'thickness': 0.15},
             'bgcolor': "rgba(0,0,0,0.05)",
             'steps': [{'range': [0, p50],   'color': th["green"]},
@@ -536,8 +548,19 @@ def _render_exceptional_radial_gauge(irs, ctx, th):
             'threshold': {'line': {'color': "#fff", 'width': 4}, 'thickness': 0.8, 'value': irs}
         }
     ))
-    fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-                      font={'color': th['text2'], 'family': "Inter"}, height=240, margin=dict(l=40, r=40, t=30, b=0))
+    # Ajusté à height=200 et margins réduites pour s'aligner exactement aux box gauche/droite (height:200px)
+    fig.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        font={'color': th['text2'], 'family': "Arial, sans-serif"}, height=200, margin=dict(l=40, r=40, t=15, b=10),
+        annotations=[dict(
+            text=f"<b>{irs:.3f}</b>",
+            x=0.5, y=0.08,
+            xref="paper", yref="paper",
+            xanchor="center", yanchor="bottom",
+            showarrow=False,
+            font=dict(size=38, color=th['text'], family="Arial, sans-serif")
+        )]
+    )
     return fig
 
 def render(profil):
@@ -551,7 +574,7 @@ def render(profil):
                   T["sidebar_profile_mayor"]:"mayor", T["sidebar_profile_researcher"]:"researcher"}
     # ── Labels sans backslash ─────────────────────────────────────────────────
     dec_title    = "DÉCISION SANITAIRE" if lang == "fr" else "HEALTH DECISION"
-    choisir_lbl  = "Filtrer ville" if lang == "fr" else "Filter city"
+    choisir_lbl  = "**FILTRER VILLE**" if lang == "fr" else "**FILTER CITY**"
     
     # ── 1. Sélections & Préparations de données ───────────────────────────────
     villes_dispo = sorted(df["ville"].unique().tolist())
@@ -561,7 +584,7 @@ def render(profil):
     
     with hcol2:
         st.markdown('<div style="height:5px;"></div>', unsafe_allow_html=True)
-        ville_dec = st.selectbox(f"🏙️ {choisir_lbl}", villes_dispo, key="v5_city_top_header")
+        ville_dec = st.selectbox(choisir_lbl, villes_dispo, key="v5_city_top_header")
 
     # Calcul des statistiques (nécessaire avant l'affichage hcol1/hcol3)
     an_min, an_max_sel = st.session_state.get("annee_sel", (int(df["date"].dt.year.min()), int(df["date"].dt.year.max())))
@@ -650,7 +673,7 @@ def render(profil):
         with c_c:
             csv_data = df_ville[['date','ville','region','pm2_5_moyen','pm2_5_max','IRS','niveau_sanitaire','polluant_dominant','temperature_2m_max','wind_speed_10m_max','precipitation_sum','dust_moyen','us_aqi_moyen']].copy() if all(c in df_ville.columns for c in ['pm2_5_max','dust_moyen']) else df_ville.copy()
             st.download_button(label="📥 TÉLÉCHARGER CSV", data=csv_data.to_csv(index=False).encode('utf-8'), file_name=f"airsentinel_{ville_dec}_{date_rapport}.csv", mime="text/csv", key="v5_btn_csv_top")
-    sub1, sub2 = st.tabs([f"📊 DONNÉES RÉELLES", f"🎛️ SIMULATEUR IRS"])
+    sub1, sub2 = st.tabs(["**DONNÉES RÉELLES**", "**SIMULATEUR IRS**"])
     with sub1:
         m_col1, m_col2, m_col3 = st.columns([0.8, 1.2, 1.8])
         with m_col1:
@@ -665,7 +688,7 @@ def render(profil):
                 unsafe_allow_html=True
             )
         with m_col2:
-            st.plotly_chart(_render_exceptional_radial_gauge(irs_ville, ctx, th), use_container_width=True, config={'displayModeBar': False}, key="gauge_v5_real_trio")
+            st.plotly_chart(_render_exceptional_radial_gauge(irs_ville, ctx, th), use_container_width=True, config={'displayModeBar': False, 'responsive': True}, key="gauge_v5_real_trio")
         with m_col3:
             _rec_content(profil, profil_map, snk, tkey, snc, snt, ctx, th, T, scope_label)
         _vuln_section(snk, lang, th)
@@ -686,7 +709,7 @@ def render(profil):
                 unsafe_allow_html=True
             )
         with m_col2_s:
-            st.plotly_chart(_render_exceptional_radial_gauge(irs_v, ctx, th), use_container_width=True, config={'displayModeBar': False}, key="gauge_v5_sim_trio")
+            st.plotly_chart(_render_exceptional_radial_gauge(irs_v, ctx, th), use_container_width=True, config={'displayModeBar': False, 'responsive': True}, key="gauge_v5_sim_trio")
         with m_col3_s:
             _rec_content(profil, profil_map, snk_s, tkey_s, snc_s, snt_s, ctx, th, T, scope_label)
         _vuln_section(snk_s, lang, th)
