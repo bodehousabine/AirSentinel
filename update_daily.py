@@ -353,24 +353,51 @@ def calculer_variables_derivees(df_new, df_historique, date):
     for reg in regions:
         df_combined[f'region_{reg}'] = (df_combined['region'] == reg).astype(int)
 
-    # ── IRS — Indice de Risque Sanitaire ─────────────────────────────────
-    # Basé sur seuils PM2.5 OMS AQG 2021 — NCBI NBK574591, Table 3.6
-    def calculer_irs(pm25):
-        if   pm25 <= SEUIL_AQG: return 0  # FAIBLE
-        elif pm25 <= SEUIL_IT4: return 1  # MODÉRÉ
-        elif pm25 <= SEUIL_IT3: return 2  # ÉLEVÉ
-        elif pm25 <= SEUIL_IT2: return 3  # TRÈS ÉLEVÉ
-        elif pm25 <= SEUIL_IT1: return 4  # CRITIQUE
-        else:                   return 5  # DANGEREUX
+# ── IRS — Indice de Risque Sanitaire par ACP ─────────────────────────
+    # Référence : Notebook 05 · INS Cameroun (2019)
+    def niveau_sanitaire_pm25(pm25):
+        if   pm25 <= SEUIL_AQG: return 'FAIBLE'
+        elif pm25 <= SEUIL_IT4: return 'MODÉRÉ'
+        elif pm25 <= SEUIL_IT3: return 'ÉLEVÉ'
+        elif pm25 <= SEUIL_IT2: return 'TRÈS ÉLEVÉ'
+        elif pm25 <= SEUIL_IT1: return 'CRITIQUE'
+        else:                   return 'DANGEREUX'
 
-    def niveau_sanitaire(irs):
-        niveaux = {0: 'FAIBLE', 1: 'MODÉRÉ', 2: 'ÉLEVÉ',
-                   3: 'TRÈS ÉLEVÉ', 4: 'CRITIQUE', 5: 'DANGEREUX'}
-        return niveaux.get(irs, 'N/A')
+    try:
+        scaler_irs = joblib.load('models/scaler_acp_irs.pkl')
+        pca_irs    = joblib.load('models/pca_irs.pkl')
+        cols_irs   = joblib.load('models/cols_irs.pkl')
+        seuils_irs = joblib.load('models/seuils_irs.pkl')
 
-    df_combined['IRS_brut']         = df_combined['pm2_5_moyen'].apply(calculer_irs)
-    df_combined['IRS']              = df_combined['IRS_brut']
-    df_combined['niveau_sanitaire'] = df_combined['IRS_brut'].apply(niveau_sanitaire)
+        cols_ok  = [c for c in cols_irs if c in df_combined.columns]
+        X        = scaler_irs.transform(
+                     df_combined[cols_ok].fillna(df_combined[cols_ok].median())
+                   )
+        scores   = pca_irs.transform(X)
+
+        if pca_irs.n_components_ == 1:
+            irs_brut = scores[:, 0]
+        else:
+            v        = pca_irs.explained_variance_ratio_
+            irs_brut = (v[0]*scores[:,0] + v[1]*scores[:,1]) / (v[0]+v[1])
+
+        irs_min = seuils_irs.get('irs_min', irs_brut.min())
+        irs_max = seuils_irs.get('irs_max', irs_brut.max())
+
+        df_combined['IRS']              = ((irs_brut - irs_min) / (irs_max - irs_min)).clip(0, 1)
+        df_combined['IRS_brut']         = df_combined['IRS']
+        df_combined['niveau_sanitaire'] = df_combined['pm2_5_moyen'].apply(niveau_sanitaire_pm25)
+        print('✅ IRS calculé par ACP')
+
+    except Exception as e:
+        print(f'⚠️ ACP indisponible → fallback seuils OMS : {e}')
+        df_combined['IRS_brut']         = df_combined['pm2_5_moyen'].apply(
+            lambda pm25: 0 if pm25<=SEUIL_AQG else 1 if pm25<=SEUIL_IT4 else
+                         2 if pm25<=SEUIL_IT3 else 3 if pm25<=SEUIL_IT2 else
+                         4 if pm25<=SEUIL_IT1 else 5
+        )
+        df_combined['IRS']              = df_combined['IRS_brut'] / 5.0
+        df_combined['niveau_sanitaire'] = df_combined['pm2_5_moyen'].apply(niveau_sanitaire_pm25)
 
     # ── Récupérer seulement les nouvelles lignes ──────────────────────────
     df_result = df_combined[df_combined['date'] == date_ts].copy()

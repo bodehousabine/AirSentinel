@@ -389,30 +389,38 @@ def render(profil):
             st.warning("Modèles non disponibles — vérifier le dossier models/")
 
     # ══════════════════════════════════════════════════════════════════════════
-    # ONGLET 3 — Simulateur
+    # ONGLET 3 — Simulateur avec vrai modèle
     # ══════════════════════════════════════════════════════════════════════════
     with tabs[2]:
         def _m(col, fb):
             return float(df[col].mean()) if col in df.columns and len(df) > 0 else fb
 
-        # En-tête simulateur
+        # En-tête
         st.markdown(
             f'<div style="background:linear-gradient(135deg,{th["bg_elevated"]},{th["bg_tertiary"]});'
             f'border:1px solid {th["amber"]}44;border-left:4px solid {th["amber"]};'
             f'border-radius:12px;padding:14px 20px;margin-bottom:20px;">'
             f'<div style="font-size:14px;font-weight:600;color:{th["amber"]};margin-bottom:4px;">'
-            f'🎛️ Simulateur de conditions météo</div>'
+            f'🎛️ Simulateur · Modèle Hybride RL+ARIMA</div>'
             f'<div style="font-size:12px;color:{th["text2"]};">'
-            f'Ajustez les paramètres pour estimer l\'impact sur la qualité de l\'air</div>'
+            f'Ajustez les paramètres météo — le vrai modèle prédit le PM2.5 en temps réel</div>'
             f'</div>',
             unsafe_allow_html=True
         )
 
-        # Layout 2 colonnes : sliders | résultat
-        col_sliders, col_result = st.columns([3, 2])
+        # Sélecteur ville pour le simulateur
+        villes_sim = sorted(df["ville"].unique().tolist())
+        ville_sim  = st.selectbox(
+            "🏙️ Ville de référence" if lang == "fr" else "🏙️ Reference city",
+            villes_sim, key="sim_ville"
+        )
+        df_sim = df[df["ville"] == ville_sim].sort_values("date")
 
+        # ── Layout UNIQUE : sliders (gauche) | jauge (droite) ───────────────
+        col_sliders, col_gauge = st.columns([3, 2])
+
+        # Sliders dans la colonne gauche
         with col_sliders:
-            # Section météo
             st.markdown(
                 f'<div style="font-size:11px;font-weight:700;color:{th["text3"]};'
                 f'text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;">'
@@ -428,11 +436,9 @@ def render(profil):
             with c2:
                 dust = st.slider("🏜️ Dust (µg/m³)", 0, 300,
                                  int(min(300, max(0, _m("dust_moyen", 80)))), key="s_d")
-                hum  = st.slider("💧 Humidité (%)", 10, 100, 60, key="s_h")
-
+                precip = st.slider("🌧️ Précipitations (mm)", 0, 50,
+                                   int(min(50, max(0, _m("precipitation_sum", 2)))), key="s_p")
             st.markdown("<div style='margin-top:12px;'></div>", unsafe_allow_html=True)
-
-            # Section épisodes
             st.markdown(
                 f'<div style="font-size:11px;font-weight:700;color:{th["text3"]};'
                 f'text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;">'
@@ -447,86 +453,169 @@ def render(profil):
                 feux = st.checkbox("🔥 Épisode feux", key="s_feux",
                                    help="CO > p90 en saison sèche · Barker et al. (2020)")
 
-        # Calcul
-        pm25_s = max(5, 10 + 0.4*temp - 0.3*vent + 0.05*dust
-                     + (15 if harm else 0) + (20 if feux else 0))
-        irs_s  = min(1.0, pm25_s/80*0.35 + dust/300*0.25 + 0.10)
-        nc, nt, nk = irs_level(irs_s, ctx["p50"], ctx["p75"], ctx["p90"], T, th)
+        # ── Calcul vrai modèle (avant d'afficher la jauge) ────────────────
+        if modeles_ok and len(df_sim) > 0:
+            try:
+                last_row = df_sim[features].fillna(df_sim[features].median()).tail(1).copy()
+                for col_feat in features:
+                    if 'temperature_2m_max' in col_feat:    last_row[col_feat] = temp
+                    elif 'wind_speed_10m_max' in col_feat:  last_row[col_feat] = vent
+                    elif 'dust_moyen' in col_feat:          last_row[col_feat] = dust
+                    elif 'precipitation_sum' in col_feat:   last_row[col_feat] = precip
+                    elif 'harmattan_intense' in col_feat:   last_row[col_feat] = int(harm)
+                    elif 'episode_feux' in col_feat:        last_row[col_feat] = int(feux)
+                last_s     = scaler.transform(last_row)
+                p_rl       = modele.predict(last_s)[0]
+                region_sim = df_sim['region'].iloc[-1]
+                zone_sim   = _get_zone(region_sim)
+                p_arima    = arima[zone_sim].forecast(steps=1).iloc[-1]
+                pm25_s     = max(0, p_rl + p_arima)
+                source_sim = f"✅ Modèle Hybride RL+ARIMA · {zone_sim}"
+            except:
+                pm25_s     = max(5, 10 + 0.4*temp - 0.3*vent + 0.05*dust
+                                 + (15 if harm else 0) + (20 if feux else 0))
+                source_sim = "⚠️ Fallback formule approx."
+        else:
+            pm25_s     = max(5, 10 + 0.4*temp - 0.3*vent + 0.05*dust
+                             + (15 if harm else 0) + (20 if feux else 0))
+            source_sim = "⚠️ Modèle non disponible · formule approx."
+
+        irs_s     = min(1.0, pm25_s/80*0.35 + dust/300*0.25 + 0.10)
+        nc, nt, _ = irs_level(irs_s, ctx["p50"], ctx["p75"], ctx["p90"], T, th)
         ecart     = irs_s - ctx["irs_moy"]
         ecart_sgn = "↑" if ecart > 0 else "↓"
         ecart_col = th["red"] if ecart > 0 else th["green"]
+        if   pm25_s <= 15:   oms_niv = "✅ Conforme OMS"
+        elif pm25_s <= 25:   oms_niv = "⚠️ IT4 dépassé"
+        elif pm25_s <= 37.5: oms_niv = "🟠 IT3 dépassé"
+        elif pm25_s <= 50:   oms_niv = "🔴 IT2 dépassé"
+        else:                oms_niv = "⛔ Critique"
 
-        # Niveau OMS
-        if   pm25_s <= 15:   oms_niv = "✅ Conforme OMS"   if lang == "fr" else "✅ WHO Compliant"
-        elif pm25_s <= 25:   oms_niv = "⚠️ IT4 dépassé"    if lang == "fr" else "⚠️ IT4 exceeded"
-        elif pm25_s <= 37.5: oms_niv = "🟠 IT3 dépassé"    if lang == "fr" else "🟠 IT3 exceeded"
-        elif pm25_s <= 50:   oms_niv = "🔴 IT2 dépassé"    if lang == "fr" else "🔴 IT2 exceeded"
-        else:                oms_niv = "⛔ Critique"        if lang == "fr" else "⛔ Critical"
+        # Jauge dans la colonne droite — même bloc que les sliders
+        with col_gauge:
+            # Plotly gauge : 0 = bas-gauche (225°), 100 = bas-droite (-45°=315°)
+            # Angle trigonométrique standard : 0°=droite, 90°=haut, 180°=gauche
+            # La jauge couvre 270° de 225° à -45° (sens antihoraire)
+            # Pour val dans [0,100] : angle = 225° - val/100 * 270°
+            val_norm  = min(pm25_s, 100) / 100
+            angle_deg = 225 - val_norm * 270
+            angle_rad = np.radians(angle_deg)
 
-        with col_result:
-            st.markdown(
-                f'<div style="background:linear-gradient(145deg,{th["bg_tertiary"]},{th["bg_elevated"]});'
-                f'border:2px solid {nc};border-radius:16px;padding:24px 20px;text-align:center;'
-                f'box-shadow:0 8px 32px {nc}33;">'
+            cx, cy = 0.5, 0.30   # centre pivot
+            L      = 0.36        # longueur aiguille
 
-                # PM2.5
-                f'<div style="font-size:11px;color:{th["text3"]};text-transform:uppercase;'
-                f'letter-spacing:.1em;margin-bottom:6px;">PM2.5 estimé</div>'
-                f'<div style="font-size:48px;font-weight:900;color:{nc};line-height:1;'
-                f'text-shadow:0 0 30px {nc}55;">{pm25_s:.1f}</div>'
-                f'<div style="font-size:14px;color:{th["text3"]};margin-bottom:16px;">µg/m³</div>'
+            # Dans paper coords : Y diminue vers le haut → inverser sin
+            tip_x  = cx + L * np.cos(angle_rad)
+            tip_y  = cy - L * np.sin(angle_rad)
 
-                # Séparateur
-                f'<div style="height:1px;background:{nc}33;margin:12px 0;"></div>'
+            back_x = cx - 0.06 * np.cos(angle_rad)
+            back_y = cy + 0.06 * np.sin(angle_rad)
 
-                # IRS
-                f'<div style="font-size:11px;color:{th["text3"]};text-transform:uppercase;'
-                f'letter-spacing:.1em;margin-bottom:6px;">IRS simulé</div>'
-                f'<div style="font-size:32px;font-weight:800;color:{nc};">{irs_s:.3f}</div>'
-                f'<div style="font-size:14px;font-weight:600;color:{nc};margin-top:6px;">{nt}</div>'
-
-                # Écart vs moyenne
-                f'<div style="font-size:12px;color:{ecart_col};margin-top:8px;font-weight:600;">'
-                f'{ecart_sgn} {abs(ecart):.3f} vs moy. {ctx["scope_annees"]}</div>'
-
-                # Séparateur
-                f'<div style="height:1px;background:{nc}33;margin:12px 0;"></div>'
-
-                # Niveau OMS
-                f'<div style="font-size:13px;font-weight:600;color:{nc};margin-top:4px;">'
-                f'{oms_niv}</div>'
-                f'<div style="font-size:10px;color:{th["text3"]};margin-top:4px;">'
-                f'{pm25_s/15:.1f}x seuil OMS AQG 2021</div>'
-
-                f'</div>',
-                unsafe_allow_html=True
-            )
-
-            # Jauge PM2.5
             fig_gauge = go.Figure(go.Indicator(
                 mode="gauge+number",
                 value=pm25_s,
-                number=dict(suffix=" µg/m³", font=dict(color=nc, size=18)),
+                number=dict(
+                    suffix=" µg/m³",
+                    font=dict(color=nc, size=18, family="DM Mono")
+                ),
+                title=dict(
+                    text=f"PM2.5 Prédit · {ville_sim}",
+                    font=dict(color="#94a3b8", size=11)
+                ),
                 gauge=dict(
-                    axis=dict(range=[0, 100], tickwidth=1, tickcolor=th["text3"]),
-                    bar=dict(color=nc, thickness=0.3),
-                    bgcolor="rgba(0,0,0,0)",
+                    axis=dict(
+                        range=[0, 100],
+                        tickwidth=2,
+                        tickcolor="#94a3b8",
+                        tickvals=[0, 15, 25, 37.5, 75, 100],
+                        ticktext=["0", "15", "25", "37", "75", "100"],
+                        tickfont=dict(size=10, color="#94a3b8")
+                    ),
+                    bar=dict(color=nc, thickness=0.04),
+                    bgcolor="#1e293b",
+                    borderwidth=2,
+                    bordercolor="#334155",
                     steps=[
-                        dict(range=[0, 15],   color="rgba(16,185,129,0.15)"),
-                        dict(range=[15, 25],  color="rgba(245,158,11,0.15)"),
-                        dict(range=[25, 37.5],color="rgba(249,115,22,0.15)"),
-                        dict(range=[37.5, 100],color="rgba(239,68,68,0.15)"),
+                        dict(range=[0, 15],    color="#10b981"),
+                        dict(range=[15, 25],   color="#f59e0b"),
+                        dict(range=[25, 37.5], color="#f97316"),
+                        dict(range=[37.5, 75], color="#ef4444"),
+                        dict(range=[75, 100],  color="#7f1d1d"),
                     ],
-                    threshold=dict(line=dict(color=th["red"], width=2), value=15)
+                    threshold=dict(
+                        line=dict(color="white", width=2),
+                        thickness=0.8, value=15
+                    )
                 ),
             ))
             fig_gauge.update_layout(
-                paper_bgcolor="rgba(0,0,0,0)",
-                font=dict(color=th["text2"]),
-                height=160,
+                paper_bgcolor="#0f172a",
+                font=dict(color="#e2e8f0"),
+                height=300,
                 margin=dict(l=20, r=20, t=20, b=10)
             )
             st.plotly_chart(fig_gauge, width="stretch")
+
+
+
+        # ── Cadre résultat PLEINE LARGEUR en bas ──────────────────────────
+        st.markdown("<div style='margin-top:12px;'></div>", unsafe_allow_html=True)
+        st.markdown(
+            f'<div style="background:linear-gradient(135deg,#0f172a,#1e293b);'
+            f'border:2px solid {nc};border-radius:16px;padding:20px 28px;'
+            f'box-shadow:0 8px 32px {nc}33;">'
+
+            f'<div style="display:grid;grid-template-columns:1fr 1px 1fr 1px 1fr 1px 1fr;'
+            f'align-items:center;gap:0;">'
+
+            # PM2.5
+            f'<div style="text-align:center;padding:0 20px;">'
+            f'<div style="font-size:10px;color:#64748b;text-transform:uppercase;'
+            f'letter-spacing:.1em;margin-bottom:6px;">PM2.5 prédit</div>'
+            f'<div style="font-size:38px;font-weight:900;color:{nc};'
+            f'text-shadow:0 0 20px {nc}55;line-height:1;">{pm25_s:.1f}</div>'
+            f'<div style="font-size:11px;color:#94a3b8;margin-top:2px;">µg/m³</div>'
+            f'</div>'
+
+            f'<div style="height:60px;background:{nc}33;width:1px;"></div>'
+
+            # IRS
+            f'<div style="text-align:center;padding:0 20px;">'
+            f'<div style="font-size:10px;color:#64748b;text-transform:uppercase;'
+            f'letter-spacing:.1em;margin-bottom:6px;">IRS simulé</div>'
+            f'<div style="font-size:32px;font-weight:800;color:{nc};line-height:1;">{irs_s:.3f}</div>'
+            f'<div style="font-size:12px;font-weight:600;color:{nc};margin-top:4px;">{nt}</div>'
+            f'</div>'
+
+            f'<div style="height:60px;background:{nc}33;width:1px;"></div>'
+
+            # Niveau OMS
+            f'<div style="text-align:center;padding:0 20px;">'
+            f'<div style="font-size:10px;color:#64748b;text-transform:uppercase;'
+            f'letter-spacing:.1em;margin-bottom:6px;">Niveau OMS</div>'
+            f'<div style="font-size:18px;font-weight:700;color:{nc};line-height:1.2;">{oms_niv}</div>'
+            f'<div style="font-size:11px;color:#94a3b8;margin-top:4px;">{pm25_s/15:.1f}x seuil AQG 2021</div>'
+            f'</div>'
+
+            f'<div style="height:60px;background:{nc}33;width:1px;"></div>'
+
+            # Écart vs moyenne
+            f'<div style="text-align:center;padding:0 20px;">'
+            f'<div style="font-size:10px;color:#64748b;text-transform:uppercase;'
+            f'letter-spacing:.1em;margin-bottom:6px;">vs Moyenne</div>'
+            f'<div style="font-size:32px;font-weight:800;color:{ecart_col};line-height:1;">'
+            f'{ecart_sgn}{abs(ecart):.3f}</div>'
+            f'<div style="font-size:11px;color:#94a3b8;margin-top:4px;">{ctx["scope_annees"]}</div>'
+            f'</div>'
+
+            f'</div>'
+
+            f'<div style="font-size:9px;color:#475569;margin-top:14px;padding-top:10px;'
+            f'border-top:1px solid #1e293b;font-family:DM Mono,monospace;text-align:center;">'
+            f'{source_sim} · WHO AQG 2021 · NCBI NBK574591</div>'
+            f'</div>',
+            unsafe_allow_html=True
+        )
 
     # ══════════════════════════════════════════════════════════════════════════
     # ONGLET 4 — Calendrier mensuel impressionnant

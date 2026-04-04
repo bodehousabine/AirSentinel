@@ -46,7 +46,7 @@ def _load_models():
         return None, None, None, None
 
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=86400)
 def _predire_toutes_villes(_hash, df):
     """Prédit PM2.5 pour aujourd'hui pour toutes les villes."""
     modele, scaler, features, arima = _load_models()
@@ -116,8 +116,10 @@ def render(profil):
     mode_today = "Aujourd'hui" in mode or "Today" in mode
 
     if mode_today:
-        # ── Données prédites pour aujourd'hui ─────────────────────────────
-        df_pred = _predire_toutes_villes(len(df), df)
+    # ── Données prédites pour aujourd'hui ─────────────────────────────
+        date_max_str = str(df["date"].max().date())
+        with st.spinner("🔮 Calcul des prédictions pour aujourd'hui..."):
+            df_pred = _predire_toutes_villes(date_max_str, df)
         if df_pred is not None and len(df_pred) > 0:
             df_carte      = df_pred.copy()
             periode_label = f"📅 {date.today().strftime('%d %b %Y')} · Prédictions"
