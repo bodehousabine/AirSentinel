@@ -177,7 +177,7 @@ def accueil():
             </div>
 
             <div class="footer">
-                Version 1.0.0 • Développé par Henri Joël — ENSP Yaoundé
+                Version 1.0.0 • Développé par Henri Joël — ENSPY Yaoundé 2026
             </div>
         </div>
     </body>
