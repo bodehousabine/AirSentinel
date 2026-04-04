@@ -98,27 +98,57 @@ def render(profil):
     lang = ctx["lang"]
     COORDS = ctx["coords"] if "coords" in ctx else {}
 
-    _b_col, _ = st.columns([1, 1])
-    with _b_col:
+    col_banner, col_controls = st.columns([2, 1])
+    with col_banner:
         banner(IMAGES["carte_banner"], 120,
-               T['bloc1_label'],
-               profil.upper(), th,
-               accent=th["teal"], tint_hex="#00d4b1", tint_strength=0.32)
+            T['bloc1_label'],
+            "", th,
+            accent=th["teal"], tint_hex="#00d4b1", tint_strength=0.32)
 
     if len(df) == 0:
         empty_state(T, th)
         return
 
-    # ── Toggle Aujourd'hui / Historique + sélecteur ville ─────────────────
-    col_mode, col_ville = st.columns([1, 2])
-    with col_mode:
+    # ── Mode + Région — colonne droite, dans la hauteur de la bannière ─────
+    with col_controls:
         auj_lbl  = "📅 Aujourd'hui" if lang == "fr" else "📅 Today"
         hist_lbl = "📊 Historique"  if lang == "fr" else "📊 Historical"
-        mode = st.radio("Mode", [auj_lbl, hist_lbl], horizontal=True, key="carte_mode")
+
+        regions_dispo = sorted(df["region"].unique().tolist())
+        all_reg_label = "Toutes les régions" if lang == "fr" else "All regions"
+
+        # Réduire le padding Streamlit pour coller à 120px
+        st.markdown("""
+        <style>
+        div[data-testid="stVerticalBlock"] > div:has(> div[data-testid="stRadio"]) {
+            padding-top: 0 !important;
+            margin-top: 0 !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
+        # Mode radio vertical (aujourd'hui en haut, historique en bas)
+        mode = st.radio(
+            "Mode",
+            [auj_lbl, hist_lbl],
+            horizontal=False,
+            key="carte_mode",
+            label_visibility="collapsed"
+        )
+        # Région juste en dessous, compact
+        region_sel = st.multiselect(
+            "🗺️ Région" if lang == "fr" else "🗺️ Region",
+            regions_dispo,
+            default=[],
+            key="carte_region_sel",
+            label_visibility="collapsed",
+            placeholder="Toutes les régions" if lang == "fr" else "All regions"
+        )
+
     mode_today = "Aujourd'hui" in mode or "Today" in mode
 
     if mode_today:
-    # ── Données prédites pour aujourd'hui ─────────────────────────────
+        # ── Données prédites pour aujourd'hui ─────────────────────────────
         date_max_str = str(df["date"].max().date())
         with st.spinner("🔮 Calcul des prédictions pour aujourd'hui..."):
             df_pred = _predire_toutes_villes(date_max_str, df)
@@ -127,7 +157,6 @@ def render(profil):
             periode_label = f"📅 {date.today().strftime('%d %b %Y')} · Prédictions"
             source_label  = "Modèle Hybride RL+ARIMA"
         else:
-            # Fallback sur données réelles si modèle indisponible
             date_max      = df["date"].max()
             df_carte      = df[df["date"] == date_max].copy()
             periode_label = str(date_max.date())
@@ -144,14 +173,17 @@ def render(profil):
         periode_label = f"{an_min}–{an_max_sel}"
         source_label  = "Données réelles"
 
-    with col_ville:
-        villes_dispo = sorted(df_carte["ville"].unique().tolist())
-        all_label    = "Toutes les villes" if lang == "fr" else "All cities"
-        ville_sel_carte = st.selectbox(
-            "🏙️ Ville" if lang == "fr" else "🏙️ City",
-            [all_label] + villes_dispo,
-            key="carte_ville_sel"
-        )
+    # ── Filtrer par région si sélectionnée ────────────────────────────────
+    # ── Filtrer par région si sélectionnée ────────────────────────────────
+    if region_sel:  # liste non vide = filtre actif
+        df_carte   = df_carte[df_carte["region"].isin(region_sel)].copy()
+        periode_label += f" · {', '.join(region_sel)}"
+        all_reg_label  = "Toutes les régions"  # garder pour le zoom
+    else:
+        region_sel = []  # aucune sélection = toutes les régions
+
+    all_label       = "Toutes les villes" if lang == "fr" else "All cities"
+    ville_sel_carte = all_label
 
     # ── Agrégation ────────────────────────────────────────────────────────
     agg = df_carte.groupby("ville")[["pm2_5_moyen", "IRS"]].mean().reset_index()
@@ -209,8 +241,16 @@ def render(profil):
                 text=agg["ville"],
                 hovertemplate="<b>%{text}</b><br>PM2.5 : %{marker.color:.1f} µg/m³<br>IRS : %{customdata:.3f}<extra></extra>",
                 customdata=agg["IRS"]))
-            geo_center = dict(lat=7.35, lon=12.35)
-            geo_zoom   = 5.4
+            # Zoom sur la région sélectionnée si filtrée
+            if region_sel and len(agg) > 0:  # au lieu de region_sel != all_reg_label
+                geo_center = dict(
+                    lat=float(agg["lat"].mean()),
+                    lon=float(agg["lon"].mean())
+                )
+                geo_zoom = 7.0
+            else:
+                geo_center = dict(lat=7.35, lon=12.35)
+                geo_zoom   = 5.4
 
         titre_carte = f"{T['bloc1_map_title']} · {periode_label}"
         if ville_sel_carte != all_label:
