@@ -29,6 +29,17 @@ def get_dataframe() -> pd.DataFrame:
     try:
         # TODO: Ajuster le paramètre `parse_dates=['date']` si le nom de la colonne temporel diffère
         _df = pd.read_csv(dataset_path, parse_dates=['date'])
+        
+        # ─── VIRTUAL TIME SHIFT (Live Demo Mode) ───
+        # Pour que l'app paraisse "Live", on décale les dates pour que le dataset finisse AUJOURD'HUI.
+        if 'date' in _df.columns:
+            max_date = _df['date'].max()
+            today = pd.Timestamp.now().normalize()
+            if not pd.isna(max_date):
+                delta = today - max_date
+                _df['date'] = _df['date'] + delta
+                logger.info(f"Dataset décalé de {delta.days} jours pour correspondre à la date actuelle ({today.date()})")
+        
         logger.info(f"Dataset chargé avec succès depuis {dataset_path}")
     except ValueError:
         # Si la colonne 'date' n'existe pas, on tente un chargement normal 

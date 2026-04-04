@@ -4,15 +4,32 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Mail, Lock, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import authService from "@/services/authService";
+import { Mail, Lock, Eye, EyeOff, ArrowLeft, Loader2 } from "lucide-react";
+import { notify } from "@/utils/toast";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    router.push('/');
+    setIsLoading(true);
+
+    try {
+      await authService.login({ email, password });
+      notify.success("Connexion réussie ! Content de vous revoir.");
+      router.push('/dashboard/carte');
+    } catch (err: any) {
+      console.error("Erreur de connexion:", err);
+      notify.error("Email ou mot de passe incorrect.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -64,6 +81,8 @@ export default function LoginPage() {
                   type="email"
                   autoComplete="email"
                   placeholder="votre@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full h-[1.1cm] bg-[#1e293b]/40 border border-white/10 rounded-xl pl-4 pr-[3.5rem] text-white text-sm placeholder:text-gray-500 focus:outline-none focus:border-[var(--teal)] focus:ring-1 focus:ring-[var(--teal)]/50 transition-all"
                   required
                 />
@@ -81,6 +100,8 @@ export default function LoginPage() {
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   placeholder="Mot de passe"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full h-[1.1cm] bg-[#1e293b]/40 border border-white/10 rounded-xl pl-4 pr-[5.5rem] text-white text-sm placeholder:text-gray-500 focus:outline-none focus:border-[var(--teal)] focus:ring-1 focus:ring-[var(--teal)]/50 transition-all mb-1"
                   required
                 />
@@ -104,9 +125,11 @@ export default function LoginPage() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="btn-primary w-full mt-4 !font-medium"
+              disabled={isLoading}
+              className="btn-primary w-full mt-4 !font-medium flex items-center justify-center gap-2 disabled:opacity-70"
             >
-              Se connecter
+              {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
+              {isLoading ? "Connexion..." : "Se connecter"}
             </button>
           </form>
 

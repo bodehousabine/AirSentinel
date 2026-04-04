@@ -41,14 +41,31 @@ def _find_col(df, candidates):
             return c
     return None
 
-def _irs_label_color(irs_val):
+def _irs_label_color(irs_val, status_label=None):
+    """
+    Détermine le label et la couleur. 
+    Priorise le label textuel s'il contient des mots clés ou emojis.
+    """
+    if status_label:
+        l = status_label.upper()
+        if "FAIBLE" in l or "🟢" in l:
+            return "FAIBLE", "#4CAF50"
+        if "MODÉRÉ" in l or "🟡" in l:
+            return "MODÉRÉ", "#FFC107"
+        if "ÉLEVÉ" in l or "🟠" in l:
+            return "ÉLEVÉ", "#FF5722"
+        if "CRITIQUE" in l or "🔴" in l:
+            return "CRITIQUE", "#B71C1C"
+
+    # Fallback sur les seuils numériques si pas de label
     if irs_val is None:
-        return None, None
-    if irs_val <= 0:
+        return "N/A", "#9E9E9E"
+    
+    if irs_val <= 0.2:
         return "FAIBLE", "#4CAF50"
-    elif irs_val <= 1:
+    elif irs_val <= 0.5:
         return "MODÉRÉ", "#FFC107"
-    elif irs_val <= 2:
+    elif irs_val <= 0.8:
         return "ÉLEVÉ", "#FF5722"
     else:
         return "CRITIQUE", "#B71C1C"
@@ -59,36 +76,37 @@ def _irs_label_color(irs_val):
 def get_carte():
     """
     Retourne une liste de points géolocalisés par ville avec PM2.5 et IRS.
-    Les colonnes lat/lon doivent exister dans le CSV, sinon elles seront null.
     """
     try:
         df = get_dataframe()
     except FileNotFoundError as e:
         raise HTTPException(status_code=503, detail=str(e))
 
-    city_col = _find_col(df, ["ville", "city"])
-    pm25_col = _find_col(df, ["pm2_5_moyen", "pm2_5", "pm25", "PM2.5"])
-    lat_col  = _find_col(df, ["lat", "latitude"])
-    lon_col  = _find_col(df, ["lon", "lng", "longitude"])
-    irs_col  = _find_col(df, ["IRS", "irs", "irs_value"])
+    city_col   = _find_col(df, ["ville", "city"])
+    pm25_col   = _find_col(df, ["pm2_5_moyen", "pm2_5", "pm25", "PM2.5"])
+    lat_col    = _find_col(df, ["latitude", "lat"])
+    lon_col    = _find_col(df, ["longitude", "lon", "lng"])
+    irs_col    = _find_col(df, ["IRS", "irs", "irs_value"])
+    status_col = _find_col(df, ["niveau_sanitaire", "niveau_alerte", "label"])
 
     if not city_col:
-        raise HTTPException(status_code=500, detail="Colonne 'city' introuvable dans le dataset.")
+        raise HTTPException(status_code=500, detail="Colonne ville introuvable.")
 
     agg = {pm25_col: "mean"} if pm25_col else {}
-    if irs_col:
-        agg[irs_col] = "mean"
-    if lat_col:
-        agg[lat_col] = "first"
-    if lon_col:
-        agg[lon_col] = "first"
+    if irs_col: agg[irs_col] = "mean"
+    if lat_col: agg[lat_col] = "first"
+    if lon_col: agg[lon_col] = "first"
+    if status_col: agg[status_col] = "first"
 
     grouped = df.groupby(city_col).agg(agg).reset_index()
 
     result = []
     for _, row in grouped.iterrows():
         irs_val = float(row[irs_col]) if irs_col else None
-        label, color = _irs_label_color(irs_val)
+        status_text = str(row[status_col]) if status_col else None
+        
+        label, color = _irs_label_color(irs_val, status_text)
+        
         result.append(VillePoint(
             city=row[city_col],
             lat=float(row[lat_col]) if lat_col else None,
@@ -117,9 +135,9 @@ def get_analyses():
     except FileNotFoundError as e:
         raise HTTPException(status_code=503, detail=str(e))
 
-    pm25_col   = _find_col(df, ["pm2_5", "pm25", "PM2.5"])
-    region_col = _find_col(df, ["region", "Region"])
-    city_col   = _find_col(df, ["city", "ville"])
+    pm25_col   = _find_col(df, ["pm2_5_moyen", "pm2_5", "pm25", "PM2.5", "PM25"])
+    region_col = _find_col(df, ["region", "Region", "Area"])
+    city_col   = _find_col(df, ["ville", "city", "Ville", "City"])
 
     # 1. PM2.5 par région
     pm25_par_region = {}

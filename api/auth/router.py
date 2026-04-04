@@ -7,7 +7,7 @@ from datetime import timedelta
 from api.core.database import get_db
 from api.core.config import get_settings
 from api.models.user import User
-from api.schemas.user import UserCreate, UserLogin, UserResponse, Token
+from api.schemas.user import UserCreate, UserLogin, UserResponse, Token, UserRegisterResponse
 from api.auth.service import hash_password, verify_password, create_access_token
 from api.auth.dependencies import get_current_user
 
@@ -16,11 +16,10 @@ settings = get_settings()
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
-@router.post("/register", response_model=UserResponse)
+@router.post("/register", response_model=UserRegisterResponse)
 async def register(user_in: UserCreate, db: AsyncSession = Depends(get_db)):
     """
-    Enregistre un nouvel utilisateur.
-    Vérifie si l'email existe déjà.
+    Enregistre un nouvel utilisateur et renvoie un token immédiatement.
     """
     # Vérification de l'existence de l'utilisateur
     result = await db.execute(select(User).filter(User.email == user_in.email))
@@ -43,7 +42,20 @@ async def register(user_in: UserCreate, db: AsyncSession = Depends(get_db)):
     await db.commit()
     await db.refresh(new_user)
     
-    return new_user
+    # Génération du token immédiat (pour éviter un second appel /login)
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": str(new_user.id)}, 
+        expires_delta=access_token_expires
+    )
+    
+    return {
+        "user": new_user,
+        "token": {
+            "access_token": access_token, 
+            "token_type": "bearer"
+        }
+    }
 
 
 @router.post("/login", response_model=Token)

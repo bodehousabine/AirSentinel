@@ -37,10 +37,15 @@ app = FastAPI(
 )
 
 # ─── CORS ─────────────────────────────────────────────────────────
+origins = settings.ALLOWED_ORIGINS
+# En mode DEBUG, on peut être plus permissif pour faciliter le développement local
+if settings.DEBUG:
+    origins = ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
-    allow_credentials=True,
+    allow_origins=origins,
+    allow_credentials=True if "*" not in origins else False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

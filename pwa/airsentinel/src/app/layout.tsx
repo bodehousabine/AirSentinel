@@ -26,6 +26,8 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+import { Toaster } from "react-hot-toast";
+
 export default function RootLayout({
   children,
 }: {
@@ -36,7 +38,23 @@ export default function RootLayout({
       <head>
         <link rel="apple-touch-icon" href="/LogoAir.png" />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <Toaster 
+          position="top-center"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: "rgba(15, 23, 42, 0.9)",
+              color: "#fff",
+              backdropFilter: "blur(10px)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              fontSize: "14px",
+              borderRadius: "12px",
+            },
+          }}
+        />
+        {children}
+      </body>
     </html>
   );
 }

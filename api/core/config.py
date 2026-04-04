@@ -7,7 +7,12 @@ class Settings(BaseSettings):
     # Application
     DEBUG: bool = True
     API_PREFIX: str = "/api/v1"
-    ALLOWED_ORIGINS: List[str] = ["http://localhost:8501", "https://airsentinel.onrender.com"]
+    ALLOWED_ORIGINS: List[str] = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:8501", 
+        "https://airsentinel.onrender.com"
+    ]
     
     # Dataset et ML
     DATASET_PATH: str = "data/processed/airsentinel_dataset.csv"
