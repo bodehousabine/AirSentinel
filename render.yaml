@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: airsentinel-api
+    runtime: docker
+    plan: free
+    region: frankfurt # Plus proche du Cameroun géographiquement parmi les choix Render
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: DEBUG
+        value: "false"
+      - key: DATABASE_URL
+        sync: false # À configurer manuellement dans le dashboard Render pour Supabase
+    healthCheckPath: /health
+    autoDeploy: true

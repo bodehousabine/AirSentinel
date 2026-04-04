@@ -1,7 +1,6 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 
 // Ensure we don't render placeholder on server to avoid hydration mismatch

@@ -53,7 +53,7 @@ def get_alertes():
     except FileNotFoundError as e:
         raise HTTPException(status_code=503, detail=str(e))
 
-    pm25_col = _find_col(df, ["pm2_5_moyen", "pm2_5", "pm25", "PM2.5"])
+    pm25_col = _find_col(df, ["pm2_5_moyen", "pm2_5", "pm25", "PM2.5", "PM25"])
     irs_col  = _find_col(df, ["IRS", "irs", "irs_value"])
 
     if "date" not in df.columns:

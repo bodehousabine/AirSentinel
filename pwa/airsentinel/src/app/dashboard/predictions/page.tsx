@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, 
+  XAxis, YAxis, CartesianGrid, Tooltip, 
   ResponsiveContainer, AreaChart, Area, ReferenceLine 
 } from "recharts";
-import { Brain, Sparkles, ChevronRight, AlertCircle, Loader2, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Brain, Sparkles, AlertCircle, Loader2, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import predictionService from "@/services/predictionService";
 import { PredictionPoint } from "@/types/prediction";
 
@@ -147,7 +147,7 @@ export default function PredictionsPage() {
               </div>
               <h4 className="font-bold text-lg text-white mb-2 italic tracking-tight">Anticipation cruciale</h4>
               <p className="text-xs text-gray-400 leading-relaxed mb-6 font-medium">
-                Nos modèles LSTM détectent les pics de pollution 24h à 48h avant l'apparition des symptômes physiques.
+                Nos modèles LSTM détectent les pics de pollution 24h à 48h avant l&apos;apparition des symptômes physiques.
               </p>
               <button className="w-full py-3 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] font-black text-[#00d4b1] uppercase tracking-widest transition-all">
                 Détails du Modèle
@@ -165,6 +165,9 @@ export default function PredictionsPage() {
            </div>
         </div>
       </div>
+      
+      {/* Mobile Spacer */}
+      <div className="h-[120px] sm:hidden" />
     </main>
   );
 }

@@ -5,11 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import authService from "../services/authService";
+import { User as UserType } from "../types/auth";
 import { User, Home, LogOut, Loader2 } from "lucide-react";
 import { notify } from "@/utils/toast";
 
 export default function Navbar() {
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<UserType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
@@ -66,7 +67,7 @@ export default function Navbar() {
                 {currentUser.avatar_url ? (
                   <Image 
                     src={currentUser.avatar_url} 
-                    alt={currentUser.full_name} 
+                    alt={currentUser.full_name || "User"} 
                     fill 
                     className="object-cover"
                   />

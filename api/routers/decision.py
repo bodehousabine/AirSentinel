@@ -121,7 +121,7 @@ def _find_col(df, candidates):
 
 def _get_niveau_actuel(df) -> str:
     """Calcule le niveau IRS actuel à partir des dernières données disponibles."""
-    pm25_col = _find_col(df, ["pm2_5", "pm25", "PM2.5"])
+    pm25_col = _find_col(df, ["pm2_5_moyen", "pm2_5", "pm25", "PM2.5", "PM25"])
     if not pm25_col:
         return "MODÉRÉ"  # Niveau par défaut si données insuffisantes
 

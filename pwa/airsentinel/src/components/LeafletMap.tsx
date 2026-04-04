@@ -26,12 +26,11 @@ function HeatmapLayer({ points }: { points: VillePoint[] }) {
   useEffect(() => {
     if (points.length === 0) return;
     
-    // @ts-ignore - Leaflet.heat is not typed
     const heatData: [number, number, number][] = points
       .filter(p => p.lat !== null && p.lon !== null)
       .map(c => [c.lat!, c.lon!, c.pm25_moyen / 100]);
       
-    // @ts-ignore
+    // @ts-expect-error - Leaflet.heat plugin not typed
     const heatLayer = L.heatLayer(heatData, {
       radius: 40,
       blur: 25,
@@ -210,7 +209,7 @@ export default function LeafletMap() {
   }, []);
 
   useEffect(() => {
-    // @ts-ignore
+    // @ts-expect-error - Leaflet internal method for icon URLs
     delete L.Icon.Default.prototype._getIconUrl;
     L.Icon.Default.mergeOptions({
       iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",

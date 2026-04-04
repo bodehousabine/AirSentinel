@@ -8,6 +8,11 @@ export const metadata: Metadata = {
   title: "AirSentinel Cameroun — L'IA au service d'un air plus pur",
   description: "Visualisez, Analysez et Anticipez la Qualité de l'Air sur Tout le Territoire Camerounais",
   manifest: "/manifest.json",
+  icons: {
+    icon: "/LogoAir.png",
+    shortcut: "/LogoAir.png",
+    apple: "/LogoAir.png",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -35,9 +40,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr">
-      <head>
-        <link rel="apple-touch-icon" href="/LogoAir.png" />
-      </head>
+      <head />
       <body className={inter.className}>
         <Toaster 
           position="top-center"

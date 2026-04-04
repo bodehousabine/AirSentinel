@@ -60,7 +60,7 @@ def get_contexte():
     except FileNotFoundError as e:
         raise HTTPException(status_code=503, detail=str(e))
 
-    pm25_col = _find_col(df, ["pm2_5", "pm25", "PM2.5"])
+    pm25_col = _find_col(df, ["pm2_5_moyen", "pm2_5", "pm25", "PM2.5", "PM25"])
 
     # ─── 1. Donut niveaux IRS ────────────────────────────────────────
     def classify_pm25(val):
@@ -88,11 +88,11 @@ def get_contexte():
 
     # ─── 2. Donut polluants ─────────────────────────────────────────
     polluant_cols = {
-        "PM2.5": _find_col(df, ["pm2_5", "pm25"]),
-        "PM10":  _find_col(df, ["pm10"]),
-        "NO2":   _find_col(df, ["no2"]),
-        "O3":    _find_col(df, ["o3"]),
-        "SO2":   _find_col(df, ["so2"]),
+        "PM2.5": pm25_col,
+        "PM10":  _find_col(df, ["pm10_moyen", "pm10"]),
+        "NO2":   _find_col(df, ["no2_moyen", "no2"]),
+        "O3":    _find_col(df, ["o3_moyen", "ozone_moyen", "o3"]),
+        "SO2":   _find_col(df, ["so2_moyen", "so2"]),
     }
     polluant_couleurs = {
         "PM2.5": "#2196F3",

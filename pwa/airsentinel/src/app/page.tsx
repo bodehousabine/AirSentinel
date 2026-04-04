@@ -410,7 +410,7 @@ export default function LandingPage() {
         {/* CTA */}
         <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap", marginTop: "10px" }}>
           <Link href="/register" className="btn-primary" style={{ padding: "14px 28px", fontSize: "16px" }}>
-            S'inscrire gratuitement
+            S&apos;inscrire gratuitement
           </Link>
           <a
             href="#pilliers"

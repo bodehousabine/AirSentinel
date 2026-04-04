@@ -9,7 +9,7 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen bg-[#020c18] text-[#e0f2fe] font-sans">
       <Navbar />
-      <div className="pt-[64px] pb-[80px] sm:pb-0">
+      <div className="pt-[64px] pb-[140px] sm:pb-0">
         {children}
       </div>
       <PWAFooter />
