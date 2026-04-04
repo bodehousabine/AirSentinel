@@ -437,68 +437,6 @@ def render(profil):
 
     st.markdown("<div style='margin:20px 0 8px;'></div>", unsafe_allow_html=True)
 
-    # ══════════════════════════════════════════════════════════════════════════
-    # SECTION 3 — IMPACT SANITAIRE · Chen & Hoek (2020)
-    # ══════════════════════════════════════════════════════════════════════════
-    st.markdown(
-        f'<div style="font-size:13px;font-weight:600;color:{txt_main};margin-bottom:12px;">'
-        f'🏥 Impact sanitaire estimé · Chen & Hoek (2020) via WHO AQG 2021</div>',
-        unsafe_allow_html=True
-    )
-
-    pm25_national = float(df['pm2_5_moyen'].mean())
-    dep_national  = max(0, pm25_national - 15.0)
-    red_national  = (dep_national / 10) * 6
-
-    col_i1, col_i2, col_i3, col_i4 = st.columns([1, 1, 1, 2])
-    zones_list = list(ZONES.items())
-
-    for col_ui, (nom_zone, meta) in zip([col_i1, col_i2, col_i3], zones_list):
-        pm25_z = meta['pm25']
-        dep_z  = max(0, pm25_z - 15.0)
-        red_z  = (dep_z / 10) * 6
-        rv2, gv2, bv2 = _rgb(meta['color'])
-        is_sel = nom_zone == zone_sel
-        brd    = f'2px solid {meta["color"]}' if is_sel else f'1px solid {meta["color"]}44'
-        with col_ui:
-            st.markdown(
-                f'<div style="background:{bg_card};'
-                f'border:{brd};border-radius:12px;padding:14px;text-align:center;">'
-                f'<div style="font-size:11px;color:{txt_dim};margin-bottom:6px;">'
-                f'{meta["emoji"]} {nom_zone.replace("Zone ","")}</div>'
-                f'<div style="font-size:24px;font-weight:700;color:{meta["color"]};">{pm25_z:.1f}</div>'
-                f'<div style="font-size:10px;color:{txt_dim};">µg/m³</div>'
-                f'<div style="font-size:11px;color:{txt_sub};margin-top:8px;'
-                f'padding-top:8px;border-top:1px solid {meta["color"]}33;">'
-                f'+{dep_z:.1f} µg/m³ vs OMS</div>'
-                f'<div style="font-size:15px;font-weight:700;color:{th["red"]};margin-top:4px;">'
-                f'→ -{red_z:.1f}%</div>'
-                f'<div style="font-size:9px;color:{txt_dim};">mortalité cardiopulm.</div>'
-                f'</div>',
-                unsafe_allow_html=True
-            )
-
-    with col_i4:
-        st.markdown(
-            f'<div style="background:{bg_head};'
-            f'border:1px solid {th["teal"]}55;'
-            f'border-left:4px solid {th["teal"]};'
-            f'border-radius:12px;padding:16px 18px;">'
-            f'<div style="font-size:12px;font-weight:600;color:{th["teal"]};margin-bottom:10px;">'
-            f'🌍 Impact national — Cameroun</div>'
-            f'<div style="font-size:13px;color:{txt_sub};line-height:1.8;">'
-            f'PM2.5 moyen : <strong style="color:{th["amber"]};">{pm25_national:.1f} µg/m³</strong><br>'
-            f'Dépassement OMS : <strong style="color:{txt_main};">+{dep_national:.1f} µg/m³</strong><br>'
-            f'Si PM2.5 → 15 µg/m³ :<br>'
-            f'<strong style="font-size:22px;color:{th["green"]};">-{red_national:.1f}%</strong>'
-            f'<span style="font-size:11px;color:{txt_sub};"> mortalité cardiopulm.</span>'
-            f'</div>'
-            f'<div style="font-size:9px;color:{txt_dim};margin-top:10px;font-family:DM Mono,monospace;">'
-            f'+10 µg/m³ PM2.5 → +6% mortalité cardiopulmonaire<br>'
-            f'Chen & Hoek (2020) · NCBI NBK574591</div>'
-            f'</div>',
-            unsafe_allow_html=True
-        )
 
     # ── Sources ───────────────────────────────────────────────────────────────
     st.markdown("<div style='margin-top:16px;'></div>", unsafe_allow_html=True)
