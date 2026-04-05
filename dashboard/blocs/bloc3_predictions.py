@@ -92,7 +92,7 @@ def render(profil):
         v_all = T["all_cities"]
         v_list = [v_all] + sorted(df["ville"].unique().tolist())
         v = st.selectbox(
-            "🏙️ Sélectionner une ville" if lang == "fr" else "🏙️ Select a city",
+            "**SÉLECTIONNER UNE VILLE**" if lang == "fr" else "**SELECT A CITY**",
             v_list, index=0, key="p_v"
         )
 
@@ -227,19 +227,21 @@ def render(profil):
             annotation_font_size=10
         )
 
-        titre_pred = f"PM2.5 · {v} · Prédiction 72h"
+        titre_pred = f"PM2.5 · {v} · {'72h Forecast' if lang=='en' else 'Prédiction 72h'}"
         fig.update_layout(
-            **PL, height=420,  # plus grand
-            title=dict(text=titre_pred, font=dict(color=th["text"], size=14)),
+            **PL, height=420,
+            title=dict(text=titre_pred, font=dict(color=th["text"], size=15, family="Arial Black, sans-serif")),
             legend=dict(
-                font=dict(color=th["text2"], size=11),
-                bgcolor="rgba(0,0,0,0)",
+                font=dict(color=th["text"], size=12, family="Arial, sans-serif"),
+                bgcolor="rgba(0,0,0,0.3)",
+                bordercolor=th["border_soft"], borderwidth=1,
                 orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1
             ),
             margin=dict(l=44, r=20, t=60, b=36)
         )
-        fig.update_xaxes(**GRID)
-        fig.update_yaxes(**GRID)
+        fig.update_xaxes(**GRID, tickfont=dict(size=12, color=th["text"], family="Arial, sans-serif"))
+        fig.update_yaxes(**GRID, tickfont=dict(size=12, color=th["text"], family="Arial, sans-serif"),
+                         title_font=dict(size=13, color=th["text"], family="Arial, sans-serif"))
         st.plotly_chart(fig, width="stretch")
 
         # ── KPIs prédiction — plus visibles ──────────────────────────────
@@ -319,10 +321,10 @@ def render(profil):
                 # KPIs performance — plus frappants
                 k1, k2, k3, k4 = st.columns(4)
                 kpi_data = [
-                    (k1, f"{perf['r2']:.4f}",         "R²",              "Variance expliquée", th["green"],  "🎯"),
-                    (k2, f"{perf['mae']:.3f}",         "MAE (µg/m³)",     "Erreur moyenne",     th["amber"],  "📏"),
-                    (k3, f"{perf['err_max']:.1f}",     "Erreur max",      "µg/m³",              th["coral"],  "⚠️"),
-                    (k4, f"{100-perf['pct_10']:.1f}%",  "Accuracy" if lang=="en" else "Précision" ,       "Erreur < 10 µg/m³",  th["blue"],   "✅"),
+                    (k1, f"{perf['r2']:.4f}",         "R²",              "Explained variance" if lang=="en" else "Variance expliquée", th["green"],  "🎯"),
+                    (k2, f"{perf['mae']:.3f}",         "MAE (µg/m³)",     "Mean error" if lang=="en" else "Erreur moyenne",     th["amber"],  "📏"),
+                    (k3, f"{perf['err_max']:.1f}",     "Max error" if lang=="en" else "Erreur max",      "µg/m³",              th["coral"],  "⚠️"),
+                    (k4, f"{100-perf['pct_10']:.1f}%",  "Accuracy" if lang=="en" else "Précision" ,       "Error < 10 µg/m³" if lang=="en" else "Erreur < 10 µg/m³",  th["blue"],   "✅"),
                 ]
                 for col, val, lbl, sub, color, emoji in kpi_data:
                     with col:
@@ -385,14 +387,17 @@ def render(profil):
                 fig_tl.update_layout(
                     **PL, height=420,
                     title=dict(
-                        text=f"Réel vs Prédit · {ville_ref} · 2025 · R²={perf['r2']:.4f} · MAE={perf['mae']:.3f} µg/m³",
-                        font=dict(color=th["text"], size=13)
+                        text=f"{'Actual vs Predicted' if lang=='en' else 'Réel vs Prédit'} · {ville_ref} · 2025 · R²={perf['r2']:.4f} · MAE={perf['mae']:.3f} µg/m³",
+                        font=dict(color=th["text"], size=14, family="Arial Black, sans-serif")
                     ),
-                    xaxis=dict(**GRID),
-                    yaxis=dict(**GRID, title="PM2.5 (µg/m³)"),
+                    xaxis=dict(**GRID, tickfont=dict(size=12, color=th["text"], family="Arial, sans-serif")),
+                    yaxis=dict(**GRID, title="PM2.5 (µg/m³)",
+                               title_font=dict(size=13, color=th["text"], family="Arial, sans-serif"),
+                               tickfont=dict(size=12, color=th["text"], family="Arial, sans-serif")),
                     legend=dict(
-                        font=dict(color=th["text2"], size=11),
-                        bgcolor="rgba(0,0,0,0)",
+                        font=dict(color=th["text"], size=12, family="Arial, sans-serif"),
+                        bgcolor="rgba(0,0,0,0.3)",
+                        bordercolor=th["border_soft"], borderwidth=1,
                         orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1
                     )
                 )
@@ -430,7 +435,8 @@ def render(profil):
             st.markdown(
                 f'<div style="font-size:11px;font-weight:700;color:{th["text3"]};'
                 f'text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;">'
-                f'🌡️ Conditions météorologiques</div>',
+                + ("🌡️ Weather conditions" if lang=="en" else "🌡️ Conditions météorologiques")
+                + "</div>",
                 unsafe_allow_html=True
             )
             c1, c2 = st.columns(2)
@@ -448,16 +454,17 @@ def render(profil):
             st.markdown(
                 f'<div style="font-size:11px;font-weight:700;color:{th["text3"]};'
                 f'text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;">'
-                f'⚡ Climate episodes" if lang=="en" else "⚡ Épisodes climatiques</div>',
+                + ("⚡ Climate episodes" if lang=="en" else "⚡ Épisodes climatiques")
+                + "</div>",
                 unsafe_allow_html=True
             )
             c3, c4 = st.columns(2)
             with c3:
-                harm = st.checkbox("🌪️ Harmattan intense", key="s_harm",
-                                   help="Dust > p90 ET précipitations < p10 · Schepanski et al. (2007)")
+                harm = st.checkbox("🌪️ Intense Harmattan" if lang=="en" else "🌪️ Harmattan intense", key="s_harm",
+                                   help="Dust > p90 AND precipitation < p10 · Schepanski et al. (2007)")
             with c4:
-                feux = st.checkbox("🔥 Épisode feux", key="s_feux",
-                                   help="CO > p90 en saison sèche · Barker et al. (2020)")
+                feux = st.checkbox("🔥 Fire episode" if lang=="en" else "🔥 Épisode feux", key="s_feux",
+                                   help="CO > p90 in dry season · Barker et al. (2020)")
 
         # ── Calcul vrai modèle (avant d'afficher la jauge) ────────────────
         if modeles_ok and len(df_sim) > 0:
@@ -491,11 +498,11 @@ def render(profil):
         ecart     = irs_s - ctx["irs_moy"]
         ecart_sgn = "↑" if ecart > 0 else "↓"
         ecart_col = th["red"] if ecart > 0 else th["green"]
-        if   pm25_s <= 15:   oms_niv = "✅ Conforme OMS"
-        elif pm25_s <= 25:   oms_niv = "⚠️ IT4 dépassé"
-        elif pm25_s <= 37.5: oms_niv = "🟠 IT3 dépassé"
-        elif pm25_s <= 50:   oms_niv = "🔴 IT2 dépassé"
-        else:                oms_niv = "⛔ Critique"
+        if   pm25_s <= 15:   oms_niv = "✅ WHO Compliant"  if lang=="en" else "✅ Conforme OMS"
+        elif pm25_s <= 25:   oms_niv = "⚠️ IT4 exceeded"   if lang=="en" else "⚠️ IT4 dépassé"
+        elif pm25_s <= 37.5: oms_niv = "🟠 IT3 exceeded"   if lang=="en" else "🟠 IT3 dépassé"
+        elif pm25_s <= 50:   oms_niv = "🔴 IT2 exceeded"   if lang=="en" else "🔴 IT2 dépassé"
+        else:                oms_niv = "⛔ Critical"        if lang=="en" else "⛔ Critique"
 
         # Jauge dans la colonne droite — même bloc que les sliders
         with col_gauge:
@@ -525,7 +532,7 @@ def render(profil):
                     font=dict(color=nc, size=18, family="DM Mono")
                 ),
                 title=dict(
-                    text=f"PM2.5 Prédit · {ville_sim}",
+                    text=f"{'Predicted PM2.5' if lang=='en' else 'PM2.5 Prédit'} · {ville_sim}",
                     font=dict(color="#94a3b8", size=11)
                 ),
                 gauge=dict(
@@ -577,7 +584,7 @@ def render(profil):
             # PM2.5
             f'<div style="text-align:center;padding:0 20px;">'
             f'<div style="font-size:10px;color:#64748b;text-transform:uppercase;'
-            f'letter-spacing:.1em;margin-bottom:6px;">PM2.5 prédit</div>'
+            f'letter-spacing:.1em;margin-bottom:6px;">{"Predicted PM2.5" if lang=="en" else "PM2.5 prédit"}</div>'
             f'<div style="font-size:38px;font-weight:900;color:{nc};'
             f'text-shadow:0 0 20px {nc}55;line-height:1;">{pm25_s:.1f}</div>'
             f'<div style="font-size:11px;color:#94a3b8;margin-top:2px;">µg/m³</div>'
@@ -588,7 +595,7 @@ def render(profil):
             # IRS
             f'<div style="text-align:center;padding:0 20px;">'
             f'<div style="font-size:10px;color:#64748b;text-transform:uppercase;'
-            f'letter-spacing:.1em;margin-bottom:6px;">IRS simulé</div>'
+            f'letter-spacing:.1em;margin-bottom:6px;">{"Simulated IRS" if lang=="en" else "IRS simulé"}</div>'
             f'<div style="font-size:32px;font-weight:800;color:{nc};line-height:1;">{irs_s:.3f}</div>'
             f'<div style="font-size:12px;font-weight:600;color:{nc};margin-top:4px;">{nt}</div>'
             f'</div>'
@@ -598,9 +605,9 @@ def render(profil):
             # Niveau OMS
             f'<div style="text-align:center;padding:0 20px;">'
             f'<div style="font-size:10px;color:#64748b;text-transform:uppercase;'
-            f'letter-spacing:.1em;margin-bottom:6px;">Niveau OMS</div>'
+            f'letter-spacing:.1em;margin-bottom:6px;">{"WHO Level" if lang=="en" else "Niveau OMS"}</div>'
             f'<div style="font-size:18px;font-weight:700;color:{nc};line-height:1.2;">{oms_niv}</div>'
-            f'<div style="font-size:11px;color:#94a3b8;margin-top:4px;">{pm25_s/15:.1f}x seuil AQG 2021</div>'
+            f'<div style="font-size:11px;color:#94a3b8;margin-top:4px;">{pm25_s/15:.1f}x {"AQG threshold 2021" if lang=="en" else "seuil AQG 2021"}</div>'
             f'</div>'
 
             f'<div style="height:60px;background:{nc}33;width:1px;"></div>'
@@ -608,7 +615,7 @@ def render(profil):
             # Écart vs moyenne
             f'<div style="text-align:center;padding:0 20px;">'
             f'<div style="font-size:10px;color:#64748b;text-transform:uppercase;'
-            f'letter-spacing:.1em;margin-bottom:6px;">vs Moyenne</div>'
+            f'letter-spacing:.1em;margin-bottom:6px;">{"vs Average" if lang=="en" else "vs Moyenne"}</div>'
             f'<div style="font-size:32px;font-weight:800;color:{ecart_col};line-height:1;">'
             f'{ecart_sgn}{abs(ecart):.3f}</div>'
             f'<div style="font-size:11px;color:#94a3b8;margin-top:4px;">{ctx["scope_annees"]}</div>'
@@ -765,7 +772,7 @@ def render(profil):
                             f'<div style="font-size:12px;font-weight:700;color:{th["text3"]};'
                             f'text-transform:uppercase;">{mois_long[m_idx]}</div>'
                             f'<div style="font-size:20px;margin-top:8px;">—</div>'
-                            f'<div style="font-size:10px;color:{th["text3"]};margin-top:4px;">Pas de données</div>'
+                            f'<div style="font-size:10px;color:{th["text3"]};margin-top:4px;">{"No data" if lang=="en" else "Pas de données"}</div>'
                             f'</div>',
                             unsafe_allow_html=True
                         )
@@ -779,10 +786,10 @@ def render(profil):
                 f'<div style="width:12px;height:12px;border-radius:50%;background:{c};"></div>'
                 f'<span style="font-size:11px;color:{th["text3"]};">{l}</span></div>'
                 for c, l in [
-                    (th["green"], f"< 15 µg/m³ · Conforme OMS"),
-                    (th["amber"], f"15–25 µg/m³ · Modéré"),
-                    (th["coral"], f"25–37.5 µg/m³ · Élevé"),
-                    (th["red"],   f"> 37.5 µg/m³ · Critique"),
+                    (th["green"], "< 15 µg/m³ · " + ("WHO Compliant" if lang=="en" else "Conforme OMS")),
+                    (th["amber"], "15–25 µg/m³ · " + ("Moderate" if lang=="en" else "Modéré")),
+                    (th["coral"], "25–37.5 µg/m³ · " + ("High" if lang=="en" else "Élevé")),
+                    (th["red"],   "> 37.5 µg/m³ · " + ("Critical" if lang=="en" else "Critique")),
                 ]
             ])
             + f'</div>',
@@ -790,7 +797,10 @@ def render(profil):
         )
 
     sources_bar(
-        f"Modèle Hybride Régression+ARIMA · Box & Jenkins (1976) · "
-        f"INS Cameroun (2019) · WHO AQG 2021 · NCBI NBK574591",
+        ("Hybrid Model Regression+ARIMA · Box & Jenkins (1976) · "
+         "INS Cameroon (2019) · WHO AQG 2021 · NCBI NBK574591")
+        if lang=="en" else
+        ("Modèle Hybride Régression+ARIMA · Box & Jenkins (1976) · "
+         "INS Cameroun (2019) · WHO AQG 2021 · NCBI NBK574591"),
         th
     )
