@@ -539,15 +539,15 @@ def _vuln_section(snk, lang, th):
                 f'</div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-def _rec_content(profil, profil_map, snk, tkey, snc, snt, ctx, th, T, scope_label):
+def _rec_content(profil, profil_map, snk, tkey, snc, snt, ctx, th, T, scope_label, lang="fr"):
     pk = profil_map.get(profil, "citizen")
     if pk == "health":
         primary_action = T.get(f"bloc5_med_{tkey}", "Stable status." if lang=="en" else "Statut stable.")
     elif pk == "mayor":
         acts = T.get(f"bloc5_mayor_{tkey}", ["Veille administrative active."])
-        primary_action = f"🚨 {acts[0]}" if len(acts) > 0 else "Active watch." if lang=="en" else "Veille active."
+        primary_action = f"\U0001F6A8 {acts[0]}" if len(acts) > 0 else ("Active watch." if lang=="en" else "Veille active.")
     else:
-        primary_action = T.get(f"bloc4_msg_{snk}_{pk}", T.get(f"bloc4_msg_{snk}_citizen", "—"))
+        primary_action = T.get(f"bloc4_msg_{snk}_{pk}", T.get(f"bloc4_msg_{snk}_citizen", "\u2014"))
     if len(primary_action) > 120:
         primary_action = primary_action[:117] + "..."
     st.markdown(
@@ -718,7 +718,7 @@ def render(profil):
         with m_col3:
             _ctx_card(niv_ctx, col_ctx_hex, p90_ville, pm25_ville, th, lang)
         with m_col4:
-            _rec_content(profil, profil_map, snk, tkey, snc, snt, ctx, th, T, scope_label)
+            _rec_content(profil, profil_map, snk, tkey, snc, snt, ctx, th, T, scope_label, lang)
         _vuln_section(snk, lang, th)
 
     with sub2:
@@ -747,7 +747,7 @@ def render(profil):
         with m_col3_s:
             _ctx_card(niv_ctx_s, col_ctx_hex_s, p90_ville, pm25_sim, th, lang)
         with m_col4_s:
-            _rec_content(profil, profil_map, snk_s, tkey_s, snc_s, snt_s, ctx, th, T, scope_label)
+            _rec_content(profil, profil_map, snk_s, tkey_s, snc_s, snt_s, ctx, th, T, scope_label, lang)
         _vuln_section(snk_s, lang, th)
 
     st.markdown("<div style='margin-top:40px;'></div>", unsafe_allow_html=True)

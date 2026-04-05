@@ -121,7 +121,7 @@ def render(profil):
     p50, p75, p90 = ctx["p50"], ctx["p75"], ctx["p90"]
     if   irs_moy < p50: irs_label, irs_col = T.get("level_faible", "FAIBLE"), th["green"]
     elif irs_moy < p75: irs_label, irs_col = T.get("level_modere", "MODÉRÉ"), th["amber"]
-    elif irs_moy < p90: irs_label, irs_col = T.get("level_eleve",  "ÉLEVÉ"),  th["orange"]
+    elif irs_moy < p90: irs_label, irs_col = T.get("level_eleve",  "ÉLEVÉ"),  th["coral"]
     else:               irs_label, irs_col = T.get("level_critique","CRITIQUE"), th["red"]
 
     SEUIL_AQG = 15
