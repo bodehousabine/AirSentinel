@@ -59,12 +59,12 @@ with st.sidebar:
                     filter:saturate(0.90) brightness(0.65);"
              onerror="this.style.opacity='0'"/>
         <div style="position:absolute;inset:0;
-                    background:linear-gradient(135deg,rgba(0,212,177,0.42) 0%,rgba(2,12,24,0.78) 100%);"></div>
+                    background:{'linear-gradient(135deg,rgba(0,212,177,0.42) 0%,rgba(2,12,24,0.78) 100%)' if th['name']=='dark' else 'linear-gradient(135deg,rgba(0,212,177,0.2) 0%,rgba(212,235,248,0.8) 100%)'};"></div>
         <div style="position:absolute;inset:0;display:flex;flex-direction:column;
                     align-items:center;justify-content:center;text-align:center;padding:10px;">
             <div style="font-size:32px;margin-bottom:4px;">🌍</div>
-            <div style="font-size:17px;font-weight:600;color:#e0f2fe;">AirSentinel</div>
-            <div style="font-size:10px;color:#00d4b1;letter-spacing:.16em;
+            <div style="font-size:17px;font-weight:600;color:{th['text']};">AirSentinel</div>
+            <div style="font-size:10px;color:{ th['teal'] if th['name']=='dark' else '#006b58' };letter-spacing:.16em;
                         margin-top:3px;font-family:'DM Mono',monospace;">
                 {T['sidebar_app_subtitle']}
             </div>
@@ -167,53 +167,70 @@ from blocs.bloc5_decision    import render as bloc5
 from blocs.bloc6_shap        import render as bloc6
 
 # ── CSS premium pour les onglets ───────────────────────────────────────────────
-st.markdown("""
+st.markdown(f"""
 <style>
-/* Conteneur des onglets — fond identique au sélecteur de villes */
-.stTabs [data-baseweb="tab-list"] {
+/* Conteneur des onglets — fond dynamique selon thème */
+.stTabs [data-baseweb="tab-list"] {{
     gap: 2px;
-    background: #071e35 !important;
-    border-bottom: 1px solid rgba(14,165,233,0.20);
+    background: {th['bg_tertiary']} !important;
+    border-bottom: 1px solid {th['border_soft']};
     padding: 4px 8px 0 8px;
     border-radius: 10px 10px 0 0;
-}
+}}
 
 /* Chaque onglet */
-.stTabs [data-baseweb="tab"] {
+.stTabs [data-baseweb="tab"] {{
     font-family: 'Inter', 'DM Sans', sans-serif !important;
     font-size: 15px !important;
     font-weight: 950 !important;
     letter-spacing: 0.12em !important;
     text-transform: uppercase !important;
-    color: #e2e8f0 !important; /* Texte plus brillant par defaut */
+    color: {th['text2']} !important; 
     background: transparent !important;
     border: none !important;
     border-radius: 6px 6px 0 0 !important;
     padding: 12px 22px !important;
     transition: all 0.25s ease !important;
-}
+}}
 
 /* Hover */
-.stTabs [data-baseweb="tab"]:hover {
-    color: #f0f9ff !important;
-    background: rgba(14,165,233,0.15) !important;
-}
+.stTabs [data-baseweb="tab"]:hover {{
+    color: {th['text']} !important;
+    background: {th['border_soft']} !important;
+}}
 
 /* Onglet actif */
-.stTabs [aria-selected="true"] {
-    color: #ffffff !important;
-    background: rgba(14,165,233,0.25) !important;
-    border-bottom: 3px solid #0ea5e9 !important;
+.stTabs [aria-selected="true"] {{
+    color: {th['teal'] if th['name']=='dark' else '#006b58'} !important;
+    background: {th['border_soft']} !important;
+    border-bottom: 3px solid {th['teal']} !important;
     font-weight: 950 !important;
     font-size: 16px !important;
-}
+}}
 
 /* Cacher le highlight Streamlit par défaut */
-.stTabs [data-baseweb="tab-highlight"] {
+.stTabs [data-baseweb="tab-highlight"] {{
     display: none !important;
-}
+}}
+
+/* ── Spécifique Sidebar : Boutons Accueil & Apropos ── */
+section[data-testid="stSidebar"] .stButton > button {{
+    background: {th['bg_tertiary']} !important;
+    color: {th['text']} !important;
+    border: 1px solid {th['border_soft']} !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+}}
+
+section[data-testid="stSidebar"] .stButton > button:hover {{
+    border-color: {th['teal']} !important;
+    background: {th['border_soft']} !important;
+    color: {th['teal'] if th['name']=='dark' else '#006b58'} !important;
+}}
 </style>
 """, unsafe_allow_html=True)
+
 
 tabs = st.tabs([
     T["tab_carte"], T["tab_kpis"], T["tab_predictions"],

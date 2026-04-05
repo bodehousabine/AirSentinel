@@ -137,7 +137,7 @@ button[data-testid="stBaseButton-secondary"]:hover {
     letter-spacing: -0.04em;
     font-family: 'Inter', sans-serif;
 }
-.brand-air { color: #f8fafc; }
+.brand-air { color: VAR_TEXT; }
 .brand-sentinel { color: #00d4b1; }
 
 /* Chatbox */
@@ -145,7 +145,7 @@ iframe[title="chatbox.render_chatbox"] {
     position: fixed !important; bottom: 20px !important; right: 20px !important; z-index: 1000000 !important;
 }
 </style>
-    """.replace("VAR_BG_URL", bg_url).replace("VAR_OVERLAY", overlay)
+    """.replace("VAR_BG_URL", bg_url).replace("VAR_OVERLAY", overlay).replace("VAR_TEXT", th['text']).replace("VAR_TEXT2", th['text2'])
     st.markdown(css_code, unsafe_allow_html=True)
 
     # 3. Logo + AirSentinel + CAMEROUN + séparateur + Slogan
@@ -163,7 +163,7 @@ iframe[title="chatbox.render_chatbox"] {
             <div style="width:7px;height:7px;border-radius:50%;background:#00d4b1;"></div>
             <div style="flex:1;height:1px;background:linear-gradient(to left,transparent,rgba(0,212,177,0.5));"></div>
         </div>
-        <div style="font-size:30px;font-weight:800;color:#f8fafc;font-family:'Inter',sans-serif;margin-bottom:30px;display:flex;align-items:center;justify-content:center;gap:15px;flex-wrap:wrap;">
+        <div style="font-size:30px;font-weight:800;color:{th['text']};font-family:'Inter',sans-serif;margin-bottom:30px;display:flex;align-items:center;justify-content:center;gap:15px;flex-wrap:wrap;">
             <span>Anticiper</span>
             <span style="color:#00d4b1;font-size:26px;">•</span>
             <span>Alerter</span>
@@ -181,7 +181,7 @@ iframe[title="chatbox.render_chatbox"] {
     # 5. Description et Footer
     st.markdown(f"""
     <div style="text-align:center; margin-top: 25px;">
-        <div style="font-size:16px;color:rgba(248,250,252,0.8);line-height:1.6;max-width:580px;margin:0 auto;">
+        <div style="font-size:16px;color:{th['text2']};line-height:1.6;max-width:580px;margin:0 auto;">
             {T["landing_desc"]}
         </div>
         <div style="margin-top:25px;font-size:11px;color:rgba(248,250,252,0.3);font-family:'DM Mono',monospace;letter-spacing:0.15em;">

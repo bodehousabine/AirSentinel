@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <title>About Us - HubSpot</title>
     <style>
         * {
@@ -241,8 +242,12 @@
         }
 
         .number-card-icon {
-            font-size: 4em;
             margin-bottom: 30px;
+        }
+
+        .number-card-icon i {
+            font-size: 3.5rem;
+            color: #00C9A7;
         }
 
         .number-card h3 {
@@ -403,15 +408,23 @@
 
         .testimonials-arrow {
             background: none;
-            border: none;
-            font-size: 1.5em;
+            border: 1.5px solid #333;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 1.1em;
             cursor: pointer;
             color: #333;
-            transition: color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
         }
 
         .testimonials-arrow:hover {
-            color: #ff5a1f;
+            background-color: #333;
+            color: #ffffff;
         }
 
         .testimonials-dots {
@@ -526,7 +539,7 @@
                 </ul>
             </div>
             <div class="story-image">
-                <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop"
+                <img src="https://www.conservation-nature.fr/wp-content/uploads/2020/04/shutterstock_1279254037.jpg"
                     alt="HubSpot Founders">
             </div>
         </div>
@@ -538,15 +551,21 @@
             <h2 class="numbers-title">AirSentinel By the Numbers</h2>
             <div class="numbers-grid">
                 <div class="number-card">
-                    <div class="number-card-icon">�️</div>
+                    <div class="number-card-icon">
+                        <i class="fa-solid fa-city"></i>
+                    </div>
                     <h3>40 Villes</h3>
                 </div>
                 <div class="number-card">
-                    <div class="number-card-icon">🗺️</div>
+                    <div class="number-card-icon">
+                        <i class="fa-solid fa-map"></i>
+                    </div>
                     <h3>10 Régions</h3>
                 </div>
                 <div class="number-card">
-                    <div class="number-card-icon">📊</div>
+                    <div class="number-card-icon">
+                        <i class="fa-solid fa-chart-bar"></i>
+                    </div>
                     <h3>50 760 Observations</h3>
                 </div>
             </div>
