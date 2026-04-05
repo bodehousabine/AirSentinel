@@ -56,7 +56,7 @@ def _kpi_card(irs, snt, snc, pm25, col_ctx_hex, niv_ctx, p90_ville, th, titre="R
         unsafe_allow_html=True
     )
 
-def _ctx_card(niv_ctx, col_ctx_hex, p90_ville, pm25, th):
+def _ctx_card(niv_ctx, col_ctx_hex, p90_ville, pm25, th, lang):
     """Carte contexte camerounais — niveau local basé sur p90 historique."""
     if not niv_ctx or not p90_ville:
         st.markdown(
@@ -64,7 +64,7 @@ def _ctx_card(niv_ctx, col_ctx_hex, p90_ville, pm25, th):
             f'border-radius:15px;padding:20px 15px;text-align:center;height:200px;'
             f'box-sizing:border-box;'
             f'display:flex;flex-direction:column;justify-content:center;">'
-            f'<div style="font-size:11px;color:{th["text3"]};">Contexte non disponible</div>'
+            f'<div style="font-size:11px;color:{th["text3"]};">{"Context unavailable" if lang=="en" else "Contexte non disponible"}</div>'
             f'</div>', unsafe_allow_html=True)
         return
     ratio     = pm25 / p90_ville
@@ -77,20 +77,20 @@ def _ctx_card(niv_ctx, col_ctx_hex, p90_ville, pm25, th):
         f'display:flex;flex-direction:column;justify-content:center;'
         f'box-shadow:0 10px 25px {col_ctx_hex}44;">'
         f'<div style="font-size:11px;color:{th["text"]};font-weight:950;'
-        f'text-transform:uppercase;margin-bottom:6px;">Contexte Cameroun</div>'
+        f'text-transform:uppercase;margin-bottom:6px;">{"Cameroon Context" if lang=="en" else "Contexte Cameroun"}</div>'
         f'<div style="font-size:28px;font-weight:950;color:{col_ctx_hex};line-height:1;">{niv_ctx}</div>'
         f'<div style="font-size:10px;color:{th["text3"]};margin-top:6px;">'
-        f'Seuil local p90 = {p90_ville:.1f} µg/m³</div>'
+        f'{"Local threshold p90=" if lang=="en" else "Seuil local p90 ="} {p90_ville:.1f} µg/m³</div>'
         f'<div style="margin-top:8px;">'
         f'<div style="background:{th["bg_tertiary"]};border-radius:4px;height:6px;overflow:hidden;">'
         f'<div style="background:{col_ctx_hex};height:100%;width:{barre_w}%;border-radius:4px;"></div>'
         f'</div>'
         f'<div style="font-size:10px;color:{col_ctx_hex};margin-top:4px;font-weight:700;">'
-        f'{pm25:.1f} / {p90_ville:.1f} µg/m³ · {ratio*100:.0f}% du seuil</div>'
+        f'{pm25:.1f} / {p90_ville:.1f} µg/m³ · {ratio*100:.0f}{"% of threshold" if lang=="en" else "% du seuil"}</div>'
         f'</div>'
         f'<div style="margin-top:6px;padding-top:6px;border-top:1px solid {col_ctx_hex}33;">'
         f'<div style="font-size:9px;color:{th["text3"]};">'
-        f'Réf. · Percentile 90 historique 2022-2026 · INS Cameroun (2019)</div>'
+        f'Réf. · {"Historical 90th percentile 2022-2026" if lang=="en" else "Percentile 90 historique 2022-2026"} · INS Cameroun (2019)</div>'
         f'</div>'
         f'</div>',
         unsafe_allow_html=True
@@ -136,8 +136,9 @@ def _generer_pdf(ville, date_rapport, pm25, irs, niveau, ratio_oms,
             "critique": colors.HexColor("#fef2f2"),
         }.get(snk, LIGHT)
 
-        niv_label = {"faible":"FAIBLE","modere":"MODERE","eleve":"ELEVE","critique":"CRITIQUE"}.get(snk, niveau)
-        niv_desc  = {"faible":"Air de qualite satisfaisante","modere":"Qualite moderee - Prudence",
+        niv_label = {"faible":"LOW","modere":"MODERATE","eleve":"HIGH","critique":"CRITICAL"}.get(snk, niveau) if lang=="en" else {"faible":"FAIBLE","modere":"MODERE","eleve":"ELEVE","critique":"CRITIQUE"}.get(snk, niveau)
+        niv_desc  = {"faible":"Satisfactory air quality","modere":"Moderate quality - Caution",
+                     "eleve":"High quality - Alert","critique":"CRITICAL HEALTH DANGER"}.get(snk, "") if lang=="en" else {"faible":"Air de qualite satisfaisante","modere":"Qualite moderee - Prudence",
                      "eleve":"Qualite elevee - Alerte","critique":"DANGER SANITAIRE CRITIQUE"}.get(snk, "")
 
         TN  = "Times-Roman"
@@ -160,16 +161,16 @@ def _generer_pdf(ville, date_rapport, pm25, irs, niveau, ratio_oms,
         c.drawString(1.2*cm, H - 1.65*cm, "AirSentinel Cameroun")
         c.setFillColor(SLATE)
         c.setFont(TN, 9)
-        c.drawString(1.2*cm, H - 2.25*cm, "Rapport Sanitaire Quotidien  ·  DPA Green Tech  ·  IndabaX Cameroon 2026")
+        c.drawString(1.2*cm, H - 2.25*cm, "Daily Health Report · DPA Green Tech · IndabaX Cameroon 2026" if lang=="en" else "Rapport Sanitaire Quotidien  ·  DPA Green Tech  ·  IndabaX Cameroon 2026")
         c.setStrokeColor(colors.HexColor("#1e3a5f"))
         c.setLineWidth(0.5)
         c.line(1.2*cm, H - 2.65*cm, W - M, H - 2.65*cm)
         c.setFillColor(colors.HexColor("#475569"))
         c.setFont(TN, 8)
-        c.drawString(1.2*cm, H - 3.1*cm, "Rapport de surveillance environnementale et sanitaire · Donnees Open-Meteo")
+        c.drawString(1.2*cm, H - 3.1*cm, "Environmental health surveillance report · Open-Meteo Data" if lang=="en" else "Rapport de surveillance environnementale et sanitaire · Donnees Open-Meteo")
         c.setFillColor(WHITE)
         c.setFont(TNB, 15)
-        c.drawRightString(W - M, H - 1.65*cm, f"Ville : {ville}")
+        c.drawRightString(W - M, H - 1.65*cm, f"City : {ville}" if lang=="en" else f"Ville : {ville}")
         c.setFillColor(TEAL)
         c.setFont(TNB, 10)
         c.drawRightString(W - M, H - 2.25*cm, f"Date : {date_rapport}")
@@ -238,10 +239,10 @@ def _generer_pdf(ville, date_rapport, pm25, irs, niveau, ratio_oms,
 
         # 4 KPIs
         kpis_data = [
-            ("PM2.5 MOYEN",   f"{pm25:.1f}",      "µg/m³",     niv_color),
-            ("INDICE IRS",    f"{irs:.3f}",        "ACP·INS2019",niv_color),
-            ("SEUIL OMS",     f"{ratio_oms:.1f}x", "depassement",niv_color),
-            ("POLLUANT DOM.", poll_dom[:8],         "dominant",  niv_color),
+            ("AVG PM2.5" if lang=="en" else "PM2.5 MOYEN",   f"{pm25:.1f}",      "µg/m³",     niv_color),
+            ("IRS INDEX" if lang=="en" else "INDICE IRS",    f"{irs:.3f}",        "ACP·INS2019",niv_color),
+            ("WHO LIMIT" if lang=="en" else "SEUIL OMS",     f"{ratio_oms:.1f}x", "exceeded" if lang=="en" else "depassement",niv_color),
+            ("MAIN POLLUT." if lang=="en" else "POLLUANT DOM.", poll_dom[:8],         "dominant",  niv_color),
         ]
         for i, (lbl, val, unit, bc) in enumerate(kpis_data):
             _kpi_box(M + BW + PAD + i*KW, KY, KW, KH, lbl, val, unit, bc, bc)
@@ -259,7 +260,7 @@ def _generer_pdf(ville, date_rapport, pm25, irs, niveau, ratio_oms,
         c.rect(CTX_X + 0.08*cm, KY + KH - 0.4*cm, KW - 0.16*cm, 0.2*cm, fill=1, stroke=0)
         c.setFillColor(WHITE)
         c.setFont(HVB, 6)
-        c.drawCentredString(CTX_X + KW/2, KY + KH - 0.25*cm, "CONTEXTE CMR")
+        c.drawCentredString(CTX_X + KW/2, KY + KH - 0.25*cm, "CMR CONTEXT" if lang=="en" else "CONTEXTE CMR")
         if niv_ctx and p90_ville:
             c.setFillColor(ctx_col)
             c.setFont(TNB, 11)
@@ -279,22 +280,21 @@ def _generer_pdf(ville, date_rapport, pm25, irs, niveau, ratio_oms,
         c.roundRect(M, S3T - S3H, IW, S3H, 10, fill=1, stroke=0)
         c.setFillColor(TEAL)
         c.setFont(TNB, 11)
-        c.drawCentredString(W/2, S3T - 0.42*cm, "PREDICTIONS PM2.5  ·  72 HEURES")
+        c.drawCentredString(W/2, S3T - 0.42*cm, "PM2.5 PREDICTIONS · 72 HOURS" if lang=="en" else "PREDICTIONS PM2.5  ·  72 HEURES")
         c.setFillColor(SLATE)
         c.setFont(TN, 7)
-        c.drawCentredString(W/2, S3T - 0.75*cm, "Modele Hybride RL+ARIMA  ·  MAE = 3.456  ·  R² = 0.893")
+        c.drawCentredString(W/2, S3T - 0.75*cm, "Hybrid Model RL+ARIMA · MAE = 3.456 · R² = 0.893" if lang=="en" else "Modele Hybride RL+ARIMA  ·  MAE = 3.456  ·  R² = 0.893")
         c.setStrokeColor(colors.HexColor("#334155"))
         c.setLineWidth(0.4)
         c.line(M + 0.5*cm, S3T - 0.95*cm, M + IW - 0.5*cm, S3T - 0.95*cm)
 
-        jours_lbl = ["Aujourd'hui", "Demain", "Apres-demain"]
+        jours_lbl = ["Today", "Tomorrow", "Day after tomorrow"] if lang=="en" else ["Aujourd'hui", "Demain", "Apres-demain"]
         jours_dt  = [ddate.today() + timedelta(days=i) for i in range(3)]
         CW = IW / 3
         for i, (lbl, dt, pred) in enumerate(zip(jours_lbl, jours_dt, preds)):
             pc  = (colors.HexColor("#10b981") if pred<=15 else colors.HexColor("#f59e0b")
                    if pred<=25 else colors.HexColor("#f97316") if pred<=37.5 else colors.HexColor("#ef4444"))
-            pniv_oms = ("FAIBLE" if pred<=15 else "MODERE" if pred<=25 else
-                        "ELEVE" if pred<=37.5 else "CRITIQUE")
+            pniv_oms = ("LOW" if pred<=15 else "MODERATE" if pred<=25 else "HIGH" if pred<=37.5 else "CRITICAL") if lang=="en" else ("FAIBLE" if pred<=15 else "MODERE" if pred<=25 else "ELEVE" if pred<=37.5 else "CRITIQUE")
             cx = M + i * CW + CW/2
 
             # Niveau contextuel pour cette prédiction
@@ -315,7 +315,7 @@ def _generer_pdf(ville, date_rapport, pm25, irs, niveau, ratio_oms,
             # Jour + date
             c.setFillColor(WHITE)
             c.setFont(TNB, 10)
-            c.drawCentredString(cx, S3T - 1.2*cm, lbl)
+            c.drawCentredString(cx, S3T - 1.2*cm, lbl.encode("latin-1", "replace").decode("latin-1"))
             c.setFillColor(SLATE)
             c.setFont(TN, 7.5)
             c.drawCentredString(cx, S3T - 1.6*cm, dt.strftime("%d / %m / %Y"))
@@ -328,7 +328,7 @@ def _generer_pdf(ville, date_rapport, pm25, irs, niveau, ratio_oms,
             # Niveau OMS
             c.setFillColor(pc)
             c.setFont(HVB, 8)
-            c.drawCentredString(cx, S3T - 2.8*cm, f"OMS : {pniv_oms}")
+            c.drawCentredString(cx, S3T - 2.8*cm, f"WHO: {pniv_oms}" if lang=="en" else f"OMS : {pniv_oms}")
 
             # Niveau contextuel
             if pniv_ctx:
@@ -383,9 +383,9 @@ def _generer_pdf(ville, date_rapport, pm25, irs, niveau, ratio_oms,
         c.setLineWidth(0.5)
         c.line(M, S5T - 0.48*cm, M + IW, S5T - 0.48*cm)
 
-        vuln = VULN_FR[snk]
-        pops = [("Enfants",vuln["enfants"]),("Enceintes",vuln["enceintes"]),
-                ("Ages",vuln["ages"]),("Asthma",vuln["asthma"]),("Agricult.",vuln["agricult"])]
+        vuln = VULN_EN[snk] if lang == "en" else VULN_FR[snk]
+        pops = [("Children" if lang=="en" else "Enfants",vuln["enfants"]),("Pregnant" if lang=="en" else "Enceintes",vuln["enceintes"]),
+                ("Seniors" if lang=="en" else "Ages",vuln["ages"]),("Asthma",vuln["asthma"]),("Agricult.",vuln["agricult"])]
         VCW = IW / 5
         VCH = S5H - 0.65*cm
         for i, (plbl, preco) in enumerate(pops):
@@ -514,8 +514,8 @@ def _vuln_section(snk, lang, th):
     svg_senior = f'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="{cc}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M14 15a2 2 0 0 0-4 0"/><path d="M2.5 13L5 7c.7-1.3 1.4-2 3-2"/><path d="M21.5 13L19 7c-.7-1.3-1.5-2-3-2"/></svg>'
     svg_asthma = f'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="{cc}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v9"/><path d="M8 11c-2.5-3-5.5-2.5-5.5 1.5 0 5 3.5 9.5 9.5 9.5V11"/><path d="M16 11c2.5-3 5.5-2.5 5.5 1.5 0 5-3.5 9.5-9.5 9.5V11"/></svg>'
     svg_agri   = f'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="{cc}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>'
-    pops = [(svg_child,"ENFANTS","enfants"),(svg_women,"FEMMES","enceintes"),
-            (svg_senior,"SÉNIORS","ages"),(svg_asthma,"ASTHME","asthma"),(svg_agri,"AGRICUL.","agricult")]
+    pops = [(svg_child,"CHILDREN" if lang=="en" else "ENFANTS","enfants"),(svg_women,"WOMEN" if lang=="en" else "FEMMES","enceintes"),
+            (svg_senior,"SENIORS" if lang=="en" else "SÉNIORS","ages"),(svg_asthma,"ASTHMA" if lang=="en" else "ASTHME","asthma"),(svg_agri,"AGRICULT." if lang=="en" else "AGRICUL.","agricult")]
     nom_fr = {"faible":"NIVEAU FAIBLE (VERT)","modere":"NIVEAU MODÉRÉ (JAUNE)","eleve":"NIVEAU ÉLEVÉ (ORANGE)","critique":"NIVEAU CRITIQUE (ROUGE)"}
     nom_en = {"faible":"LOW LEVEL (GREEN)","modere":"MODERATE LEVEL (YELLOW)","eleve":"HIGH LEVEL (ORANGE)","critique":"CRITICAL LEVEL (RED)"}
     niveau_lbl = nom_fr[snk] if lang == "fr" else nom_en[snk]
@@ -523,7 +523,7 @@ def _vuln_section(snk, lang, th):
         f'<div style="margin-top:15px;padding:15px;background:{th["bg_tertiary"]};'
         f'border:2px solid {cc}88;border-top:5px solid {cc};border-radius:15px;">'
         f'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">'
-        f'<div style="font-size:14px;font-weight:950;color:{th["text"]};text-transform:uppercase;letter-spacing:.15em;">TABLEAU D\'ACTION · POPULATIONS VULNÉRABLES</div>'
+        f'<div style="font-size:14px;font-weight:950;color:{th["text"]};text-transform:uppercase;letter-spacing:.15em;">' + ("ACTION BOARD · VULNERABLE POPULATIONS" if lang=="en" else "TABLEAU D'ACTION · POPULATIONS VULNÉRABLES") + '</div>'
         f'<div style="background:{cc}22;color:{cc};padding:4px 10px;border-radius:6px;font-weight:900;font-size:12px;">{niveau_lbl}</div>'
         f'</div>', unsafe_allow_html=True)
     cols = st.columns(len(pops))
@@ -542,10 +542,10 @@ def _vuln_section(snk, lang, th):
 def _rec_content(profil, profil_map, snk, tkey, snc, snt, ctx, th, T, scope_label):
     pk = profil_map.get(profil, "citizen")
     if pk == "health":
-        primary_action = T.get(f"bloc5_med_{tkey}", "Statut stable.")
+        primary_action = T.get(f"bloc5_med_{tkey}", "Stable status." if lang=="en" else "Statut stable.")
     elif pk == "mayor":
         acts = T.get(f"bloc5_mayor_{tkey}", ["Veille administrative active."])
-        primary_action = f"🚨 {acts[0]}" if len(acts) > 0 else "Veille active."
+        primary_action = f"🚨 {acts[0]}" if len(acts) > 0 else "Active watch." if lang=="en" else "Veille active."
     else:
         primary_action = T.get(f"bloc4_msg_{snk}_{pk}", T.get(f"bloc4_msg_{snk}_citizen", "—"))
     if len(primary_action) > 120:
@@ -624,6 +624,8 @@ def render(profil):
 
     # ── Niveau contextuel camerounais ─────────────────────────────────────────
     niv_ctx, col_ctx = niveau_contextuel(pm25_ville, ville_dec)
+    if lang == "en" and niv_ctx:
+        niv_ctx = niv_ctx.replace("MODÉRÉ", "MODERATE").replace("ÉLEVÉ", "HIGH").replace("PIC ANORMAL", "ABNORMAL PEAK")
     col_ctx_hex = {"green":th["green"],"amber":th["amber"],
                    "coral":th["coral"],"red":th["red"]}.get(col_ctx, th["text3"])
     p90_ville = _get_p90_ville(ville_dec)
@@ -679,7 +681,7 @@ def render(profil):
         c_p, c_c = st.columns(2, gap="small")
         with c_p:
             date_rapport = str(df["date"].max().date())
-            niveau_txt   = {"faible":"FAIBLE","modere":"MODÉRÉ","eleve":"ÉLEVÉ","critique":"CRITIQUE"}[snk]
+            niveau_txt   = {"faible":"LOW","modere":"MODERATE","eleve":"HIGH","critique":"CRITICAL"}[snk] if lang=="en" else {"faible":"FAIBLE","modere":"MODÉRÉ","eleve":"ÉLEVÉ","critique":"CRITIQUE"}[snk]
             pdf_bytes = _generer_pdf(
                 ville=ville_dec, date_rapport=date_rapport, pm25=pm25_ville,
                 irs=irs_ville, niveau=niveau_txt, ratio_oms=pm25_ville/15,
@@ -687,7 +689,7 @@ def render(profil):
                 niv_ctx=niv_ctx, p90_ville=p90_ville
             )
             if pdf_bytes:
-                st.download_button(label="📄 TÉLÉCHARGER PDF", data=pdf_bytes,
+                st.download_button(label="📄 DOWNLOAD PDF" if lang=="en" else "📄 TÉLÉCHARGER PDF", data=pdf_bytes,
                     file_name=f"airsentinel_{ville_dec}_{date_rapport}.pdf",
                     mime="application/pdf", key="v5_btn_pdf_top")
         with c_c:
@@ -695,32 +697,32 @@ def render(profil):
                         'niveau_sanitaire','polluant_dominant','temperature_2m_max',
                         'wind_speed_10m_max','precipitation_sum','dust_moyen','us_aqi_moyen']
             csv_data = (df_ville[[c for c in cols_csv if c in df_ville.columns]].copy())
-            st.download_button(label="📥 TÉLÉCHARGER CSV",
+            st.download_button(label="📥 DOWNLOAD CSV" if lang=="en" else "📥 TÉLÉCHARGER CSV",
                 data=csv_data.to_csv(index=False).encode('utf-8'),
                 file_name=f"airsentinel_{ville_dec}_{date_rapport}.csv",
                 mime="text/csv", key="v5_btn_csv_top")
 
     # ── Onglets ───────────────────────────────────────────────────────────────
-    sub1, sub2 = st.tabs(["**DONNÉES RÉELLES**", "**SIMULATEUR IRS**"])
+    sub1, sub2 = st.tabs(["**REAL DATA**", "**IRS SIMULATOR**"] if lang == "en" else ["**DONNÉES RÉELLES**", "**SIMULATEUR IRS**"])
 
     with sub1:
         m_col1, m_col2, m_col3, m_col4 = st.columns([0.9, 1.3, 1.0, 1.3])
         with m_col1:
             _kpi_card(irs_ville, snt, snc, pm25_ville,
                       col_ctx_hex, niv_ctx, p90_ville, th,
-                      titre="Risque Sanitaire")
+                      titre="Health Risk" if lang=="en" else "Risque Sanitaire")
         with m_col2:
             st.plotly_chart(_render_exceptional_radial_gauge(irs_ville, ctx, th),
                 use_container_width=True, config={'displayModeBar':False,'responsive':True},
                 key="gauge_v5_real_trio")
         with m_col3:
-            _ctx_card(niv_ctx, col_ctx_hex, p90_ville, pm25_ville, th)
+            _ctx_card(niv_ctx, col_ctx_hex, p90_ville, pm25_ville, th, lang)
         with m_col4:
             _rec_content(profil, profil_map, snk, tkey, snc, snt, ctx, th, T, scope_label)
         _vuln_section(snk, lang, th)
 
     with sub2:
-        irs_v = st.slider("MODIFICATION SIMULÉE :", 0.0, 1.0,
+        irs_v = st.slider("SIMULATED MODIFICATION:" if lang=="en" else "MODIFICATION SIMULÉE :", 0.0, 1.0,
                           float(irs_ville), 0.001, key="v5_sim_final_trio")
         snc_s, snt_s, snk_s = irs_level(irs_v, ctx["p50"], ctx["p75"], ctx["p90"], T, th)
         tkey_s = _SNK_TO_KEY[snk_s]
@@ -728,6 +730,8 @@ def render(profil):
         # Niveau contextuel simulé basé sur IRS simulé → recalculer pm25 approx
         pm25_sim = irs_v * 80  # approximation linéaire pour le simulateur
         niv_ctx_s, col_ctx_s = niveau_contextuel(pm25_sim, ville_dec)
+        if lang == "en" and niv_ctx_s:
+            niv_ctx_s = niv_ctx_s.replace("MODÉRÉ", "MODERATE").replace("ÉLEVÉ", "HIGH").replace("PIC ANORMAL", "ABNORMAL PEAK")
         col_ctx_hex_s = {"green":th["green"],"amber":th["amber"],
                          "coral":th["coral"],"red":th["red"]}.get(col_ctx_s, th["text3"])
 
@@ -735,16 +739,16 @@ def render(profil):
         with m_col1_s:
             _kpi_card(irs_v, snt_s, snc_s, pm25_sim,
                       col_ctx_hex_s, niv_ctx_s, p90_ville, th,
-                      titre="Risque Simulé")
+                      titre="Simulated Risk" if lang=="en" else "Risque Simulé")
         with m_col2_s:
             st.plotly_chart(_render_exceptional_radial_gauge(irs_v, ctx, th),
                 use_container_width=True, config={'displayModeBar':False,'responsive':True},
                 key="gauge_v5_sim_trio")
         with m_col3_s:
-            _ctx_card(niv_ctx_s, col_ctx_hex_s, p90_ville, pm25_sim, th)
+            _ctx_card(niv_ctx_s, col_ctx_hex_s, p90_ville, pm25_sim, th, lang)
         with m_col4_s:
             _rec_content(profil, profil_map, snk_s, tkey_s, snc_s, snt_s, ctx, th, T, scope_label)
         _vuln_section(snk_s, lang, th)
 
     st.markdown("<div style='margin-top:40px;'></div>", unsafe_allow_html=True)
-    sources_bar(f"📊 ANALYSE DÉCISIONNELLE · INDABAX 2026", th)
+    sources_bar(f"📊 DECISIONAL ANALYSIS · INDABAX 2026" if lang=="en" else f"📊 ANALYSE DÉCISIONNELLE · INDABAX 2026", th)

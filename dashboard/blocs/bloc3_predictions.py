@@ -322,7 +322,7 @@ def render(profil):
                     (k1, f"{perf['r2']:.4f}",         "R²",              "Variance expliquée", th["green"],  "🎯"),
                     (k2, f"{perf['mae']:.3f}",         "MAE (µg/m³)",     "Erreur moyenne",     th["amber"],  "📏"),
                     (k3, f"{perf['err_max']:.1f}",     "Erreur max",      "µg/m³",              th["coral"],  "⚠️"),
-                    (k4, f"{100-perf['pct_10']:.1f}%", "Précision",       "Erreur < 10 µg/m³",  th["blue"],   "✅"),
+                    (k4, f"{100-perf['pct_10']:.1f}%",  "Accuracy" if lang=="en" else "Précision" ,       "Erreur < 10 µg/m³",  th["blue"],   "✅"),
                 ]
                 for col, val, lbl, sub, color, emoji in kpi_data:
                     with col:
@@ -435,20 +435,20 @@ def render(profil):
             )
             c1, c2 = st.columns(2)
             with c1:
-                temp = st.slider("🌡️ Température (°C)", 20, 45,
+                temp = st.slider("🌡️ Temperature (°C)" if lang=="en" else "Température (°C)", 20, 45,
                                  int(min(45, max(20, _m("temperature_2m_max", 30)))), key="s_t")
-                vent = st.slider("💨 Vent (km/h)", 0, 60,
+                vent = st.slider("💨 Wind (km/h)" if lang=="en" else "💨 Vent (km/h)", 0, 60,
                                  int(min(60, max(0, _m("wind_speed_10m_max", 15)))), key="s_v")
             with c2:
                 dust = st.slider("🏜️ Dust (µg/m³)", 0, 300,
                                  int(min(300, max(0, _m("dust_moyen", 80)))), key="s_d")
-                precip = st.slider("🌧️ Précipitations (mm)", 0, 50,
+                precip = st.slider("🌧️ Precipitation (mm)" if lang=="en" else "🌧️ Précipitations (mm)", 0, 50,
                                    int(min(50, max(0, _m("precipitation_sum", 2)))), key="s_p")
             st.markdown("<div style='margin-top:12px;'></div>", unsafe_allow_html=True)
             st.markdown(
                 f'<div style="font-size:11px;font-weight:700;color:{th["text3"]};'
                 f'text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;">'
-                f'⚡ Épisodes climatiques</div>',
+                f'⚡ Climate episodes" if lang=="en" else "⚡ Épisodes climatiques</div>',
                 unsafe_allow_html=True
             )
             c3, c4 = st.columns(2)

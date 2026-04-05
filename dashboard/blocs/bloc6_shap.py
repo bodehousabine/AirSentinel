@@ -64,6 +64,7 @@ def get_zones_meta(lang):
             'Zone équatoriale': {
                 'name':    'Zone équatoriale',
                 'regions': ['Centre', 'Est', 'Sud', 'Littoral', 'Sud-Ouest', 'Ouest', 'Nord-Ouest'],
+                'regions_lbl': ['Centre', 'East', 'South', 'Littoral', 'South-West', 'West', 'North-West'] if lang=='en' else ['Centre', 'Est', 'Sud', 'Littoral', 'Sud-Ouest', 'Ouest', 'Nord-Ouest'],
                 'color':   '#10b981',
                 'icon':    'leaf',
                 'desc':    'Forêt équatoriale · Feux de brousse · 2 saisons des pluies',
@@ -73,6 +74,7 @@ def get_zones_meta(lang):
             'Zone soudanienne': {
                 'name':    'Zone soudanienne',
                 'regions': ['Adamaoua', 'Nord'],
+                'regions_lbl': ['Adamaoua', 'North'] if lang=='en' else ['Adamaoua', 'Nord'],
                 'color':   '#f59e0b',
                 'icon':    'wheat',
                 'desc':    'Savane soudanienne · 5-6 mois saison sèche · Transition',
@@ -82,6 +84,7 @@ def get_zones_meta(lang):
             'Zone soudano-sahélienne': {
                 'name':    'Zone soudano-sahélienne',
                 'regions': ['Extreme-Nord'],
+                'regions_lbl': ['Far-North'] if lang=='en' else ['Extreme-Nord'],
                 'color':   '#ef4444',
                 'icon':    'sun',
                 'desc':    'Steppe sahélienne · 7-9 mois saison sèche · Harmattan',
@@ -94,6 +97,7 @@ def get_zones_meta(lang):
             'Zone équatoriale': {
                 'name':    'Equatorial Zone',
                 'regions': ['Centre', 'Est', 'Sud', 'Littoral', 'Sud-Ouest', 'Ouest', 'Nord-Ouest'],
+                'regions_lbl': ['Centre', 'East', 'South', 'Littoral', 'South-West', 'West', 'North-West'] if lang=='en' else ['Centre', 'Est', 'Sud', 'Littoral', 'Sud-Ouest', 'Ouest', 'Nord-Ouest'],
                 'color':   '#10b981',
                 'icon':    'leaf',
                 'desc':    'Equatorial forest · Bushfires · 2 rainy seasons',
@@ -103,6 +107,7 @@ def get_zones_meta(lang):
             'Zone soudanienne': {
                 'name':    'Sudanian Zone',
                 'regions': ['Adamaoua', 'Nord'],
+                'regions_lbl': ['Adamaoua', 'North'] if lang=='en' else ['Adamaoua', 'Nord'],
                 'color':   '#f59e0b',
                 'icon':    'wheat',
                 'desc':    'Sudanian savanna · 5-6 months dry season · Transition',
@@ -112,6 +117,7 @@ def get_zones_meta(lang):
             'Zone soudano-sahélienne': {
                 'name':    'Sudano-Sahelian Zone',
                 'regions': ['Extreme-Nord'],
+                'regions_lbl': ['Far-North'] if lang=='en' else ['Extreme-Nord'],
                 'color':   '#ef4444',
                 'icon':    'sun',
                 'desc':    'Sahelian steppe · 7-9 months dry season · Harmattan',
@@ -295,9 +301,9 @@ def _rgb(hex_color):
 
 
 @st.cache_data(ttl=3600)
-def _calc_zones_stats(_df_hash, df):
+def _calc_zones_stats(_df_hash, df, lang):
     zones_stats = {}
-    for nom_zone, meta in get_zones_meta('fr').items():
+    for nom_zone, meta in get_zones_meta(lang).items():
         df_z = df[df['region'].isin(meta['regions'])]
         if len(df_z) == 0:
             continue
@@ -330,7 +336,7 @@ def render(profil):
         empty_state(T, th)
         return
 
-    ZONES = _calc_zones_stats(str(len(df)) + '_v3', df)
+    ZONES = _calc_zones_stats(str(len(df)) + '_v3', df, lang)
     if not ZONES:
         empty_state(T, th)
         return
@@ -378,14 +384,14 @@ def render(profil):
         f'<div>'
         f'<div style="font-size:17px;font-weight:700;color:{meta_sel["color"]};'
         f'display:flex;align-items:center;gap:8px;">'
-        f'{_icon(meta_sel["icon"], 20, meta_sel["color"])} {zone_sel}</div>'
+        f'{_icon(meta_sel["icon"], 20, meta_sel["color"])} {meta_sel.get("name", zone_sel)}</div>'
         f'<div style="font-size:13px;color:{txt_sub};margin-top:8px;">{meta_sel["desc"]}</div>'
         f'<div style="font-size:13px;color:{txt_main};margin-top:8px;">'
-        f'Facteur dominant : <strong style="color:{meta_sel["color"]};">{meta_sel["facteur"]}</strong>'
+        f'{"Dominant factor:" if lang=="en" else "Facteur dominant :"} <strong style="color:{meta_sel["color"]};">{meta_sel["facteur"]}</strong>'
         f'</div></div>'
         f'<div style="text-align:right;font-size:12px;color:{txt_dim};'
         f'font-family:DM Mono,monospace;line-height:2.0;">'
-        f'{"<br>".join(meta_sel["regions"])}</div>'
+        f'{"<br>".join(meta_sel.get("regions_lbl", meta_sel["regions"]))}</div>'
         f'</div></div>',
         unsafe_allow_html=True
     )
@@ -395,17 +401,17 @@ def render(profil):
     # ══════════════════════════════════════════════════════════════════════════
     k1, k2, k3, k4, k5, k6 = st.columns(6)
     kpis = [
-        (k1, 'wind',        f"{meta_sel['pm25']:.1f}",     'PM2.5 moy.',  'µg/m³',
+        (k1, 'wind',        f"{meta_sel['pm25']:.1f}",     'Avg PM2.5' if lang=='en' else 'PM2.5 moy.',  'µg/m³',
          th['red'] if meta_sel['pm25'] > 25 else th['amber'] if meta_sel['pm25'] > 15 else th['green']),
-        (k2, 'cloud',       f"{meta_sel['dust']:.0f}",     'Dust moy.',   'µg/m³',
+        (k2, 'cloud',       f"{meta_sel['dust']:.0f}",     'Avg Dust' if lang=='en' else 'Dust moy.',   'µg/m³',
          th['red'] if meta_sel['dust'] > 50 else th['amber'] if meta_sel['dust'] > 20 else th['green']),
-        (k3, 'thermometer', f"{meta_sel['temp']:.1f}°",    'Temp. max',   'moy.',
+        (k3, 'thermometer', f"{meta_sel['temp']:.1f}°",    'Max Temp' if lang=='en' else 'Temp. max',   'avg' if lang=='en' else 'moy.',
          th['coral'] if meta_sel['temp'] > 32 else th['amber']),
-        (k4, 'droplets',    f"{meta_sel['precip']:.1f}",   'Précip.',     'mm/jour',
+        (k4, 'droplets',    f"{meta_sel['precip']:.1f}",   'Precip.' if lang=='en' else 'Précip.',     'mm/day' if lang=='en' else 'mm/jour',
          th['blue'] if meta_sel['precip'] > 4 else th['amber']),
-        (k5, 'wind',        f"{meta_sel['harmattan']:.1f}%",'Harmattan',  'fréq.',
+        (k5, 'wind',        f"{meta_sel['harmattan']:.1f}%",'Harmattan',  'freq.' if lang=='en' else 'fréq.',
          th['red'] if meta_sel['harmattan'] > 5 else th['green']),
-        (k6, 'flame',       f"{meta_sel['feux']:.1f}%",    'Feux',        'fréq.',
+        (k6, 'flame',       f"{meta_sel['feux']:.1f}%",    'Fires' if lang=='en' else 'Feux',        'freq.' if lang=='en' else 'fréq.',
          th['red'] if meta_sel['feux'] > 2 else th['green']),
     ]
     for col_ui, ico, val, label, unit, color in kpis:
@@ -445,7 +451,7 @@ def render(profil):
 
             f'<div style="font-size:15px;font-weight:700;color:{meta_sel["color"]};'
             f'margin-bottom:16px;display:flex;align-items:center;gap:8px;">'
-            f'{_icon(meta_sel["icon"], 18, meta_sel["color"])} Insight — {zone_sel}</div>'
+            f'{_icon(meta_sel["icon"], 18, meta_sel["color"])} Insight — {meta_sel.get("name", zone_sel)}</div>'
 
             f'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;'
             f'padding:10px;background:rgba({rv},{gv},{bv},0.12);border-radius:8px;">'
@@ -557,7 +563,7 @@ def render(profil):
         rv2, gv2, bv2 = _rgb(meta['color'])
         is_sel = nom_zone == zone_sel
         fig_bars.add_trace(go.Bar(
-            name=nom_zone.replace('Zone ', ''),
+            name=meta.get('name', nom_zone).replace('Zone ', '').replace(' Zone', ''),
             x=list(indicateurs.keys()),
             y=[meta[k] for k in indicateurs.values()],
             marker=dict(
@@ -569,7 +575,7 @@ def render(profil):
             textposition='outside',
             textfont=dict(size=13 if is_sel else 11,
                           color=meta['color'] if is_sel else f'rgba({rv2},{gv2},{bv2},0.85)'),
-            hovertemplate=f"<b>{nom_zone}</b><br>%{{x}} : %{{y:.1f}}<extra></extra>",
+            hovertemplate=f"<b>{meta.get('name', nom_zone)}</b><br>%{{x}} : %{{y:.1f}}<extra></extra>",
         ))
 
     fig_bars.add_shape(
