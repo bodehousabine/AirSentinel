@@ -1,6 +1,7 @@
 import streamlit as st
 import plotly.graph_objects as go
 from utils import get_context, banner, img_card, kpi_box, sources_bar, empty_state, POLLUANTS, risk_color
+import joblib, os
 from assets import IMAGES
 
 def render(profil):
@@ -96,6 +97,23 @@ def render(profil):
         empty_state(T, th)
         return
 
+    # ── Seuil contextuel camerounais pour les villes filtrées ─────────────────
+    def _load_seuils_ctx_b2():
+        base = os.path.dirname(os.path.abspath(__file__))
+        for c in [os.path.join(base, '..', 'models'), os.path.join(base, '..', '..', 'models')]:
+            p = os.path.join(c, 'seuils_contextuels.pkl')
+            if os.path.exists(p):
+                return joblib.load(p)
+        return None
+
+    _sc = _load_seuils_ctx_b2()
+    # Calculer la moyenne des seuils p90 des villes filtrées
+    seuil_ctx_local = None
+    if _sc:
+        p90s = [_sc['par_ville'][v] for v in _sel_villes_effective if v in _sc['par_ville']]
+        if p90s:
+            seuil_ctx_local = round(sum(p90s) / len(p90s), 1)
+
     # ── Calculs KPI locaux ─────────────────────────────────────────────────────
     pm25_moy = float(df_local["pm2_5_moyen"].mean())
     irs_moy  = float(df_local["IRS"].mean()) if "IRS" in df_local.columns else 0.0
@@ -169,6 +187,12 @@ def render(profil):
             fillcolor=f"rgba(14,165,233,0.07)"))
         fig1.add_hline(y=15.0, line=dict(color=th["red"],width=1,dash="dash"),
             annotation_text=T["who_threshold"], annotation_font_color=th["red"], annotation_font_size=10)
+        if seuil_ctx_local:
+            fig1.add_hline(y=seuil_ctx_local,
+                line=dict(color=th["teal"], width=1.5, dash="dot"),
+                annotation_text=f"Contexte CMR · {seuil_ctx_local:.1f} µg/m³",
+                annotation_font_color=th["teal"], annotation_font_size=10,
+                annotation_position="top right")
         
         scope_lbl = ("National" if lang == "fr" else "National") if is_all_regions and (toutes_villes in sel_villes or len(sel_villes)==0) else ("Filtré" if lang == "fr" else "Filtered")
         
@@ -196,6 +220,12 @@ def render(profil):
             fill="tozeroy", fillcolor="rgba(14,165,233,0.07)"))
         fig_s.add_hline(y=15, line=dict(color=th["red"], width=1, dash="dash"),
             annotation_text="OMS", annotation_font_color=th["red"], annotation_font_size=9)
+        if seuil_ctx_local:
+            fig_s.add_hline(y=seuil_ctx_local,
+                line=dict(color=th["teal"], width=1.5, dash="dot"),
+                annotation_text=f"CMR p90 · {seuil_ctx_local:.1f}",
+                annotation_font_color=th["teal"], annotation_font_size=9,
+                annotation_position="top right")
         fig_s.update_layout(**PL, height=280, showlegend=False,
             title=dict(text=lbl_s, font=dict(color=th["text"], size=14, weight="bold")))
         fig_s.update_xaxes(**GRID)
