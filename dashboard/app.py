@@ -78,6 +78,34 @@ with st.sidebar:
 
     st.markdown(f"<hr style='border-color:{th['border_soft']};margin:10px 0;'>", unsafe_allow_html=True)
 
+    # ── Paramètres (Thème & Langue) ──────────────────────────────────────────
+    st.markdown(
+        f"<div style='font-size:10px;text-transform:uppercase;letter-spacing:.1em;"
+        f"color:{th['text3']};margin-bottom:8px;'>{T['sidebar_theme_title']} & {T['sidebar_lang_title']}</div>",
+        unsafe_allow_html=True
+    )
+    
+    col_th, col_lang = st.columns(2)
+    th_labels = [T["sidebar_theme_dark"], T["sidebar_theme_light"]]
+    th_vals   = ["dark", "light"]
+    def update_th_sb():
+        st.session_state["theme_name"] = th_vals[th_labels.index(st.session_state.sb_th_sel)]
+    with col_th:
+        st.selectbox("T", th_labels, index=th_vals.index(st.session_state["theme_name"]), 
+                     key="sb_th_sel", on_change=update_th_sb, label_visibility="collapsed")
+
+    l_labels = ["fr Français", "en English"]
+    l_vals   = ["fr", "en"]
+    def update_lang_sb():
+        st.session_state["lang"] = l_vals[l_labels.index(st.session_state.sb_lang_sel)]
+        if "tab_radio" in st.session_state:
+            del st.session_state["tab_radio"]
+    with col_lang:
+        st.selectbox("L", l_labels, index=l_vals.index(st.session_state["lang"]), 
+                     key="sb_lang_sel", on_change=update_lang_sb, label_visibility="collapsed")
+
+    st.markdown(f"<hr style='border-color:{th['border_soft']};margin:12px 0;'>", unsafe_allow_html=True)
+
     # ── Profil ────────────────────────────────────────────────────────────────
     st.markdown(
         f"<div style='font-size:10px;text-transform:uppercase;letter-spacing:.1em;"
@@ -106,29 +134,6 @@ with st.sidebar:
         key="annee_sel",
         label_visibility="collapsed"
     )
-
-    st.markdown(f"<hr style='border-color:{th['border_soft']};margin:12px 0;'>", unsafe_allow_html=True)
-
-    # ── Paramètres (Thème & Langue) ──────────────────────────────────────────
-    st.markdown(
-        f"<div style='font-size:10px;text-transform:uppercase;letter-spacing:.1em;"
-        f"color:{th['text3']};margin-bottom:8px;'>{T['sidebar_theme_title']} & {T['sidebar_lang_title']}</div>",
-        unsafe_allow_html=True
-    )
-    
-    th_labels = [T["sidebar_theme_dark"], T["sidebar_theme_light"]]
-    th_vals   = ["dark", "light"]
-    def update_th_sb():
-        st.session_state["theme_name"] = th_vals[th_labels.index(st.session_state.sb_th_sel)]
-    st.selectbox("T", th_labels, index=th_vals.index(st.session_state["theme_name"]), 
-                 key="sb_th_sel", on_change=update_th_sb, label_visibility="collapsed")
-
-    l_labels = ["fr Français", "us English"]
-    l_vals   = ["fr", "en"]
-    def update_lang_sb():
-        st.session_state["lang"] = l_vals[l_labels.index(st.session_state.sb_lang_sel)]
-    st.selectbox("L", l_labels, index=l_vals.index(st.session_state["lang"]), 
-                 key="sb_lang_sel", on_change=update_lang_sb, label_visibility="collapsed")
 
     st.markdown("<div style='margin-top:10px;'></div>", unsafe_allow_html=True)
     about_label = "ℹ️ À Propos" if st.session_state["lang"] == "fr" else "ℹ️ About"
@@ -174,30 +179,31 @@ st.markdown("""
 /* Chaque onglet */
 .stTabs [data-baseweb="tab"] {
     font-family: 'Inter', 'DM Sans', sans-serif !important;
-    font-size: 13.5px !important;
-    font-weight: 900 !important;
+    font-size: 15px !important;
+    font-weight: 950 !important;
     letter-spacing: 0.12em !important;
     text-transform: uppercase !important;
     color: #e2e8f0 !important; /* Texte plus brillant par defaut */
     background: transparent !important;
     border: none !important;
     border-radius: 6px 6px 0 0 !important;
-    padding: 10px 20px !important;
+    padding: 12px 22px !important;
     transition: all 0.25s ease !important;
 }
 
 /* Hover */
 .stTabs [data-baseweb="tab"]:hover {
-    color: #e2e8f0 !important;
-    background: rgba(14,165,233,0.10) !important;
+    color: #f0f9ff !important;
+    background: rgba(14,165,233,0.15) !important;
 }
 
 /* Onglet actif */
 .stTabs [aria-selected="true"] {
-    color: #f0f9ff !important;
-    background: rgba(14,165,233,0.15) !important;
-    border-bottom: 2px solid #0ea5e9 !important;
-    font-weight: 900 !important;
+    color: #ffffff !important;
+    background: rgba(14,165,233,0.25) !important;
+    border-bottom: 3px solid #0ea5e9 !important;
+    font-weight: 950 !important;
+    font-size: 16px !important;
 }
 
 /* Cacher le highlight Streamlit par défaut */
@@ -211,6 +217,31 @@ tabs = st.tabs([
     T["tab_carte"], T["tab_kpis"], T["tab_predictions"],
     T["tab_alertes"], T["tab_decision"], T["tab_contexte"]
 ])
+
+# Capture the currently active tab from localStorage if it exists, and click it
+# We use standard JS to detect clicks on tabs and save their index.
+import time
+js_restore_tab = f"""
+<script>
+    // {time.time()} 
+    const tabs = window.parent.document.querySelectorAll('.stTabs [data-baseweb="tab"]');
+    if (tabs.length > 0) {{
+        tabs.forEach((tab, index) => {{
+            tab.addEventListener('click', () => {{
+                window.parent.sessionStorage.setItem('air_active_tab', index);
+            }});
+        }});
+        const savedTab = window.parent.sessionStorage.getItem('air_active_tab');
+        if (savedTab !== null && tabs[savedTab]) {{
+            if (tabs[savedTab].getAttribute('aria-selected') !== 'true') {{
+                tabs[savedTab].click();
+            }}
+        }}
+    }}
+</script>
+"""
+import streamlit.components.v1 as components
+components.html(js_restore_tab, height=0, width=0)
 
 with tabs[0]: bloc1(profil)
 with tabs[1]: bloc2(profil)

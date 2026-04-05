@@ -150,12 +150,14 @@ def render(profil):
     if mode_today:
         # ── Données prédites pour aujourd'hui ─────────────────────────────
         date_max_str = str(df["date"].max().date())
-        with st.spinner("🔮 Calcul des prédictions pour aujourd'hui..."):
+        msg = "🔮 Calcul des prédictions pour aujourd'hui..." if lang == "fr" else "🔮 Calculating predictions for today..."
+        with st.spinner(msg):
             df_pred = _predire_toutes_villes(date_max_str, df)
         if df_pred is not None and len(df_pred) > 0:
             df_carte      = df_pred.copy()
-            periode_label = f"📅 {date.today().strftime('%d %b %Y')} · Prédictions"
-            source_label  = "Modèle Hybride RL+ARIMA"
+            lbl = "Prédictions" if lang == "fr" else "Predictions"
+            periode_label = f"📅 {date.today().strftime('%d %b %Y')} · {lbl}"
+            source_label  = "Modèle Hybride RL+ARIMA" if lang == "fr" else "Hybrid RL+ARIMA Model"
         else:
             date_max      = df["date"].max()
             df_carte      = df[df["date"] == date_max].copy()
@@ -178,7 +180,7 @@ def render(profil):
     if region_sel:  # liste non vide = filtre actif
         df_carte   = df_carte[df_carte["region"].isin(region_sel)].copy()
         periode_label += f" · {', '.join(region_sel)}"
-        all_reg_label  = "Toutes les régions"  # garder pour le zoom
+        all_reg_label  = "Toutes les régions" if lang == "fr" else "All regions"  # garder pour le zoom
     else:
         region_sel = []  # aucune sélection = toutes les régions
 
@@ -343,7 +345,7 @@ def render(profil):
     st.markdown("<hr style='border-color:rgba(99,160,255,0.06);margin:8px 0 2px;'>", unsafe_allow_html=True)
 
     # ══ ANALYSES ENRICHIES — toujours basées sur données historiques réelles ══
-    titre_analyses = "Analyses détaillées · " + periode_label
+    titre_analyses = ("Analyses détaillées · " if lang == "fr" else "Detailed analyses · ") + periode_label
     st.markdown(f"""
     <div style="font-size:16px;font-weight:600;color:{th['text']};margin-top:-10px;margin-bottom:16px;">
         📊 {titre_analyses}

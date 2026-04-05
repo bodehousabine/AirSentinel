@@ -58,116 +58,236 @@ def _icon(name, size=16, color="currentColor"):
     return svg.format(s=size, c=color)
 
 # ── Zones INS Cameroun (2019) ─────────────────────────────────────────────────
-ZONES_META = {
-    'Zone équatoriale': {
-        'regions': ['Centre', 'Est', 'Sud', 'Littoral', 'Sud-Ouest', 'Ouest', 'Nord-Ouest'],
-        'color':   '#10b981',
-        'icon':    'leaf',
-        'desc':    'Forêt équatoriale · Feux de brousse · 2 saisons des pluies',
-        'facteur': 'Feux de brousse en saison sèche (jan-fév)',
-        'ref':     'Gordon et al. (2023) · Barker et al. (2020)',
-    },
-    'Zone soudanienne': {
-        'regions': ['Adamaoua', 'Nord'],
-        'color':   '#f59e0b',
-        'icon':    'wheat',
-        'desc':    'Savane soudanienne · 5-6 mois saison sèche · Transition',
-        'facteur': 'Dust sahélien + inversions thermiques nocturnes',
-        'ref':     'INS Cameroun (2019) · Annuaire Statistique',
-    },
-    'Zone soudano-sahélienne': {
-        'regions': ['Extreme-Nord'],
-        'color':   '#ef4444',
-        'icon':    'sun',
-        'desc':    'Steppe sahélienne · 7-9 mois saison sèche · Harmattan',
-        'facteur': 'Poussière saharienne (dust dominant)',
-        'ref':     'Schepanski et al. (2007) · Knippertz et al. (2008)',
-    },
-}
+def get_zones_meta(lang):
+    if lang == "fr":
+        return {
+            'Zone équatoriale': {
+                'name':    'Zone équatoriale',
+                'regions': ['Centre', 'Est', 'Sud', 'Littoral', 'Sud-Ouest', 'Ouest', 'Nord-Ouest'],
+                'color':   '#10b981',
+                'icon':    'leaf',
+                'desc':    'Forêt équatoriale · Feux de brousse · 2 saisons des pluies',
+                'facteur': 'Feux de brousse en saison sèche (jan-fév)',
+                'ref':     'Gordon et al. (2023) · Barker et al. (2020)',
+            },
+            'Zone soudanienne': {
+                'name':    'Zone soudanienne',
+                'regions': ['Adamaoua', 'Nord'],
+                'color':   '#f59e0b',
+                'icon':    'wheat',
+                'desc':    'Savane soudanienne · 5-6 mois saison sèche · Transition',
+                'facteur': 'Dust sahélien + inversions thermiques nocturnes',
+                'ref':     'INS Cameroun (2019) · Annuaire Statistique',
+            },
+            'Zone soudano-sahélienne': {
+                'name':    'Zone soudano-sahélienne',
+                'regions': ['Extreme-Nord'],
+                'color':   '#ef4444',
+                'icon':    'sun',
+                'desc':    'Steppe sahélienne · 7-9 mois saison sèche · Harmattan',
+                'facteur': 'Poussière saharienne (dust dominant)',
+                'ref':     'Schepanski et al. (2007) · Knippertz et al. (2008)',
+            },
+        }
+    else:
+        return {
+            'Zone équatoriale': {
+                'name':    'Equatorial Zone',
+                'regions': ['Centre', 'Est', 'Sud', 'Littoral', 'Sud-Ouest', 'Ouest', 'Nord-Ouest'],
+                'color':   '#10b981',
+                'icon':    'leaf',
+                'desc':    'Equatorial forest · Bushfires · 2 rainy seasons',
+                'facteur': 'Bushfires in dry season (Jan-Feb)',
+                'ref':     'Gordon et al. (2023) · Barker et al. (2020)',
+            },
+            'Zone soudanienne': {
+                'name':    'Sudanian Zone',
+                'regions': ['Adamaoua', 'Nord'],
+                'color':   '#f59e0b',
+                'icon':    'wheat',
+                'desc':    'Sudanian savanna · 5-6 months dry season · Transition',
+                'facteur': 'Sahelian dust + nocturnal thermal inversions',
+                'ref':     'INS Cameroon (2019) · Statistical Yearbook',
+            },
+            'Zone soudano-sahélienne': {
+                'name':    'Sudano-Sahelian Zone',
+                'regions': ['Extreme-Nord'],
+                'color':   '#ef4444',
+                'icon':    'sun',
+                'desc':    'Sahelian steppe · 7-9 months dry season · Harmattan',
+                'facteur': 'Saharan dust (dust dominant)',
+                'ref':     'Schepanski et al. (2007) · Knippertz et al. (2008)',
+            },
+        }
 
-RECO = {
-    'Zone équatoriale': {
-        'citoyen': [
-            ('shield',         'Jan-fév : portez un masque lors des sorties extérieures'),
-            ('wind',           'Fermez les fenêtres pendant les épisodes de feux de brousse'),
-            ('activity',       'Évitez le sport en extérieur de décembre à mars'),
-            ('tree-pine',      'Plantez des arbres — la végétation filtre les particules fines'),
-        ],
-        'medecin': [
-            ('hospital',       'Anticipez +40% de consultations respiratoires en jan-fév'),
-            ('pill',           'Renforcez les stocks d\'inhalateurs dès décembre'),
-            ('baby',           'Surveillance accrue des enfants et personnes âgées en saison sèche'),
-            ('clipboard-list', 'Informez vos patients asthmatiques dès novembre'),
-        ],
-        'maire': [
-            ('megaphone',      'Déclenchez des alertes publiques dès janvier (PM2.5 > 3x OMS)'),
-            ('ban',            'Interdisez les feux agricoles en saison sèche (jan-mar)'),
-            ('school',         'Réduisez les activités extérieures scolaires en jan-fév'),
-            ('trees',          'Investissez dans des espaces verts urbains'),
-        ],
-        'chercheur': [
-            ('bar-chart-2',    'Analyser la corrélation entre épisodes de feux et pics PM2.5 en jan-fév'),
-            ('microscope',     'Étudier l\'impact de l\'harmattan sur la composition chimique des particules'),
-            ('radio',          'Déployer des capteurs low-cost pour densifier le réseau de mesure'),
-            ('file-text',      'Publier les données AirSentinel en open data pour la communauté scientifique'),
-        ],
-    },
-    'Zone soudanienne': {
-        'citoyen': [
-            ('shield',         'Portez un masque en jan-fév — PM2.5 dépasse 2.8x le seuil OMS'),
-            ('moon',           'Évitez les sorties matinales — les nuits froides piègent les polluants'),
-            ('flame',          'Limitez la combustion domestique en saison sèche'),
-            ('droplets',       'Hydratez-vous — l\'air sec aggrave les irritations respiratoires'),
-        ],
-        'medecin': [
-            ('hospital',       'Pic de consultations en jan-fév — PM2.5 dépasse 2.8x le seuil OMS'),
-            ('thermometer',    'Surveillez les pathologies liées aux inversions thermiques'),
-            ('pill',           'Anticipez les crises d\'asthme et BPCO dès décembre'),
-            ('clipboard-list', 'Tenez un registre des cas respiratoires pour détecter les pics'),
-        ],
-        'maire': [
-            ('megaphone',      'Alertes publiques recommandées de décembre à mars'),
-            ('car',            'Réduisez la circulation en centre-ville aux heures matinales'),
-            ('hard-hat',       'Suspendez les chantiers poussièreux en jan-fév'),
-            ('radio',          'Installez des capteurs de qualité de l\'air'),
-        ],
-        'chercheur': [
-            ('bar-chart-2',    'Modéliser l\'impact des inversions thermiques nocturnes sur PM2.5'),
-            ('thermometer',    'Étudier la relation dust sahélien — maladies respiratoires dans l\'Adamaoua'),
-            ('microscope',     'Analyser la composition minérale des poussières transportées par l\'harmattan'),
-            ('file-text',      'Comparer les profils saisonniers avec les données de mortalité régionales'),
-        ],
-    },
-    'Zone soudano-sahélienne': {
-        'citoyen': [
-            ('shield',         'Port du masque obligatoire en jan-fév — PM2.5 dépasse 3.6x le seuil OMS'),
-            ('home',           'Restez à l\'intérieur lors des tempêtes de sable'),
-            ('eye',            'Protégez yeux et voies respiratoires — dust très élevé'),
-            ('droplets',       'Humidifiez l\'air intérieur — l\'air sec aggrave l\'impact'),
-        ],
-        'medecin': [
-            ('alert-triangle', 'ALERTE — PM2.5 dépasse 3.6x le seuil OMS en février'),
-            ('hospital',       'Renforcez les urgences respiratoires de décembre à mars'),
-            ('baby',           'Surveillance maximale des nourrissons et personnes âgées'),
-            ('clipboard-list', 'Protocole méningite — l\'harmattan favorise sa propagation'),
-        ],
-        'maire': [
-            ('siren',          'Déclenchez le plan d\'urgence sanitaire dès janvier'),
-            ('megaphone',      'Alertes quotidiennes obligatoires via radio et SMS en jan-fév'),
-            ('school',         'Fermez les écoles lors des pics de dust extrêmes'),
-            ('construction',   'Arrosez les routes non goudronnées pour limiter la poussière'),
-        ],
-        'chercheur': [
-            ('pie-chart',      'Quantifier la contribution du dust saharien vs sources locales au PM2.5'),
-            ('hospital',       'Corréler les pics de PM2.5 avec les admissions hospitalières à Maroua'),
-            ('globe',          'Étudier le lien harmattan — épidémies de méningite dans l\'Extrême-Nord'),
-            ('radio',          'Proposer un réseau de surveillance transfrontalier avec le Tchad et le Niger'),
-        ],
-    },
-}
+def get_reco(lang):
+    if lang == "fr":
+        return {
+            'Zone équatoriale': {
+                'citoyen': [
+                    ('shield',         'Jan-fév : portez un masque lors des sorties extérieures'),
+                    ('wind',           'Fermez les fenêtres pendant les épisodes de feux de brousse'),
+                    ('activity',       'Évitez le sport en extérieur de décembre à mars'),
+                    ('tree-pine',      'Plantez des arbres — la végétation filtre les particules fines'),
+                ],
+                'medecin': [
+                    ('hospital',       'Anticipez +40% de consultations respiratoires en jan-fév'),
+                    ('pill',           "Renforcez les stocks d'inhalateurs dès décembre"),
+                    ('baby',           'Surveillance accrue des enfants et personnes âgées en saison sèche'),
+                    ('clipboard-list', 'Informez vos patients asthmatiques dès novembre'),
+                ],
+                'maire': [
+                    ('megaphone',      'Déclenchez des alertes publiques dès janvier (PM2.5 > 3x OMS)'),
+                    ('ban',            'Interdisez les feux agricoles en saison sèche (jan-mar)'),
+                    ('school',         'Réduisez les activités extérieures scolaires en jan-fév'),
+                    ('trees',          'Investissez dans des espaces verts urbains'),
+                ],
+                'chercheur': [
+                    ('bar-chart-2',    'Analyser la corrélation entre épisodes de feux et pics PM2.5 en jan-fév'),
+                    ('microscope',     "Étudier l'impact de l'harmattan sur la composition chimique des particules"),
+                    ('radio',          'Déployer des capteurs low-cost pour densifier le réseau de mesure'),
+                    ('file-text',      'Publier les données AirSentinel en open data pour la communauté scientifique'),
+                ],
+            },
+            'Zone soudanienne': {
+                'citoyen': [
+                    ('shield',         'Portez un masque en jan-fév — PM2.5 dépasse 2.8x le seuil OMS'),
+                    ('moon',           'Évitez les sorties matinales — les nuits froides piègent les polluants'),
+                    ('flame',          'Limitez la combustion domestique en saison sèche'),
+                    ('droplets',       "Hydratez-vous — l'air sec aggrave les irritations respiratoires"),
+                ],
+                'medecin': [
+                    ('hospital',       'Pic de consultations en jan-fév — PM2.5 dépasse 2.8x le seuil OMS'),
+                    ('thermometer',    'Surveillez les pathologies liées aux inversions thermiques'),
+                    ('pill',           "Anticipez les crises d'asthme et BPCO dès décembre"),
+                    ('clipboard-list', 'Tenez un registre des cas respiratoires pour détecter les pics'),
+                ],
+                'maire': [
+                    ('megaphone',      'Alertes publiques recommandées de décembre à mars'),
+                    ('car',            'Réduisez la circulation en centre-ville aux heures matinales'),
+                    ('hard-hat',       'Suspendez les chantiers poussièreux en jan-fév'),
+                    ('radio',          "Installez des capteurs de qualité de l'air"),
+                ],
+                'chercheur': [
+                    ('bar-chart-2',    "Modéliser l'impact des inversions thermiques nocturnes sur PM2.5"),
+                    ('thermometer',    "Étudier la relation dust sahélien — maladies respiratoires dans l'Adamaoua"),
+                    ('microscope',     "Analyser la composition minérale des poussières transportées par l'harmattan"),
+                    ('file-text',      'Comparer les profils saisonniers avec les données de mortalité régionales'),
+                ],
+            },
+            'Zone soudano-sahélienne': {
+                'citoyen': [
+                    ('shield',         'Port du masque obligatoire en jan-fév — PM2.5 dépasse 3.6x le seuil OMS'),
+                    ('home',           "Restez à l'intérieur lors des tempêtes de sable"),
+                    ('eye',            'Protégez yeux et voies respiratoires — dust très élevé'),
+                    ('droplets',       "Humidifiez l'air intérieur — l'air sec aggrave l'impact"),
+                ],
+                'medecin': [
+                    ('alert-triangle', 'ALERTE — PM2.5 dépasse 3.6x le seuil OMS en février'),
+                    ('hospital',       'Renforcez les urgences respiratoires de décembre à mars'),
+                    ('baby',           'Surveillance maximale des nourrissons et personnes âgées'),
+                    ('clipboard-list', "Protocole méningite — l'harmattan favorise sa propagation"),
+                ],
+                'maire': [
+                    ('siren',          "Déclenchez le plan d'urgence sanitaire dès janvier"),
+                    ('megaphone',      'Alertes quotidiennes obligatoires via radio et SMS en jan-fév'),
+                    ('school',         'Fermez les écoles lors des pics de dust extrêmes'),
+                    ('construction',   'Arrosez les routes non goudronnées pour limiter la poussière'),
+                ],
+                'chercheur': [
+                    ('bar-chart-2',    'Corréler les pics de PM2.5 avec les admissions hospitalières à Maroua'),
+                    ('microscope',     "Analyser la composition minérale des poussières transportées par l'harmattan"),
+                    ('globe',          'Proposer un réseau de surveillance transfrontalier avec le Tchad et le Niger'),
+                    ('file-text',      "Étudier le lien harmattan — épidémies de méningite dans l'Extrême-Nord"),
+                ],
+            },
+        }
+    else:
+        return {
+            'Zone équatoriale': {
+                'citoyen': [
+                    ('shield',         'Jan-Feb: wear a mask during outdoor activities'),
+                    ('wind',           'Keep windows closed during bushfire episodes'),
+                    ('activity',       'Avoid outdoor sports from December to March'),
+                    ('tree-pine',      'Plant trees — vegetation filters fine particles'),
+                ],
+                'medecin': [
+                    ('hospital',       'Anticipate +40% respiratory consultations in Jan-Feb'),
+                    ('pill',           'Reinforce inhaler stocks starting in December'),
+                    ('baby',           'Increased surveillance of children and elderly in dry season'),
+                    ('clipboard-list', 'Inform your asthmatic patients starting in November'),
+                ],
+                'maire': [
+                    ('megaphone',      'Trigger public alerts as early as January (PM2.5 > 3x WHO)'),
+                    ('ban',            'Ban agricultural fires in dry season (Jan-Mar)'),
+                    ('school',         'Reduce outdoor school activities in Jan-Feb'),
+                    ('trees',          'Invest in urban green spaces'),
+                ],
+                'chercheur': [
+                    ('bar-chart-2',    'Analyze correlation between fire episodes and PM2.5 peaks in Jan-Feb'),
+                    ('microscope',     'Study the impact of harmattan on particle chemical composition'),
+                    ('radio',          'Deploy low-cost sensors to densify the measurement network'),
+                    ('file-text',      'Publish AirSentinel data as open data for the scientific community'),
+                ],
+            },
+            'Zone soudanienne': {
+                'citoyen': [
+                    ('shield',         'Wear a mask in Jan-Feb — PM2.5 exceeds 2.8x WHO threshold'),
+                    ('moon',           'Avoid morning outings — cold nights trap pollutants'),
+                    ('flame',          'Limit domestic combustion in dry season'),
+                    ('droplets',       'Stay hydrated — dry air worsens respiratory irritations'),
+                ],
+                'medecin': [
+                    ('hospital',       'Consultation peak in Jan-Feb — PM2.5 exceeds 2.8x WHO threshold'),
+                    ('thermometer',    'Monitor pathologies related to thermal inversions'),
+                    ('pill',           'Anticipate asthma and COPD attacks starting in December'),
+                    ('clipboard-list', 'Keep a respiratory cases register to detect peaks'),
+                ],
+                'maire': [
+                    ('megaphone',      'Public alerts recommended from December to March'),
+                    ('car',            'Reduce city center traffic during morning hours'),
+                    ('hard-hat',       'Suspend dusty construction sites in Jan-Feb'),
+                    ('radio',          'Install air quality sensors'),
+                ],
+                'chercheur': [
+                    ('bar-chart-2',    'Model impact of nocturnal thermal inversions on PM2.5'),
+                    ('thermometer',    'Study Sahelian dust — respiratory diseases relationship in Adamawa'),
+                    ('microscope',     'Analyze mineral composition of dust transported by harmattan'),
+                    ('file-text',      'Compare seasonal profiles with regional mortality data'),
+                ],
+            },
+            'Zone soudano-sahélienne': {
+                'citoyen': [
+                    ('shield',         'Mandatory mask in Jan-Feb — PM2.5 exceeds 3.6x WHO threshold'),
+                    ('home',           'Stay indoors during sandstorms'),
+                    ('eye',            'Protect eyes and airways — very high dust'),
+                    ('droplets',       'Humidify indoor air — dry air worsens the impact'),
+                ],
+                'medecin': [
+                    ('alert-triangle', 'ALERT — PM2.5 exceeds 3.6x WHO threshold in February'),
+                    ('hospital',       'Reinforce respiratory emergencies from December to March'),
+                    ('baby',           'Maximum surveillance of infants and elderly'),
+                    ('clipboard-list', 'Meningitis protocol — harmattan favors its spread'),
+                ],
+                'maire': [
+                    ('siren',          'Trigger health emergency plan as early as January'),
+                    ('megaphone',      'Mandatory daily alerts via radio and SMS in Jan-Feb'),
+                    ('school',         'Close schools during extreme dust peaks'),
+                    ('construction',   'Water unpaved roads to limit dust'),
+                ],
+                'chercheur': [
+                    ('bar-chart-2',    'Correlate PM2.5 peaks with hospital admissions in Maroua'),
+                    ('microscope',     'Analyze mineral composition of dust transported by harmattan'),
+                    ('globe',          'Propose a cross-border monitoring network with Chad and Niger'),
+                    ('file-text',      'Study harmattan — meningitis epidemics link in the Far North'),
+                ],
+            },
+        }
 
-MOIS = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc']
-
+def get_mois(lang):
+    if lang == "fr":
+        return ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc']
+    return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
 def _rgb(hex_color):
     h = hex_color.lstrip('#')
@@ -177,7 +297,7 @@ def _rgb(hex_color):
 @st.cache_data(ttl=3600)
 def _calc_zones_stats(_df_hash, df):
     zones_stats = {}
-    for nom_zone, meta in ZONES_META.items():
+    for nom_zone, meta in get_zones_meta('fr').items():
         df_z = df[df['region'].isin(meta['regions'])]
         if len(df_z) == 0:
             continue
@@ -233,14 +353,14 @@ def render(profil):
     with col_banner6:
         banner(
             IMAGES["shap_banner"] if "shap_banner" in IMAGES else IMAGES["kpi_banner"],
-            120, "PROFIL CLIMATIQUE", "", th, no_frame=False
+            120, "CLIMATE PROFILE" if lang == "en" else "PROFIL CLIMATIQUE", "", th, no_frame=False
         )
     with col_zones6:
         st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
         zone_sel = st.radio(
-            label='Zone climatique',
+            label='Climate Zone' if lang == 'en' else 'Zone climatique',
             options=list(ZONES.keys()),
-            format_func=lambda z: z,
+            format_func=lambda z: get_zones_meta(lang).get(z, {}).get('name', z),
             horizontal=False,
             key='zone_selector_bloc6'
         )
@@ -331,31 +451,31 @@ def render(profil):
             f'padding:10px;background:rgba({rv},{gv},{bv},0.12);border-radius:8px;">'
             f'<div style="flex-shrink:0;">{_icon("trending-up", 24, th["red"])}</div>'
             f'<div>'
-            f'<div style="font-size:11px;color:{txt_dim};text-transform:uppercase;letter-spacing:.06em;">Pic saisonnier</div>'
-            f'<div style="font-size:18px;font-weight:700;color:{th["red"]};">{MOIS[pic_mois-1]} · {pic_val:.1f} µg/m³</div>'
-            f'<div style="font-size:12px;color:{txt_sub};">{(pic_val/15):.1f}x le seuil OMS</div>'
+            f'<div style="font-size:11px;color:{txt_dim};text-transform:uppercase;letter-spacing:.06em;">{"Seasonal peak" if lang == "en" else "Pic saisonnier"}</div>'
+            f'<div style="font-size:18px;font-weight:700;color:{th["red"]};">{get_mois(lang)[pic_mois-1]} · {pic_val:.1f} µg/m³</div>'
+            f'<div style="font-size:12px;color:{txt_sub};">{(pic_val/15):.1f}x ' + ('WHO threshold' if lang == 'en' else 'le seuil OMS') + '</div>'
             f'</div></div>'
 
             f'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;'
             f'padding:10px;background:rgba(16,185,129,0.12);border-radius:8px;">'
             f'<div style="flex-shrink:0;">{_icon("trending-down", 24, th["green"])}</div>'
             f'<div>'
-            f'<div style="font-size:11px;color:{txt_dim};text-transform:uppercase;letter-spacing:.06em;">Minimum saisonnier</div>'
-            f'<div style="font-size:18px;font-weight:700;color:{th["green"]};">{MOIS[bas_mois-1]} · {bas_val:.1f} µg/m³</div>'
-            f'<div style="font-size:12px;color:{txt_sub};">{"Conforme OMS" if bas_val <= 15 else "Dépasse OMS"}</div>'
+            f'<div style="font-size:11px;color:{txt_dim};text-transform:uppercase;letter-spacing:.06em;">{"Seasonal minimum" if lang == "en" else "Minimum saisonnier"}</div>'
+            f'<div style="font-size:18px;font-weight:700;color:{th["green"]};">{get_mois(lang)[bas_mois-1]} · {bas_val:.1f} µg/m³</div>'
+            f'<div style="font-size:12px;color:{txt_sub};">' + ('WHO Compliant' if bas_val <= 15 and lang == 'en' else 'Exceeds WHO' if bas_val > 15 and lang == 'en' else 'Conforme OMS' if bas_val <= 15 else 'Dépasse OMS') + '</div>'
             f'</div></div>'
 
             f'<div style="display:flex;align-items:center;gap:12px;'
             f'padding:10px;background:rgba({rv},{gv},{bv},0.10);border-radius:8px;">'
             f'<div style="flex-shrink:0;">{_icon("zap", 24, meta_sel["color"])}</div>'
             f'<div>'
-            f'<div style="font-size:11px;color:{txt_dim};text-transform:uppercase;letter-spacing:.06em;">Amplitude saisonnière</div>'
+            f'<div style="font-size:11px;color:{txt_dim};text-transform:uppercase;letter-spacing:.06em;">{"Seasonal amplitude" if lang == "en" else "Amplitude saisonnière"}</div>'
             f'<div style="font-size:18px;font-weight:700;color:{meta_sel["color"]};">{amplitude:.1f} µg/m³</div>'
             f'<div style="font-size:12px;color:{txt_sub};">{meta_sel["facteur"]}</div>'
             f'</div></div>'
 
             f'<div style="font-size:9px;color:{txt_dim};margin-top:12px;font-family:DM Mono,monospace;">'
-            f'Réf. {meta_sel["ref"]} · INS Cameroun (2019)</div>'
+            f'{"Ref." if lang == "en" else "Réf."} {meta_sel["ref"]} · INS Cameroun (2019)</div>'
             f'</div>',
             unsafe_allow_html=True
         )
@@ -381,7 +501,7 @@ def render(profil):
             'chercheur': 'microscope',
         }
 
-        recos = RECO.get(zone_sel, {}).get(profil_key, [])
+        recos = get_reco(lang).get(zone_sel, {}).get(profil_key, [])
         reco_html = ''.join([
             f'<div style="display:flex;align-items:flex-start;gap:10px;'
             f'padding:10px 12px;margin-bottom:8px;'
@@ -399,7 +519,7 @@ def render(profil):
             f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">'
             f'<div style="font-size:15px;font-weight:700;color:{meta_sel["color"]};'
             f'display:flex;align-items:center;gap:8px;">'
-            f'{_icon(meta_sel["icon"], 18, meta_sel["color"])} Que faire ?</div>'
+            f'{_icon(meta_sel["icon"], 18, meta_sel["color"])} ' + ('What to do?' if lang == 'en' else 'Que faire ?') + '</div>'
             f'<div style="font-size:10px;color:{txt_dim};font-family:DM Mono,monospace;'
             f'background:rgba({rv},{gv},{bv},0.20);padding:3px 10px;border-radius:20px;'
             f'display:flex;align-items:center;gap:6px;">'
@@ -407,7 +527,7 @@ def render(profil):
             f'</div>'
             f'{reco_html}'
             f'<div style="font-size:9px;color:{txt_dim};margin-top:10px;font-family:DM Mono,monospace;">'
-            f'Basées sur · WHO AQG 2021 · INS Cameroun (2019) · {annees}</div>'
+            f'{"Based on" if lang == "en" else "Basées sur"} · WHO AQG 2021 · INS Cameroun (2019) · {annees}</div>'
             f'</div>',
             unsafe_allow_html=True
         )
@@ -420,7 +540,7 @@ def render(profil):
     st.markdown(
         f'<div style="font-size:15px;font-weight:700;color:{txt_main};'
         f'margin-bottom:14px;display:flex;align-items:center;gap:8px;">'
-        f'{_icon("bar-chart-2", 16, th["teal"])} Comparaison détaillée des indicateurs — 3 zones'
+        f'{_icon("bar-chart-2", 16, th["teal"])} ' + ('Detailed comparison of indicators — 3 zones' if lang == 'en' else 'Comparaison détaillée des indicateurs — 3 zones') +
         f'</div>',
         unsafe_allow_html=True
     )

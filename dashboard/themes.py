@@ -110,9 +110,29 @@ def build_css(th: dict, img_url: str) -> str:
     """
     return f"""
     <style>
-    /* ── Masquer les éléments natifs Streamlit ── */
-    [data-testid="stHeader"], footer, #MainMenu, .stAppDeployButton {{
+    /* ── Masquer les éléments natifs superflus sans casser le layout Streamlit ── */
+    [data-testid="stHeader"] {{
+        background: transparent !important;
+    }}
+    footer, #MainMenu, .stAppDeployButton {{
         display: none !important;
+    }}
+
+    /* Mettre les flèches d'ouverture/fermeture de la Sidebar en BLANC clairement visibles */
+    [data-testid="collapsedControl"] {{
+        z-index: 999999 !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+        border-radius: 8px !important;
+        transition: all 0.2s ease;
+    }}
+    [data-testid="collapsedControl"] svg, 
+    [data-testid="stSidebarCollapseButton"] svg {{
+        fill: #FFFFFF !important;
+        color: #FFFFFF !important;
+        stroke: #FFFFFF !important;
+    }}
+    [data-testid="collapsedControl"]:hover {{
+        background: rgba(255, 255, 255, 0.25) !important;
     }}
 
     @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap');

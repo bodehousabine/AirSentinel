@@ -51,7 +51,7 @@ def render(profil):
         f_col1, f_col2 = st.columns(2)
         with f_col1:
             sel_regions = st.multiselect(
-                "**CHOIX DES RÉGIONS**", 
+                "**CHOIX DES RÉGIONS**" if lang == "fr" else "**REGION SELECTION**", 
                 [toutes_regions] + all_regions, 
                 default=[toutes_regions],
                 key="kpi_reg_filter"
@@ -70,7 +70,7 @@ def render(profil):
         with f_col2:
             if is_all_regions:
                 sel_villes = st.multiselect(
-                    "**VILLES PAR RÉGION**", 
+                    "**VILLES PAR RÉGION**" if lang == "fr" else "**CITIES BY REGION**", 
                     cities_options, 
                     default=[toutes_villes],
                     disabled=True,
@@ -79,7 +79,7 @@ def render(profil):
                 _sel_villes_effective = df["ville"].dropna().unique().tolist()
             else:
                 sel_villes = st.multiselect(
-                    "**VILLES PAR RÉGION**", 
+                    "**VILLES PAR RÉGION**" if lang == "fr" else "**CITIES BY REGION**", 
                     cities_options, 
                     default=[toutes_villes],
                     key="kpi_vil_filter_active"
@@ -170,7 +170,7 @@ def render(profil):
         fig1.add_hline(y=15.0, line=dict(color=th["red"],width=1,dash="dash"),
             annotation_text=T["who_threshold"], annotation_font_color=th["red"], annotation_font_size=10)
         
-        scope_lbl = "National" if is_all_regions and (toutes_villes in sel_villes or len(sel_villes)==0) else "Filtré"
+        scope_lbl = ("National" if lang == "fr" else "National") if is_all_regions and (toutes_villes in sel_villes or len(sel_villes)==0) else ("Filtré" if lang == "fr" else "Filtered")
         
         fig1.update_layout(**PL, height=280, showlegend=False,
             title=dict(text=f"{T['bloc2_chart1_title']} · {scope_lbl}",
