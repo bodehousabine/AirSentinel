@@ -200,7 +200,7 @@ def render(profil):
             title=dict(text=f"{T['bloc2_chart1_title']} · {scope_lbl}",
                        font=dict(color=th["text"], size=14, weight="bold")))
         fig1.update_xaxes(**GRID); fig1.update_yaxes(**GRID)
-        st.plotly_chart(fig1, use_container_width=True)
+        st.plotly_chart(fig1, width='stretch')
 
     # ── Graphique 2 : Saisonnalité (qui vient au milieu maintenant)
     with c2:
@@ -230,7 +230,7 @@ def render(profil):
             title=dict(text=lbl_s, font=dict(color=th["text"], size=14, weight="bold")))
         fig_s.update_xaxes(**GRID)
         fig_s.update_yaxes(**GRID)
-        st.plotly_chart(fig_s, use_container_width=True)
+        st.plotly_chart(fig_s, width='stretch')
 
     # ── Tableau : Seuils OMS (qui vient à droite et devient non scrollable)
     with c3:

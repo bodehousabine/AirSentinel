@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - HubSpot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* About Us Section */
+        .about-us-section {
+            background-color: #f5f3f0;
+            padding: 60px 40px;
+        }
+
+        .about-us-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .about-us-content h1 {
+            font-size: 3.5em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #000;
+        }
+
+        .about-us-content p {
+            font-size: 1.3em;
+            line-height: 1.8;
+            color: #333;
+            max-width: 550px;
+        }
+
+        .about-us-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Our Mission Section */
+        .mission-section {
+            background-color: #ffffff;
+            padding: 60px 40px;
+        }
+
+        .mission-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .mission-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .mission-content h2 {
+            font-size: 2.8em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            line-height: 1.3;
+            color: #000;
+        }
+
+        .mission-content p {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: #555;
+            max-width: 550px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+
+            .about-us-container,
+            .mission-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .about-us-section,
+            .mission-section {
+                padding: 40px 20px;
+            }
+
+            .about-us-content h1 {
+                font-size: 2.5em;
+            }
+
+            .mission-content h2 {
+                font-size: 2em;
+            }
+
+            .about-us-content p,
+            .mission-content p {
+                font-size: 1em;
+            }
+
+            .mission-container {
+                grid-template-columns: 1fr;
+            }
+
+            .mission-image {
+                order: -1;
+            }
+
+            .story-container {
+                grid-template-columns: 1fr;
+            }
+
+            .story-image {
+                order: -1;
+            }
+        }
+
+        /* Our Story Section */
+        .story-section {
+            background-color: #f5f3f0;
+            padding: 60px 40px;
+        }
+
+        .story-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .story-content h2 {
+            font-size: 2.8em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #000;
+        }
+
+        .story-content p {
+            font-size: 1em;
+            line-height: 1.8;
+            color: #555;
+            margin-bottom: 20px;
+        }
+
+        .story-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .story-content h2 {
+            font-size: 1.2em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #000;
+        }
+
+        .story-content ul {
+            list-style-position: inside;
+            margin-bottom: 15px;
+        }
+
+        .story-content ul li {
+            font-size: 1em;
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .story-content .call-to-action {
+            background-color: #e8e2db;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 1em;
+            line-height: 1.6;
+            color: #333;
+            margin-top: 20px;
+        }
+
+        /* By the Numbers Section */
+        .numbers-section {
+            background-color: #ffffff;
+            padding: 60px 40px;
+        }
+
+        .numbers-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .numbers-title {
+            font-size: 2.8em;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 45px;
+            color: #000;
+        }
+
+        .numbers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .number-card {
+            background-color: #ffffff;
+            border: 1px solid #e5e2df;
+            border-radius: 15px;
+            padding: 30px 25px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .number-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .number-card-icon {
+            font-size: 4em;
+            margin-bottom: 30px;
+        }
+
+        .number-card h3 {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 20px;
+        }
+
+        .number-card a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #000;
+            text-decoration: none;
+            font-weight: 600;
+            border-bottom: 2px solid #000;
+            padding-bottom: 5px;
+            transition: color 0.3s ease;
+        }
+
+        .number-card a:hover {
+            color: #ff5a1f;
+            border-bottom-color: #ff5a1f;
+        }
+
+        .number-card a::after {
+            content: "→";
+        }
+
+        @media (max-width: 768px) {
+            .numbers-section {
+                padding: 40px 20px;
+            }
+
+            .numbers-title {
+                font-size: 2em;
+                margin-bottom: 40px;
+            }
+
+            .numbers-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .number-card {
+                padding: 30px 20px;
+            }
+
+            .number-card h3 {
+                font-size: 1.5em;
+            }
+        }
+
+        /* Testimonials/Team Members Section */
+        .testimonials-section {
+            background-color: #f5f3f0;
+            padding: 45px 40px;
+        }
+
+        .testimonials-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .testimonials-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .testimonials-header h2 {
+            font-size: 2.8em;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 15px;
+        }
+
+        .testimonials-header p {
+            font-size: 1.1em;
+            color: #555;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .testimonials-carousel {
+            position: relative;
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 35px 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .testimonial-card {
+            display: none;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .testimonial-card.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .testimonial-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .testimonial-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .testimonial-text {
+            font-size: 1em;
+            line-height: 1.5;
+            color: #333;
+            margin: 0 auto 15px;
+            max-width: 700px;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            margin-bottom: 10px;
+        }
+
+        .testimonial-author h3 {
+            font-size: 1em;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 3px;
+        }
+
+        .testimonial-author p {
+            font-size: 0.9em;
+            color: #666;
+            margin: 2px 0;
+        }
+
+        .testimonials-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 25px;
+        }
+
+        .testimonials-arrow {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #333;
+            transition: color 0.3s ease;
+        }
+
+        .testimonials-arrow:hover {
+            color: #ff5a1f;
+        }
+
+        .testimonials-dots {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex: 1;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #ccc;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .dot.active {
+            background-color: #000;
+        }
+
+        @media (max-width: 768px) {
+            .testimonials-section {
+                padding: 35px 20px;
+            }
+
+            .testimonials-header h2 {
+                font-size: 2em;
+            }
+
+            .testimonials-header {
+                margin-bottom: 30px;
+            }
+
+            .testimonials-carousel {
+                padding: 30px 20px;
+            }
+
+            .testimonial-text {
+                font-size: 0.95em;
+            }
+
+            .testimonials-arrow {
+                font-size: 1.2em;
+            }
+        }
+
+        .linkedin-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: #0077b5;
+            text-decoration: none;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-top: 5px;
+            transition: color 0.3s ease;
+        }
+
+        .linkedin-link:hover {
+            color: #00a0dc;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- About Us Section -->
+    <section class="about-us-section">
+        <div class="about-us-container">
+            <div class="about-us-content">
+                <h1>À propos de nous</h1>
+                <p>Notre équipe appelée <b>DPA Green Tech</b> est composée de quatre (04) membres, dont une femme,
+                    provenant des écoles de formations telles que : l’Institut Sous-régional de Statistique et
+                    d’Économie Appliquée (ISSEA) et l’École Nationale Supérieure Polytechnique de Yaoundé (ENSPY).</p>
+            </div>
+            <div class="about-us-image">
+                <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop"
+                    alt="Our Team">
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Mission Section -->
+    <section class="mission-section">
+        <div class="mission-container">
+            <div class="mission-image">
+                <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop"
+                    alt="Our Office">
+            </div>
+            <div class="mission-content">
+                <h1>Notre Motivation</h1>
+                <p>Notre motivation à participer au Hackathon 2026 Cameroun repose sur notre volonté commune d’innover
+                    et de proposer des solutions technologiques concrètes aux défis de notre environnement. Nous sommes
+                    convaincus que la combinaison des données, du développement technologique et de la réflexion
+                    stratégique peut générer un impact durable au Cameroun.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Story Section -->
+    <section class="story-section">
+        <div class="story-container">
+            <div class="story-content">
+                <h1>Hackathon IndabaX Cameroon 2026</h1>
+                <h2>Notre Mission:</h2>
+                <ul>
+                    <li>Prédire les indicateurs de pollution de l'air à partir des données météorologiques</li>
+                    <li>Identifier les facteurs aggravants liés au climat dans différentes régions</li>
+                    <li>Concevoir des outils de soutien à la décision clairs et accessibles pour les décideurs et les
+                        communautés</li>
+                </ul>
+            </div>
+            <div class="story-image">
+                <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop"
+                    alt="HubSpot Founders">
+            </div>
+        </div>
+    </section>
+
+    <!-- By the Numbers Section -->
+    <section class="numbers-section">
+        <div class="numbers-container">
+            <h2 class="numbers-title">AirSentinel By the Numbers</h2>
+            <div class="numbers-grid">
+                <div class="number-card">
+                    <div class="number-card-icon">�️</div>
+                    <h3>40 Villes</h3>
+                </div>
+                <div class="number-card">
+                    <div class="number-card-icon">🗺️</div>
+                    <h3>10 Régions</h3>
+                </div>
+                <div class="number-card">
+                    <div class="number-card-icon">📊</div>
+                    <h3>50 760 Observations</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials/Team Members Section -->
+    <section class="testimonials-section">
+        <div class="testimonials-container">
+            <div class="testimonials-header">
+                <h2>Nos Membres</h2>
+                <p>Découvrez l'équipe DPA Green Tech composée de membres talentueux et passionnés.</p>
+            </div>
+
+            <div class="testimonials-carousel">
+                <div class="testimonial-card active">
+                    <div class="testimonial-avatar"><img src="bsd.png" alt="BODEHOU"></div>
+                    <div class="testimonial-text">
+                        "J'apporte mon expertise en développement logiciel et en architecture système pour créer une
+                        solution robuste et scalable."
+                    </div>
+                    <div class="testimonial-author">
+                        <h3>BODEHOU Sabine Déo-Gracias</h3>
+                        <p>Lead Developer</p>
+                        <a href="https://www.linkedin.com/in/sabine-bodehou-79787b280?utm_source=share_via&utm_content=profile&utm_medium=member_ios"
+                            target="_blank" class="linkedin-link">LinkedIn Profile 🔗</a>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="testimonial-avatar"><img src="fma.png" alt="FANKAM"></div>
+                    <div class="testimonial-text">
+                        "Ma passion pour la science des données me permet de développer des modèles prédictifs précis
+                        pour la qualité de l'air."
+                    </div>
+                    <div class="testimonial-author">
+                        <h3>FANKAM Marc Aurel</h3>
+                        <p>Data Scientist</p>
+                        <a href="https://www.linkedin.com/in/marc-aurel-fankam-401552301?utm_source=share_via&utm_content=profile&utm_medium=member_ios"
+                            target="_blank" class="linkedin-link">LinkedIn Profile 🔗</a>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="testimonial-avatar"><img src="fah.png" alt="FOFACK"></div>
+                    <div class="testimonial-text">
+                        "Je contribue à la stratégie de projet et analyse les données environnementales pour générer des
+                        insights utiles."
+                    </div>
+                    <div class="testimonial-author">
+                        <h3>FOFACK ALEMDJOU Henri Joel</h3>
+                        <p>Data Analyst</p>
+                        <a href="https://www.linkedin.com/in/henri-fofack-250b1b320?utm_source=share_via&utm_content=profile&utm_medium=member_ios"
+                            target="_blank" class="linkedin-link">LinkedIn Profile 🔗</a>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="testimonial-avatar"><img src="prf.png" alt="PEURBAR"></div>
+                    <div class="testimonial-text">
+                        "Je coordonne le projet et assure la communication avec les stakeholders pour garantir le succès
+                        de notre solution."
+                    </div>
+                    <div class="testimonial-author">
+                        <h3>PEURBAR RIMBAR Firmin</h3>
+                        <p>Project Manager</p>
+                        <a href="https://www.linkedin.com/in/peurbar-firmin?utm_source=share_via&utm_content=profile&utm_medium=member_ios"
+                            target="_blank" class="linkedin-link">LinkedIn Profile 🔗</a>
+                    </div>
+                </div>
+
+                <div class="testimonials-nav">
+                    <button class="testimonials-arrow" id="prevBtn" onclick="changeSlide(-1)">←</button>
+                    <div class="testimonials-dots" id="dotsContainer"></div>
+                    <button class="testimonials-arrow" id="nextBtn" onclick="changeSlide(1)">→</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.testimonial-card');
+        const totalSlides = slides.length;
+
+        // Create dots
+        const dotsContainer = document.getElementById('dotsContainer');
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.classList.add('dot');
+            if (i === 0) dot.classList.add('active');
+            dot.onclick = () => goToSlide(i);
+            dotsContainer.appendChild(dot);
+        }
+
+        function changeSlide(n) {
+            currentSlide += n;
+            if (currentSlide >= totalSlides) {
+                currentSlide = 0;
+            } else if (currentSlide < 0) {
+                currentSlide = totalSlides - 1;
+            }
+            updateSlide();
+        }
+
+        function goToSlide(n) {
+            currentSlide = n;
+            updateSlide();
+        }
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                }
+            });
+
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, index) => {
+                dot.classList.remove('active');
+                if (index === currentSlide) {
+                    dot.classList.add('active');
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

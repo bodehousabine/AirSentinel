@@ -83,7 +83,7 @@ def render(profil):
     snc, snt, snk = irs_level(irs_val, p50, p75, p90, T, th)
 
     # ── Jauge de Risque (Prend toute la largeur ou large centré) ─────────────
-    st.plotly_chart(_render_irs_gauge(irs_val, ctx, th, T), use_container_width=True, config={'displayModeBar': False}, key="gauge_v4_fluid")
+    st.plotly_chart(_render_irs_gauge(irs_val, ctx, th, T), width='stretch', config={'displayModeBar': False}, key="gauge_v4_fluid")
 
     # ── Matrice des Risques (Structure originale préservée) ──────────────────
     st.markdown("<div style='height:20px;'></div>", unsafe_allow_html=True)

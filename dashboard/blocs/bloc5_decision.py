@@ -713,7 +713,7 @@ def render(profil):
                       titre="Health Risk" if lang=="en" else "Risque Sanitaire")
         with m_col2:
             st.plotly_chart(_render_exceptional_radial_gauge(irs_ville, ctx, th),
-                use_container_width=True, config={'displayModeBar':False,'responsive':True},
+                width='stretch', config={'displayModeBar':False,'responsive':True},
                 key="gauge_v5_real_trio")
         with m_col3:
             _ctx_card(niv_ctx, col_ctx_hex, p90_ville, pm25_ville, th, lang)
@@ -742,7 +742,7 @@ def render(profil):
                       titre="Simulated Risk" if lang=="en" else "Risque Simulé")
         with m_col2_s:
             st.plotly_chart(_render_exceptional_radial_gauge(irs_v, ctx, th),
-                use_container_width=True, config={'displayModeBar':False,'responsive':True},
+                width='stretch', config={'displayModeBar':False,'responsive':True},
                 key="gauge_v5_sim_trio")
         with m_col3_s:
             _ctx_card(niv_ctx_s, col_ctx_hex_s, p90_ville, pm25_sim, th, lang)

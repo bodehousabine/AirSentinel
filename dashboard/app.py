@@ -35,6 +35,7 @@ if st.session_state["page"] == "landing":
     entered = render_landing()
     if entered:
         st.session_state["page"] = "dashboard"
+        st.session_state["show_about"] = False
         st.rerun()
     st.stop()
 
@@ -72,8 +73,9 @@ with st.sidebar:
     """, unsafe_allow_html=True)
 
     if st.button("← " + ("Accueil" if st.session_state["lang"] == "fr" else "Home"),
-                 key="btn_home", use_container_width=True):
+                 key="btn_home", width='stretch'):
         st.session_state["page"] = "landing"
+        st.session_state["show_about"] = False
         st.rerun()
 
     st.markdown(f"<hr style='border-color:{th['border_soft']};margin:10px 0;'>", unsafe_allow_html=True)
@@ -137,7 +139,7 @@ with st.sidebar:
 
     st.markdown("<div style='margin-top:10px;'></div>", unsafe_allow_html=True)
     about_label = "ℹ️ À Propos" if st.session_state["lang"] == "fr" else "ℹ️ About"
-    if st.button(about_label, key="sb_about_btn", use_container_width=True):
+    if st.button(about_label, key="sb_about_btn", width='stretch'):
         st.session_state["show_about"] = True
 
     st.markdown(f"<hr style='border-color:{th['border_soft']};margin:12px 0;'>", unsafe_allow_html=True)

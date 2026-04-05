@@ -3,6 +3,8 @@ landing.py — AirSentinel Cameroun
 Page d'accueil : Centrage via CSS ciblé sur les éléments Streamlit natifs.
 """
 import streamlit as st
+import base64
+import os
 from assets import IMAGES
 from themes import get_theme
 from translations import get_t
@@ -89,6 +91,14 @@ div[data-testid="column"]:last-child .stButton > button {
     border-radius: 10px !important;
     height: 44px !important;
     padding: 0 20px !important;
+    white-space: nowrap !important;
+    min-width: max-content !important;
+}
+
+div[data-testid="stHorizontalBlock"]:has(div[data-testid="stSelectbox"]) div[data-testid="column"]:last-child {
+    min-width: 130px !important;
+    flex: none !important;
+    width: auto !important;
 }
 
 /* --- BOUTON CTA : centrage absolu --- */
@@ -166,7 +176,7 @@ iframe[title="chatbox.render_chatbox"] {
     # 4. Bouton CTA (entre slogan et description)
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        enter = st.button(T["landing_btn_enter"], key="enter_dashboard_btn", use_container_width=True)
+        enter = st.button(T["landing_btn_enter"], key="enter_dashboard_btn", width='stretch')
 
     # 5. Description et Footer
     st.markdown(f"""
@@ -181,7 +191,7 @@ iframe[title="chatbox.render_chatbox"] {
     """, unsafe_allow_html=True)
 
     # 6. Contrôles Haut Droite
-    cols = st.columns([1, 1, 1])
+    cols = st.columns([1, 1, 1.5])
     with cols[0]:
         th_labels = [T["sidebar_theme_dark"], T["sidebar_theme_light"]]
         th_vals   = ["dark", "light"]
@@ -199,7 +209,7 @@ iframe[title="chatbox.render_chatbox"] {
             st.session_state["lang"] = l_vals[l_labels.index(l_choice)]
             st.rerun()
     with cols[2]:
-        about_label = "ℹ️ À Propos" if lang == "fr" else "ℹ️ About"
+        about_label = "ℹ️ À\u00a0Propos" if lang == "fr" else "ℹ️ About"
         if st.button(about_label, key="btn_about_top"):
             st.session_state["show_about"] = True
 
@@ -211,30 +221,68 @@ iframe[title="chatbox.render_chatbox"] {
 
 
 def render_about_modal(lang):
-    title = "L'ÉQUIPE DPA GREEN TECH" if lang == "fr" else "THE DPA GREEN TECH TEAM"
-    close_btn = "OK"
-    team = [
-        {"name": "BODEHOU Sabine", "school": "ISSEA", "role": "Data Science", "img": "https://images.unsplash.com/photo-1573496359142-b8d87734a7a2?w=400&h=400&fit=crop"},
-        {"name": "FANKAM Marc Aurel", "school": "ISSEA", "role": "Modélisation", "img": "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop"},
-        {"name": "PEURBAR RIMBAR Firmin", "school": "ISSEA", "role": "SHAP & Rapport", "img": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop"},
-        {"name": "FOFACK ALEMDJOU Henri Joël", "school": "ENSP", "role": "Frontend & API", "img": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=400&fit=crop"}
-    ]
+    """
+    Lit le fichier apropos.html et l'affiche dans un dialogue Streamlit.
+    Les images locales sont encodées en base64 pour s'afficher proprement.
+    """
+    about_dir = os.path.join(os.path.dirname(__file__), "about")
+    html_file = os.path.join(about_dir, "apropos.html")
+    
+    if not os.path.exists(html_file):
+        st.error("Fichier apropos.html introuvable dans dashboard/about/")
+        return
+
+    with open(html_file, "r", encoding="utf-8") as f:
+        html_content = f.read()
+
+    # Routine d'encodage des images en base64
+    for img_name in ["bsd.png", "fma.png", "fah.png", "prf.png"]:
+        img_path = os.path.join(about_dir, img_name)
+        if os.path.exists(img_path):
+            with open(img_path, "rb") as f:
+                b64_data = base64.b64encode(f.read()).decode()
+            html_content = html_content.replace(f'src="{img_name}"', f'src="data:image/png;base64,{b64_data}"')
+
     @st.dialog("À Propos" if lang == "fr" else "About", width="large")
     def show_dialog():
-        st.markdown(f'<div style="text-align:center;margin-bottom:22px;"><h2 style="color:#00d4b1;">{title}</h2></div>', unsafe_allow_html=True)
-        cols = st.columns(4)
-        for i, m in enumerate(team):
-            with cols[i]:
-                st.markdown(f"""
-                <div style="text-align:center;background:rgba(255,255,255,0.03);padding:18px;border-radius:18px;border:1px solid rgba(0,212,177,0.12);">
-                    <img src="{m['img']}" style="width:100%;border-radius:50%;margin-bottom:12px;border:2px solid #00d4b1;">
-                    <div style="font-weight:700;color:#e0f2fe;font-size:15px;margin-bottom:4px;">{m['name']}</div>
-                    <div style="font-size:12px;color:#00d4b1;font-weight:600;margin-bottom:4px;">{m['school']}</div>
-                    <div style="font-size:11px;color:rgba(224,242,254,0.5);line-height:1.4;">{m['role']}</div>
-                </div>
-                """, unsafe_allow_html=True)
-        st.markdown("<div style='height:20px;'></div>", unsafe_allow_html=True)
-        if st.button(close_btn, use_container_width=True, key="about_ok_btn"):
+        # On injecte le style harmonisé pour le bouton de fermeture
+        st.markdown("""
+        <style>
+        div[data-testid="stDialog"] .stButton > button {
+            background: #00d4b1 !important;
+            color: #003d38 !important;
+            border-radius: 50px !important;
+            height: 48px !important;
+            padding: 0 40px !important;
+            font-size: 16px !important;
+            font-weight: 800 !important;
+            box-shadow: 0 10px 40px rgba(0,212,177,0.15) !important;
+            border: none !important;
+            transition: all 0.3s ease !important;
+            font-family: 'Inter', sans-serif !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em !important;
+            margin-top: 15px !important;
+        }
+        div[data-testid="stDialog"] .stButton > button:hover {
+            transform: translateY(-2px) !important;
+            background: #05f2cb !important;
+            box-shadow: 0 15px 45px rgba(0,212,177,0.25) !important;
+        }
+        /* Ajustement de la zone du dialogue pour le HTML */
+        div[data-testid="stDialog"] [data-testid="stVerticalBlock"] > div:first-child {
+            padding: 0 !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        # Affichage du contenu HTML via un composant Streamlit
+        import streamlit.components.v1 as components
+        components.html(html_content, height=680, scrolling=True)
+        
+        # Bouton stylisé pour fermer et revenir au dashboard
+        close_txt = "RETOURNER AU DASHBOARD ✅" if lang == "fr" else "BACK TO DASHBOARD ✅"
+        if st.button(close_txt, width='stretch', key="about_ok_btn"):
             st.session_state["show_about"] = False
             st.rerun()
     show_dialog()

@@ -5,7 +5,7 @@ Palette bleu de mer + images variées et lumineuses.
 
 IMAGES = {
     # Fond général — ciel bleu océan / satellite
-    "bg_app":        "https://tse3.mm.bing.net/th/id/OIP.FY7X8JttJWko6BCP-phnewHaEC?rs=1&pid=ImgDetMain&o=7&rm=3",
+    "bg_app":        "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=1920&q=60&auto=format",
     # Header — ville africaine lumineuse aérienne
     "header_banner": "https://images.unsplash.com/photo-1569974507005-6dc61f97fb5c?w=1600&q=85&auto=format",
     # Sidebar — forêt verte Cameroun

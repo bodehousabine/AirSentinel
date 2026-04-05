@@ -341,7 +341,7 @@ window.addEventListener('load', function() {{
                 label_visibility="collapsed",
                 placeholder=placeholder,
             )
-            submitted = st.form_submit_button("Envoyer", use_container_width=False)
+            submitted = st.form_submit_button("Envoyer", width='content')
 
         if submitted and user_input and user_input.strip():
             st.session_state["chat_open"] = True
