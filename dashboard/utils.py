@@ -10,6 +10,7 @@ import numpy as np
 import plotly.graph_objects as go
 from themes import get_theme, THEMES
 from translations import get_t
+import joblib, os
 
 MOIS_FR = ["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"]
 MOIS_EN = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
@@ -428,3 +429,42 @@ def irs_color(val, p50, p75, p90):
     c, l, nk = irs_level(val, p50, p75, p90, T, th)
     emoji = {"faible": "🟢", "modere": "🟡", "eleve": "🟠", "critique": "🔴"}[nk]
     return c, f"{emoji} {l}", nk
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Charger les seuils contextuels
+# ══════════════════════════════════════════════════════════════════════════════
+
+# Charger les seuils contextuels
+
+
+def _load_seuils_contextuels():
+    import os, joblib
+    chemins = [
+        'models/seuils_contextuels.pkl',
+        '../models/seuils_contextuels.pkl',
+    ]
+    for c in chemins:
+        if os.path.exists(c):
+            return joblib.load(c)
+    return None
+
+SEUILS_CONTEXTUELS = _load_seuils_contextuels()
+
+def niveau_contextuel(pm25, ville):
+    """
+    Retourne le niveau contextuel camerounais basé sur p90 historique.
+    Référence : Percentile 90 · AirSentinel 2022-2026 · INS Cameroun (2019)
+    """
+    if SEUILS_CONTEXTUELS is None:
+        return None, None
+
+    seuil_p90 = SEUILS_CONTEXTUELS['par_ville'].get(ville, None)
+    if seuil_p90 is None:
+        return None, None
+
+    ratio = pm25 / seuil_p90
+
+    if   ratio >= 1.0:  return "PIC ANORMAL",  "red"    # dépasse p90 local
+    elif ratio >= 0.75: return "ÉLEVÉ",         "coral"  # 75-100% du p90
+    elif ratio >= 0.50: return "MODÉRÉ",        "amber"  # 50-75% du p90
+    else:               return "NORMAL",        "green"  # < 50% du p90
