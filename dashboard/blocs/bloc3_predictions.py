@@ -541,8 +541,8 @@ def render(profil):
                         tickwidth=2,
                         tickcolor="#94a3b8",
                         tickvals=[0, 15, 25, 37.5, 75, 100],
-                        ticktext=["0", "15", "25", "37", "75", "100"],
-                        tickfont=dict(size=10, color="#94a3b8")
+                        ticktext=["0", "<b>15</b>", "<b>25</b>", "<b>37</b>", "<b>75</b>", "100"],
+                        tickfont=dict(size=13, color="#e2e8f0", family="Arial Black, sans-serif")
                     ),
                     bar=dict(color=nc, thickness=0.04),
                     bgcolor="#1e293b",
@@ -565,7 +565,7 @@ def render(profil):
                 paper_bgcolor="#0f172a",
                 font=dict(color="#e2e8f0"),
                 height=300,
-                margin=dict(l=20, r=20, t=20, b=10)
+                margin=dict(l=50, r=50, t=30, b=10)
             )
             st.plotly_chart(fig_gauge, width="stretch")
 

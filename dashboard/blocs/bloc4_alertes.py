@@ -17,11 +17,12 @@ def _render_irs_gauge(irs, ctx, th, T):
         gauge = {
             'axis': {
                 'range': [0, 1], 
-                'tickwidth': 2, 
-                'tickcolor': th['text3'],
+                'tickwidth': 3, 
+                'tickcolor': th['text'],
                 'tickvals': [0, p50, p75, p90, 1],
                 'ticktext': ["0", f"<b>{p50:.2f}</b>", f"<b>{p75:.2f}</b>", f"<b>{p90:.2f}</b>", "1"],
-                'tickmode': 'array'
+                'tickmode': 'array',
+                'tickfont': {'size': 13, 'color': th['text'], 'family': 'Arial Black, sans-serif'}
             },
             'bar': {'color': th['text'], 'thickness': 0.15},
             'bgcolor': "rgba(0,0,0,0.05)",
@@ -45,7 +46,7 @@ def _render_irs_gauge(irs, ctx, th, T):
         plot_bgcolor = "rgba(0,0,0,0)",
         font = {'color': th['text2'], 'family': "Inter"},
         height = 240,
-        margin = dict(l=40, r=40, t=50, b=20)
+        margin = dict(l=65, r=65, t=50, b=20)
     )
     return fig
 
@@ -68,7 +69,7 @@ def render(profil):
     with ch2:
         st.markdown('<div style="margin-top:34px;"></div>', unsafe_allow_html=True)
         villes = sorted(df_brut["ville"].unique().tolist())
-        sel_lbl = "🏙️ ADMINISTRATION (VILLE) :" if ctx["lang"] == "fr" else "🏙️ ADMINISTRATION (CITY) :"
+        sel_lbl = "**SÉLECTIONNER UNE VILLE :**" if ctx["lang"] == "fr" else "**SELECT A CITY :**"
         ville_sel = st.selectbox(sel_lbl, villes, key="v4_city_split_header")
 
     # Récupérer la période Sidebar

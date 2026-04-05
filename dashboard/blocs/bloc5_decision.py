@@ -564,10 +564,10 @@ def _render_exceptional_radial_gauge(irs, ctx, th):
     fig = go.Figure(go.Indicator(
         mode="gauge", value=irs, domain={'x':[0,1],'y':[0,1]},
         gauge={
-            'axis':{'range':[0,1],'tickwidth':2,'tickcolor':'#94a3b8',
+            'axis':{'range':[0,1],'tickwidth':3,'tickcolor':th['text'],
                     'tickvals':[0,p50,p75,p90,1],
-                    'ticktext':[" 0",f"{p50:.2f}",f"{p75:.2f}",f"{p90:.2f}"," 1"],
-                    'tickfont':{"size":11,"family":"Arial, sans-serif","color":"#94a3b8"}},
+                    'ticktext':["<b>0</b>",f"<b>{p50:.2f}</b>",f"<b>{p75:.2f}</b>",f"<b>{p90:.2f}</b>","<b>1</b>"],
+                    'tickfont':{"size":13,"family":"Arial Black, sans-serif","color":th['text']}},
             'bar':{'color':th['text'],'thickness':0.12},
             'bgcolor':"rgba(0,0,0,0.05)",
             'steps':[{'range':[0,p50],'color':th["green"]},{'range':[p50,p75],'color':th["amber"]},
