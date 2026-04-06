@@ -1,5 +1,6 @@
 import Navbar from "../../components/Navbar";
 import PWAFooter from "../../components/PWAFooter";
+import { VilleProvider } from "@/context/VilleContext";
 
 export default function DashboardLayout({
   children,
@@ -7,12 +8,14 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-[#020c18] text-[#e0f2fe] font-sans">
-      <Navbar />
-      <div className="pt-[64px] pb-[140px] sm:pb-0">
-        {children}
+    <VilleProvider>
+      <div className="min-h-screen bg-[#020c18] text-[#e0f2fe] font-sans">
+        <Navbar />
+        <div className="pt-[64px] pb-[140px] sm:pb-0">
+          {children}
+        </div>
+        <PWAFooter />
       </div>
-      <PWAFooter />
-    </div>
+    </VilleProvider>
   );
 }

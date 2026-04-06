@@ -119,13 +119,39 @@ def _find_col(df, candidates):
             return c
     return None
 
-def _get_niveau_actuel(df) -> str:
-    """Calcule le niveau IRS actuel à partir des dernières données disponibles."""
-    pm25_col = _find_col(df, ["pm2_5_moyen", "pm2_5", "pm25", "PM2.5", "PM25"])
-    if not pm25_col:
-        return "MODÉRÉ"  # Niveau par défaut si données insuffisantes
 
-    last_val = df.sort_values("date").tail(1)[pm25_col].values[0] if "date" in df.columns else df[pm25_col].mean()
+def _get_niveau_actuel(df, ville: Optional[str] = None) -> str:
+    """Calcule le niveau IRS actuel à partir des dernières données disponibles."""
+    niveau_col = _find_col(df, ["niveau_sanitaire", "niveau_alerte", "label"])
+    pm25_col = _find_col(df, ["pm2_5_moyen", "pm2_5", "pm25", "PM2.5", "PM25"])
+    
+    if not pm25_col:
+        return "MODÉRÉ"
+    
+    filtered_df = df
+    city_col = _find_col(df, ["ville", "city"])
+    if ville and city_col:
+        filtered_df = df[df[city_col] == ville]
+    
+    if filtered_df.empty:
+        return "MODÉRÉ"
+    
+    if "date" in filtered_df.columns:
+        filtered_df = filtered_df.sort_values("date")
+    
+    if niveau_col and niveau_col in filtered_df.columns:
+        last_row = filtered_df.tail(1).iloc[0]
+        niveau_str = str(last_row[niveau_col])
+        if "FAIBLE" in niveau_str:
+            return "FAIBLE"
+        elif "MODÉRÉ" in niveau_str or "MOYEN" in niveau_str:
+            return "MODÉRÉ"
+        elif "ÉLEVÉ" in niveau_str or "TRÈS" in niveau_str:
+            return "ÉLEVÉ"
+        elif "CRITIQUE" in niveau_str or "MAUVAIS" in niveau_str:
+            return "CRITIQUE"
+    
+    last_val = filtered_df.tail(1)[pm25_col].values[0] if pm25_col in filtered_df.columns else filtered_df[pm25_col].mean()
 
     if last_val <= 10:
         return "FAIBLE"
@@ -138,14 +164,22 @@ def _get_niveau_actuel(df) -> str:
 
 
 @router.get("/real", response_model=list[ProfilRecommandation])
-def get_recommandations():
+def get_recommandations(ville: Optional[str] = None):
     """
     Retourne les recommandations de santé pour les 4 profils selon le niveau IRS actuel.
     Le niveau est calculé dynamiquement depuis les dernières données du dataset.
+    Si une ville est spécifiée, le niveau est calculé uniquement pour cette ville.
     """
     try:
         df = get_dataframe()
-        niveau = _get_niveau_actuel(df)
+        
+        city_col = _find_col(df, ["ville", "city"])
+        if ville and city_col:
+            filtered = df[df[city_col] == ville]
+            if filtered.empty:
+                raise HTTPException(status_code=404, detail=f"Aucune donnée trouvée pour la ville: {ville}")
+        
+        niveau = _get_niveau_actuel(df, ville)
     except FileNotFoundError:
         niveau = "MODÉRÉ"  # Valeur par défaut si dataset absent
 

@@ -10,8 +10,9 @@ export interface ProfilRecommandation {
 }
 
 const healthService = {
-  getRealRecommendations: async (): Promise<ProfilRecommandation[]> => {
-    const response = await apiClient.get("/decision/real");
+  getRealRecommendations: async (ville?: string): Promise<ProfilRecommandation[]> => {
+    const params = ville ? { ville } : {};
+    const response = await apiClient.get("/decision/real", { params });
     return response.data;
   }
 };

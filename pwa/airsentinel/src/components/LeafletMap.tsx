@@ -17,6 +17,7 @@ import "leaflet.heat";
 
 import mapService from "../services/mapService";
 import { VillePoint } from "../types/map";
+import { useVille } from "../context/VilleContext";
 
 // ── Sous-composant : REAL HEATMAP LAYER ──────────────────────────────────────
 
@@ -64,7 +65,7 @@ function MapSearch({ points, onSelect }: { points: VillePoint[], onSelect: (lat:
   };
 
   return (
-    <div className="absolute top-[90px] left-0 right-0 z-[1000] flex justify-center px-4 pointer-events-none">
+    <div className="absolute top-[70px] left-0 right-0 z-[1000] flex justify-center px-4 pointer-events-none">
       <div className="w-full max-w-[400px] pointer-events-auto">
         <div className="relative group">
           <div className="absolute inset-x-0 -bottom-1 h-px bg-gradient-to-r from-transparent via-[#00d4b1]/50 to-transparent blur-sm opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
@@ -93,6 +94,7 @@ function MapSearch({ points, onSelect }: { points: VillePoint[], onSelect: (lat:
                 <button
                   key={point.city}
                   onClick={() => {
+                    selectVille(point.city);
                     if (point.lat && point.lon) onSelect(point.lat, point.lon);
                     setQuery("");
                     setResults([]);
@@ -193,6 +195,7 @@ export default function LeafletMap() {
   const [map, setMap] = useState<L.Map | null>(null);
   const [points, setPoints] = useState<VillePoint[]>([]);
   const [loading, setLoading] = useState(true);
+  const { selectVille } = useVille();
 
   useEffect(() => {
     const fetchPoints = async () => {

@@ -4,7 +4,8 @@
 !data/**/*.csv
 !data/**/*.xlsx
 !data/**/*.parquet
-*.pkl
+# Allow model files
+!models/**/*.pkl
 __pycache__/
 *.pyc
 .env
