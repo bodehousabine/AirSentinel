@@ -164,15 +164,19 @@ from blocs.bloc6_shap        import render as bloc6
 # ── CSS premium pour les onglets et le bouton À Propos ───────────────────────
 st.markdown(f"""
 <style>
-/* Conteneur des onglets — fond dynamique selon thème */
 .stTabs [data-baseweb="tab-list"] {{
     gap: 2px;
     background: {th['bg_tertiary']} !important;
     border-bottom: 1px solid {th['border_soft']};
     padding: 4px 8px 0 8px;
     border-radius: 10px 10px 0 0;
-    width: fit-content !important;
-    max-width: 100%;
+    width: 100% !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    -webkit-overflow-scrolling: touch !important;
+}}
+.stTabs [data-baseweb="tab-list"]::-webkit-scrollbar {{
+    height: 0px !important;
 }}
 
 /* Chaque onglet */

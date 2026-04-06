@@ -127,6 +127,21 @@ button[data-testid="stBaseButton-secondary"]:hover {
 iframe[title="chatbox.render_chatbox"] {
     position: fixed !important; bottom: 20px !important; right: 20px !important; z-index: 1000000 !important;
 }
+
+/* --- MEDIA QUERIES RESPONSIVE MOBILE --- */
+@media (max-width: 768px) {
+    .brand-title { font-size: 38px !important; }
+    .stApp > header { display: none !important; }
+    .slogan-text { font-size: 20px !important; gap: 8px !important; }
+    .slogan-text span:nth-child(even) { font-size: 18px !important; }
+    div[data-testid="stHorizontalBlock"]:has(div[data-testid="stSelectbox"]) {
+        top: 10px !important; right: 10px !important; gap: 4px !important;
+    }
+    div[data-testid="stSelectbox"] { width: 90px !important; }
+    button[data-testid="stBaseButton-secondary"] {
+        padding: 0 30px !important; font-size: 15px !important; height: 46px !important;
+    }
+}
 </style>
     """.replace("VAR_BG_URL", bg_url).replace("VAR_OVERLAY", overlay).replace("VAR_TEXT", th['text']).replace("VAR_TEXT2", th['text2'])
     st.markdown(css_code, unsafe_allow_html=True)
@@ -141,12 +156,12 @@ iframe[title="chatbox.render_chatbox"] {
         <div style="font-size:13px;color:#00d4b1;letter-spacing:0.7em;text-transform:uppercase;font-family:'DM Mono',monospace;font-weight:700;margin-top:8px;">
             CAMEROUN
         </div>
-        <div style="display:flex;align-items:center;justify-content:center;gap:20px;margin:20px auto;width:320px;">
+        <div style="display:flex;align-items:center;justify-content:center;gap:20px;margin:20px auto;max-width:320px;width:90%;">
             <div style="flex:1;height:1px;background:linear-gradient(to right,transparent,rgba(0,212,177,0.5));"></div>
             <div style="width:7px;height:7px;border-radius:50%;background:#00d4b1;"></div>
             <div style="flex:1;height:1px;background:linear-gradient(to left,transparent,rgba(0,212,177,0.5));"></div>
         </div>
-        <div style="font-size:30px;font-weight:800;color:{th['text']};font-family:'Inter',sans-serif;margin-bottom:30px;display:flex;align-items:center;justify-content:center;gap:15px;flex-wrap:wrap;">
+        <div class="slogan-text" style="font-weight:800;color:{th['text']};font-family:'Inter',sans-serif;margin-bottom:30px;display:flex;align-items:center;justify-content:center;gap:15px;flex-wrap:wrap;font-size:30px;">
             <span>Anticiper</span>
             <span style="color:#00d4b1;font-size:26px;">•</span>
             <span>Alerter</span>
@@ -163,7 +178,7 @@ iframe[title="chatbox.render_chatbox"] {
 
     # 5. Description et Footer
     st.markdown(f"""
-    <div style="text-align:center; margin-top: 25px;">
+    <div style="text-align:center; margin-top: 25px; padding: 0 15px;">
         <div style="font-size:16px;color:{th['text2']};line-height:1.6;max-width:580px;margin:0 auto;">
             {T["landing_desc"]}
         </div>

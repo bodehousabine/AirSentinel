@@ -312,10 +312,10 @@ def banner(img_url, height, title, subtitle, th, accent=None, tint_hex=None, tin
                         transparent 100%);"></div>
         <div style="position:absolute;inset:0;padding:20px 30px;
                     display:flex;flex-direction:column;justify-content:flex-end;">
-            <div style="font-size:42px;font-weight:950;color:#f0f9ff;line-height:1;
-                        text-transform:uppercase;letter-spacing:1.5px;
+            <div style="font-size:clamp(22px, 5vw, 42px);font-weight:950;color:#f0f9ff;line-height:1.1;
+                        text-transform:uppercase;letter-spacing:1px;
                         text-shadow:0 4px 12px rgba(0,0,0,0.5);"> {title}</div>
-            <div style="font-size:20px;color:rgba(255,255,255,0.9);
+            <div style="font-size:clamp(14px, 3vw, 20px);color:rgba(255,255,255,0.9);
                         font-weight:950;text-transform:uppercase;margin-top:4px;
                         letter-spacing:0.8px;">{subtitle}</div>
         </div>
@@ -385,8 +385,8 @@ def kpi_box(value, label, sublabel, color, th):
                 display:flex;flex-direction:column;justify-content:center;
                 box-shadow:0 4px 20px rgba(0,0,0,0.2), 0 0 15px rgba({r},{g},{b},0.12);
                 transition: transform 0.2s ease-in-out;">
-        <div style="font-size:28px;font-weight:800;color:{color};
-                    margin-bottom:6px;line-height:1;
+        <div style="font-size:clamp(22px, 4vw, 28px);font-weight:800;color:{color};
+                    margin-bottom:6px;line-height:1.2;
                     text-shadow: 0 0 12px rgba({r},{g},{b},0.4);
                     font-family:'Inter', sans-serif;">{value}</div>
         <div style="font-size:12px;font-weight:600;color:{th['text']};

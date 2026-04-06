@@ -265,7 +265,7 @@ def render(profil):
             height=710,
             title=dict(text=titre_carte, font=dict(color=th["text"], size=14), y=1, yanchor='top'),
             mapbox=dict(style="open-street-map", center=geo_center, zoom=geo_zoom))
-        st.plotly_chart(fig, width="stretch", config={
+        st.plotly_chart(fig, use_container_width=True, config={
             'scrollZoom': True,
             'displayModeBar': True,
             'displaylogo': False,
@@ -340,7 +340,7 @@ def render(profil):
             title=dict(text=lbl, font=dict(color=th["text"], size=12)))
         fig_reg.update_xaxes(**GRID, tickfont=dict(size=8), tickangle=-35)
         fig_reg.update_yaxes(**GRID)
-        st.plotly_chart(fig_reg, width="stretch")
+        st.plotly_chart(fig_reg, use_container_width=True)
 
     st.markdown("<hr style='border-color:rgba(99,160,255,0.06);margin:8px 0 2px;'>", unsafe_allow_html=True)
 
