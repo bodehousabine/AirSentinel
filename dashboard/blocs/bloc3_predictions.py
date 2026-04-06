@@ -135,12 +135,13 @@ def render(profil):
     modele, scaler, features, arima = _load_models()
     modeles_ok = all(x is not None for x in [modele, scaler, features, arima])
 
-    pred_lbl  = ":material/insights: " + ("Prédiction" if lang == "fr" else "Forecast")
-    perf_lbl  = ":material/analytics: Performance"
-    sim_lbl   = ":material/tune: " + ("Simulateur" if lang == "fr" else "Simulator")
-    month_lbl = ":material/calendar_month: " + ("Calendrier" if lang == "fr" else "Calendar")
-
-    tabs = st.tabs([pred_lbl, perf_lbl, sim_lbl, month_lbl])
+    # ── Sous-Onglets (Définis par les clés bloc3_sub_ong_... dans translations.py)
+    tabs = st.tabs([
+        T["bloc3_sub_ong_1"], 
+        T["bloc3_sub_ong_2"], 
+        T["bloc3_sub_ong_3"], 
+        T["bloc3_sub_ong_4"]
+    ])
 
     # ══════════════════════════════════════════════════════════════════════════
     # ONGLET 1 — Prédiction J/J+1/J+2

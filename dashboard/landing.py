@@ -8,6 +8,7 @@ import os
 from assets import IMAGES
 from themes import get_theme
 from translations import get_t
+from utils import get_img_as_base64
 
 def render_landing():
     # 1. États et Thème
@@ -15,6 +16,10 @@ def render_landing():
     th      = get_theme(th_name)
     lang    = st.session_state.get("lang", "fr")
     T       = get_t(lang)
+
+    # 1.1 Charger le logo personnalisé
+    logo_path = os.path.join(os.path.dirname(__file__), "..", "assets", "logo.jpg")
+    logo_b64  = get_img_as_base64(logo_path)
 
     bg_url  = IMAGES["bg_app"]
     overlay = th["bg_image_overlay"]
@@ -95,23 +100,26 @@ div[data-testid="stHorizontalBlock"]:not(:has(div[data-testid="stSelectbox"])) {
     justify-content: center !important;
 }
 
-/* Bouton CTA style Pill blanc */
-button[data-testid="stBaseButton-secondary"] {
-    background: #00d4b1 !important;
-    color: #003d38 !important;
+/* Bouton CTA style Premium avec Dégradé */
+button[data-testid*="stBaseButton"] {
+    background: linear-gradient(135deg, #05f2cb 0%, #00d4b1 100%) !important;
+    color: #00302b !important;
     border-radius: 50px !important;
-    height: 54px !important;
-    padding: 0 55px !important;
-    font-size: 18px !important;
-    font-weight: 800 !important;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2) !important;
+    height: 64px !important;
+    padding: 0 60px !important;
+    font-size: 26px !important;
+    font-weight: 900 !important;
+    box-shadow: 0 10px 40px rgba(0, 212, 177, 0.25) !important;
     border: none !important;
-    transition: all 0.3s ease !important;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
     font-family: 'Inter', sans-serif !important;
+    letter-spacing: 0.01em !important;
+    text-transform: none !important;
 }
-button[data-testid="stBaseButton-secondary"]:hover {
-    transform: translateY(-3px) !important;
-    box-shadow: 0 15px 45px rgba(0,0,0,0.3) !important;
+button[data-testid*="stBaseButton"]:hover {
+    transform: scale(1.05) translateY(-2px) !important;
+    box-shadow: 0 15px 50px rgba(0, 212, 177, 0.45) !important;
+    filter: brightness(1.1) !important;
 }
 
 .brand-title {
@@ -119,8 +127,9 @@ button[data-testid="stBaseButton-secondary"]:hover {
     font-weight: 800;
     letter-spacing: -0.04em;
     font-family: 'Inter', sans-serif;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
-.brand-air { color: VAR_TEXT; }
+.brand-air { color: #FFFFFF; }
 .brand-sentinel { color: #00d4b1; }
 
 /* Chatbox */
@@ -130,16 +139,26 @@ iframe[title="chatbox.render_chatbox"] {
 
 /* --- MEDIA QUERIES RESPONSIVE MOBILE --- */
 @media (max-width: 768px) {
-    .brand-title { font-size: 38px !important; }
+    .brand-title { font-size: 36px !important; }
     .stApp > header { display: none !important; }
-    .slogan-text { font-size: 20px !important; gap: 8px !important; }
-    .slogan-text span:nth-child(even) { font-size: 18px !important; }
+    .slogan-text { font-size: 19px !important; gap: 8px !important; }
+    .slogan-text span:nth-child(even) { font-size: 16px !important; }
     div[data-testid="stHorizontalBlock"]:has(div[data-testid="stSelectbox"]) {
         top: 10px !important; right: 10px !important; gap: 4px !important;
     }
     div[data-testid="stSelectbox"] { width: 90px !important; }
-    button[data-testid="stBaseButton-secondary"] {
-        padding: 0 30px !important; font-size: 15px !important; height: 46px !important;
+    button[data-testid*="stBaseButton"] {
+        padding: 0 32px !important; font-size: 22px !important; height: 58px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .brand-title { font-size: 28px !important; }
+    .slogan-text { font-size: 16px !important; flex-direction: column; gap: 4px !important; }
+    .slogan-text span:nth-child(even) { display: none !important; }
+    .block-container { padding-top: 40px !important; justify-content: flex-start !important; }
+    button[data-testid*="stBaseButton"] {
+        padding: 0 25px !important; font-size: 19px !important; height: 54px !important;
     }
 }
 </style>
@@ -149,23 +168,26 @@ iframe[title="chatbox.render_chatbox"] {
     # 3. Logo + AirSentinel + CAMEROUN + séparateur + Slogan
     st.markdown(f"""
     <div style="text-align:center; padding-top: 0; margin-bottom: 10px;">
-        <div style="font-size:65px; margin-bottom:12px; filter:drop-shadow(0 15px 35px rgba(0,212,177,0.4));">🌍</div>
+        <div style="margin-bottom:20px; display:flex; justify-content:center;">
+            <img src="data:image/jpeg;base64,{logo_b64}" 
+                 style="width:100%; max-width:180px; height:auto; display:block;">
+        </div>
         <div class="brand-title">
             <span class="brand-air">Air</span><span class="brand-sentinel">Sentinel</span>
         </div>
-        <div style="font-size:13px;color:#00d4b1;letter-spacing:0.7em;text-transform:uppercase;font-family:'DM Mono',monospace;font-weight:700;margin-top:8px;">
+        <div style="font-size:13px;color:{'#00d4b1' if th['name']=='dark' else '#00826e'};letter-spacing:0.7em;text-transform:uppercase;font-family:'DM Mono',monospace;font-weight:700;margin-top:8px;">
             CAMEROUN
         </div>
         <div style="display:flex;align-items:center;justify-content:center;gap:20px;margin:20px auto;max-width:320px;width:90%;">
-            <div style="flex:1;height:1px;background:linear-gradient(to right,transparent,rgba(0,212,177,0.5));"></div>
-            <div style="width:7px;height:7px;border-radius:50%;background:#00d4b1;"></div>
-            <div style="flex:1;height:1px;background:linear-gradient(to left,transparent,rgba(0,212,177,0.5));"></div>
+            <div style="flex:1;height:1px;background:linear-gradient(to right,transparent,{'rgba(0,212,177,0.5)' if th['name']=='dark' else 'rgba(0,130,110,0.4)'});"></div>
+            <div style="width:7px;height:7px;border-radius:50%;background:{'#00d4b1' if th['name']=='dark' else '#00826e'};"></div>
+            <div style="flex:1;height:1px;background:linear-gradient(to left,transparent,{'rgba(0,212,177,0.5)' if th['name']=='dark' else 'rgba(0,130,110,0.4)'});"></div>
         </div>
         <div class="slogan-text" style="font-weight:800;color:{th['text']};font-family:'Inter',sans-serif;margin-bottom:30px;display:flex;align-items:center;justify-content:center;gap:15px;flex-wrap:wrap;font-size:30px;">
             <span>Anticiper</span>
-            <span style="color:#00d4b1;font-size:26px;">•</span>
+            <span style="color:{'#00d4b1' if th['name']=='dark' else '#00826e'};font-size:26px;">•</span>
             <span>Alerter</span>
-            <span style="color:#00d4b1;font-size:26px;">•</span>
+            <span style="color:{'#00d4b1' if th['name']=='dark' else '#00826e'};font-size:26px;">•</span>
             <span>Protéger</span>
         </div>
     </div>

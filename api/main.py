@@ -132,16 +132,27 @@ def _load_models():
             }
     return None
 
+def _load_seuils_ctx():
+    base = _get_base_dir()
+    for chemin in [os.path.join(base, "models"), os.path.join(base, "..", "models")]:
+        p = os.path.join(chemin, "seuils_contextuels.pkl")
+        if os.path.exists(p):
+            return joblib.load(p)
+    return None
+
 # Chargement au démarrage
 try:
-    DF     = _load_dataset()
-    MODELS = _load_models()
+    DF         = _load_dataset()
+    MODELS     = _load_models()
+    SEUILS_CTX = _load_seuils_ctx()
     print(f"✅ Dataset chargé : {len(DF):,} lignes · {DF['date'].max().date()}")
     print(f"✅ Modèles : {'chargés' if MODELS else 'non disponibles'}")
+    print(f"✅ Seuils Contextuels : {'chargés' if SEUILS_CTX else 'non disponibles'}")
 except Exception as e:
     print(f"❌ Erreur chargement : {e}")
-    DF     = None
-    MODELS = None
+    DF         = None
+    MODELS     = None
+    SEUILS_CTX = None
 
 # ─────────────────────────────────────────────────────────────────────────────
 # FONCTIONS UTILITAIRES
@@ -197,6 +208,8 @@ def _predire_ville(ville: str, steps: int = 3) -> list:
 
 def _check_ville(ville: str):
     """Vérifie que la ville existe dans le dataset."""
+    if ville == "Toutes les villes":
+        return
     if DF is None:
         raise HTTPException(status_code=503, detail="Dataset non disponible")
     villes = DF["ville"].unique().tolist()
@@ -239,22 +252,41 @@ def root():
 
 @app.get("/villes", tags=["Données"])
 def liste_villes():
-    """Retourne la liste des 40 villes disponibles avec leurs coordonnées."""
+    """Retourne la liste des 40 villes disponibles avec leurs coordonnées et données en temps réel."""
     if DF is None:
         raise HTTPException(status_code=503, detail="Dataset non disponible")
 
-    villes = (
-        DF.drop_duplicates("ville")[["ville", "region", "latitude", "longitude"]]
-        .sort_values("ville")
-        .to_dict(orient="records")
-    )
-    # Ajouter zone climatique
-    for v in villes:
-        v["zone"] = _get_zone(v["region"])
+    date_max = DF["date"].max()
+    df_jour  = DF[DF["date"] == date_max]
+
+    villes_list = []
+    df_unique = DF.drop_duplicates("ville")[["ville", "region", "latitude", "longitude"]].sort_values("ville")
+    
+    for _, row in df_unique.iterrows():
+        v = row["ville"]
+        # PM2.5 Actuel
+        df_v_jour = df_jour[df_jour["ville"] == v]
+        pm25_actuel = float(df_v_jour["pm2_5_moyen"].mean()) if len(df_v_jour) > 0 else 0.0
+        
+        # Seuil ctx local
+        seuil = 40.5
+        if SEUILS_CTX and v in SEUILS_CTX.get("par_ville", {}):
+            seuil = round(SEUILS_CTX["par_ville"][v], 1)
+
+        villes_list.append({
+            "ville":       v,
+            "region":      row["region"],
+            "latitude":    row["latitude"],
+            "longitude":   row["longitude"],
+            "zone":        _get_zone(row["region"]),
+            "pm25_actuel": round(pm25_actuel, 2),
+            "niveau_code": _get_niveau(pm25_actuel)["code"],
+            "seuil_cmr":   seuil
+        })
 
     return {
-        "count":  len(villes),
-        "villes": villes,
+        "count":  len(villes_list),
+        "villes": villes_list,
     }
 
 
@@ -287,23 +319,29 @@ def donnees_ville(
     """Retourne les dernières données d'une ville (PM2.5, météo, IRS...)."""
     _check_ville(ville)
 
-    df_v = DF[DF["ville"] == ville].sort_values("date").tail(jours)
+    if ville == "Toutes les villes":
+        df_v = DF.groupby("date").mean(numeric_only=True).reset_index().sort_values("date").tail(jours)
+        region_v = "National"
+        zone_v = "National"
+    else:
+        df_v = DF[DF["ville"] == ville].sort_values("date").tail(jours)
+        region_v = df_v["region"].iloc[0] if len(df_v) > 0 else ""
+        zone_v   = _get_zone(region_v) if len(df_v) > 0 else ""
 
-    cols = ["date", "ville", "region", "pm2_5_moyen", "pm2_5_max",
-            "IRS", "niveau_sanitaire", "polluant_dominant",
-            "temperature_2m_max", "wind_speed_10m_max",
-            "precipitation_sum", "dust_moyen", "us_aqi_moyen"]
+    cols = ["date", "pm2_5_moyen", "pm2_5_max", "IRS", "temperature_2m_max", "wind_speed_10m_max", "precipitation_sum", "dust_moyen", "us_aqi_moyen"]
+    if ville != "Toutes les villes":
+        cols.extend(["ville", "region", "niveau_sanitaire", "polluant_dominant"])
+
     cols_ok = [c for c in cols if c in df_v.columns]
     df_out  = df_v[cols_ok].copy()
     df_out["date"] = df_out["date"].dt.strftime("%Y-%m-%d")
 
-    derniere = df_out.iloc[-1].to_dict() if len(df_out) > 0 else {}
     pm25_last = float(df_v["pm2_5_moyen"].iloc[-1]) if len(df_v) > 0 else 0
 
     return {
         "ville":        ville,
-        "region":       df_v["region"].iloc[0] if len(df_v) > 0 else "",
-        "zone":         _get_zone(df_v["region"].iloc[0]) if len(df_v) > 0 else "",
+        "region":       region_v,
+        "zone":         zone_v,
         "derniere_date": str(df_v["date"].max().date()) if len(df_v) > 0 else "",
         "pm25_actuel":  round(pm25_last, 2),
         "niveau":       _get_niveau(pm25_last),
@@ -321,10 +359,19 @@ def predire_ville(ville: str):
     """
     _check_ville(ville)
 
-    df_v   = DF[DF["ville"] == ville].sort_values("date")
-    region = df_v["region"].iloc[-1] if len(df_v) > 0 else "Centre"
-    zone   = _get_zone(region)
-    preds  = _predire_ville(ville, steps=3)
+    if ville == "Toutes les villes":
+        df_v = DF.groupby("date").mean(numeric_only=True).reset_index().sort_values("date")
+        region = "National"
+        zone = "National"
+        all_preds = []
+        for city in DF["ville"].unique():
+             all_preds.append(_predire_ville(city, steps=3))
+        preds = np.mean([p for p in all_preds if len(p)==3], axis=0).tolist() if len(all_preds)>0 else [15,15,15]
+    else:
+        df_v   = DF[DF["ville"] == ville].sort_values("date")
+        region = df_v["region"].iloc[-1] if len(df_v) > 0 else "Centre"
+        zone   = _get_zone(region)
+        preds  = _predire_ville(ville, steps=3)
 
     if not preds:
         raise HTTPException(status_code=500, detail="Erreur lors de la prédiction")
@@ -345,10 +392,28 @@ def predire_ville(ville: str):
             "niveau":        _get_niveau(pred),
         })
 
+    hist_60j = df_v.groupby("date")["pm2_5_moyen"].mean().tail(60).reset_index()
+    historique_dates = hist_60j["date"].dt.strftime("%Y-%m-%d").tolist()
+    historique_pm25  = hist_60j["pm2_5_moyen"].round(2).tolist()
+
+    seuil_cmr = 40.5
+    if ville == "Toutes les villes":
+        if SEUILS_CTX and "par_ville" in SEUILS_CTX:
+            vals = list(SEUILS_CTX["par_ville"].values())
+            seuil_cmr = round(sum(vals)/len(vals), 1) if vals else 40.5
+    else:
+        if SEUILS_CTX and ville in SEUILS_CTX.get("par_ville", {}):
+            seuil_cmr = round(SEUILS_CTX["par_ville"][ville], 1)
+
     return {
         "ville":       ville,
         "region":      region,
         "zone":        zone,
+        "seuil_cmr":   seuil_cmr,
+        "historique": {
+            "dates": historique_dates,
+            "pm25":  historique_pm25
+        },
         "predictions": predictions,
         "modele": {
             "nom":  "Hybride RL+ARIMA",
@@ -369,11 +434,19 @@ def alerte_ville(ville: str):
     """
     _check_ville(ville)
 
-    df_v   = DF[DF["ville"] == ville].sort_values("date")
-    date_max = df_v["date"].max()
-    df_jour  = df_v[df_v["date"] == date_max]
+    if ville == "Toutes les villes":
+        df_v = DF.groupby("date").mean(numeric_only=True).reset_index().sort_values("date")
+        date_max = df_v["date"].max()
+        df_jour  = df_v[df_v["date"] == date_max]
+        pm25 = float(df_jour["pm2_5_moyen"].mean()) if len(df_jour) > 0 else 15.0
+        region_v = "National"
+    else:
+        df_v   = DF[DF["ville"] == ville].sort_values("date")
+        date_max = df_v["date"].max()
+        df_jour  = df_v[df_v["date"] == date_max]
+        pm25   = float(df_jour["pm2_5_moyen"].mean()) if len(df_jour) > 0 else float(df_v["pm2_5_moyen"].mean())
+        region_v = df_v["region"].iloc[0] if len(df_v) > 0 else ""
 
-    pm25   = float(df_jour["pm2_5_moyen"].mean()) if len(df_jour) > 0 else float(df_v["pm2_5_moyen"].mean())
     niveau = _get_niveau(pm25)
     snk    = niveau["code"]
 
@@ -419,8 +492,8 @@ def alerte_ville(ville: str):
 
     return {
         "ville":       ville,
-        "region":      df_v["region"].iloc[0] if len(df_v) > 0 else "",
-        "zone":        _get_zone(df_v["region"].iloc[0]) if len(df_v) > 0 else "",
+        "region":      region_v,
+        "zone":        _get_zone(region_v) if region_v != "National" else "National",
         "date":        str(date_max.date()),
         "pm25":        round(pm25, 2),
         "niveau":      niveau,

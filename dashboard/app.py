@@ -12,12 +12,12 @@ import streamlit as st
 from assets import IMAGES
 from themes import get_theme, build_css
 from translations import get_t
-from utils import load_data
+from utils import load_data, get_img_as_base64
 from landing import render_landing
 
 st.set_page_config(
     page_title="AirSentinel Cameroun",
-    page_icon="🌍",
+    page_icon="assets/logo.jpg",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -42,7 +42,9 @@ if st.session_state["page"] == "landing":
 th = get_theme(st.session_state.get("theme_name", "dark"))
 T  = get_t(st.session_state.get("lang", "fr"))
 
-# ── Charger les années disponibles dynamiquement ──────────────────────────────
+# ── Charger le logo en Base64 ──────────────────────────────────────────────
+_logo_path = os.path.join(_dashboard_dir, "..", "assets", "logo.jpg")
+_logo_b64  = get_img_as_base64(_logo_path)
 _df_data = load_data()
 _an_max  = int(_df_data["date"].dt.year.max())
 _an_min  = int(_df_data["date"].dt.year.min())
@@ -51,7 +53,7 @@ with st.sidebar:
     # ── Logo ──────────────────────────────────────────────────────────────────
     st.markdown(f"""
     <div style="position:relative;border-radius:14px;overflow:hidden;
-                height:140px;margin-bottom:14px;
+                height:195px;margin-bottom:14px;
                 border:1px solid rgba(0,212,177,0.28);
                 box-shadow:0 4px 28px rgba(0,212,177,0.14);">
         <img src="{IMAGES['sidebar_top']}"
@@ -61,8 +63,10 @@ with st.sidebar:
         <div style="position:absolute;inset:0;
                     background:{'linear-gradient(135deg,rgba(0,212,177,0.42) 0%,rgba(2,12,24,0.78) 100%)' if th['name']=='dark' else 'linear-gradient(135deg,rgba(0,212,177,0.2) 0%,rgba(212,235,248,0.8) 100%)'};"></div>
         <div style="position:absolute;inset:0;display:flex;flex-direction:column;
-                    align-items:center;justify-content:center;text-align:center;padding:10px;">
-            <div style="font-size:32px;margin-bottom:4px;">🌍</div>
+                    align-items:center;justify-content:flex-start;text-align:center;padding:15px 10px;">
+            <div style="margin-bottom:10px;">
+                <img src="data:image/jpeg;base64,{_logo_b64}" style="width:62px;height:auto;border-radius:10px;">
+            </div>
             <div style="font-size:28px;font-weight:900;color:{th['text']};letter-spacing:-0.03em;text-shadow: 0px 3px 6px rgba(0,0,0,0.5);">AirSentinel</div>
             <div style="font-size:12px;font-weight:800;color:{ th['teal'] if th['name']=='dark' else '#006b58' };letter-spacing:.16em;
                         margin-top:3px;font-family:'DM Mono',monospace;">
@@ -141,11 +145,11 @@ with st.sidebar:
 
     # ── Footer ────────────────────────────────────────────────────────────────
     lines = T["sidebar_footer"].split("\n")
+    footer_html = "<br>".join(lines)
     st.markdown(
         f"<div style='font-size:10px;color:{th['text3']};text-align:center;"
         f"line-height:1.9;font-family:DM Mono,monospace;'>"
-        f"{lines[0]}<br>{lines[1]}<br>"
-        f"<span style='color:{th['teal']};'>{lines[2]}</span></div>",
+        f"{footer_html}</div>",
         unsafe_allow_html=True
     )
 

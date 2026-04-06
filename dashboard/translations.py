@@ -94,8 +94,8 @@ TRANSLATIONS = {
         "en": "No filter — all data",
     },
     "sidebar_footer": {
-        "fr": "IndabaX Cameroon 2026\nDPA Green Tech · ISSEA · ENSP\n17 mars → 7 avril 2026",
-        "en": "IndabaX Cameroon 2026\nDPA Green Tech · ISSEA · ENSP\nMarch 17 → April 7, 2026",
+        "fr": "IndabaX Cameroon 2026\nDPA Green Tech · ISSEA · ENSPY",
+        "en": "IndabaX Cameroon 2026\nDPA Green Tech · ISSEA · ENSPY",
     },
 
     # ══════════════════════════════════════════════════════════════════════════
@@ -134,32 +134,32 @@ TRANSLATIONS = {
     # TABS
     # ══════════════════════════════════════════════════════════════════════════
     "tab_carte": {
-        "fr": "Carte interactive",
-        "en": "Interactive map",
+        "fr": "CARTE INTERACTIVE",
+        "en": "INTERACTIVE MAP",
     },
     "tab_kpis": {
-        "fr": "Indicateurs KPI",
-        "en": "Key indicators",
+        "fr": "INDICATEURS KPI",
+        "en": "KEY INDICATORS",
     },
     "tab_predictions": {
-        "fr": "Prédictions",
-        "en": "Predictions",
+        "fr": "PRÉDICTIONS",
+        "en": "PREDICTIONS",
     },
     "tab_alertes": {
-        "fr": "Alertes",
-        "en": "Alerts",
+        "fr": "ALERTES",
+        "en": "ALERTS",
     },
     "tab_decision": {
-        "fr": "Décision santé",
-        "en": "Health decisions",
+        "fr": "DÉCISION SANTÉ",
+        "en": "HEALTH DECISION",
     },
     "tab_contexte": {
-        "fr": "Contexte",
-        "en": "Context",
+        "fr": "CONTEXTE",
+        "en": "CONTEXT",
     },
     "tab_about": {
-        "fr": "À Propos",
-        "en": "About",
+        "fr": "À PROPOS",
+        "en": "ABOUT",
     },
 
     # ══════════════════════════════════════════════════════════════════════════
@@ -286,16 +286,36 @@ TRANSLATIONS = {
         "en": "Short term 24h–72h · HRI simulator · Monthly calendar",
     },
     "bloc3_tab_short": {
-        "fr": "⚡ Court terme 24h–72h",
-        "en": "⚡ Short term 24h–72h",
+        "fr": ":material/insights: Prédiction 72h",
+        "en": ":material/insights: 72h Prediction",
+    },
+    "bloc3_tab_perf": {
+        "fr": ":material/analytics: Performance",
+        "en": ":material/analytics: Performance",
     },
     "bloc3_tab_sim": {
-        "fr": "📅 Simulateur IRS",
-        "en": "📅 HRI Simulator",
+        "fr": ":material/tune: Simulateur",
+        "en": ":material/tune: Simulator",
     },
     "bloc3_tab_monthly": {
-        "fr": "📆 Calendrier mensuel",
-        "en": "📆 Monthly calendar",
+        "fr": ":material/calendar_month: Calendrier",
+        "en": ":material/calendar_month: Calendar",
+    },
+    "bloc3_sub_ong_1": {
+        "fr": ":material/insights: PREDICTION J/J+1/J+2",
+        "en": ":material/insights: FORECAST D/D+1/D+2",
+    },
+    "bloc3_sub_ong_2": {
+        "fr": ":material/analytics: PERFORMANCE",
+        "en": ":material/analytics: PERFORMANCE",
+    },
+    "bloc3_sub_ong_3": {
+        "fr": ":material/tune: SIMULATEUR IRS",
+        "en": ":material/tune: HRI SIMULATOR",
+    },
+    "bloc3_sub_ong_4": {
+        "fr": ":material/calendar_month: CALENDRIER",
+        "en": ":material/calendar_month: CALENDAR",
     },
     "bloc3_city_select": {
         "fr": "Ville pour la prédiction 72h",
@@ -584,8 +604,8 @@ TRANSLATIONS = {
     "landing_count_obs":     {"fr": "observations", "en": "observations"},
     "landing_count_pred":    {"fr": "prédictions",  "en": "predictions"},
     "landing_btn_enter": {
-        "fr": "🚀  Accéder au Dashboard  →",
-        "en": "🚀  Open Dashboard  →",
+        "fr": "Accéder au Dashboard",
+        "en": "Open Dashboard",
     },
     "landing_about_btn": {
         "fr": "ℹ️  À Propos",

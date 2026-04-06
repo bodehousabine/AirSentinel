@@ -6,7 +6,7 @@ Ce projet est conçu pour apporter des solutions technologiques concrètes et  i
 - BODEHOU Sabine (ISSEA) — Data Science
 - FANKAM Marc Aurel (ISSEA) — Modélisation
 - PEURBAR RIMBAR Firmin (ISSEA) — SHAP & Rapport
-- FOFACK ALEMDJOU Henri Joël (ENSP) — Frontend & API
+- FOFACK ALEMDJOU Henri Joël (ENSPY) — Frontend & API
 
 ## Installation
 pip install -r requirements.txt
