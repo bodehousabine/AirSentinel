@@ -13,10 +13,11 @@ Ce projet est conçu pour apporter des solutions technologiques concrètes et in
 
 ## ✨ Fonctionnalités Clés
 - **Prédiction IA** : Estimation de la qualité de l'air basée sur des modèles XGBoost/LightGBM.
+- **Simulateur Interactif (AI Lab)** : Manipulez les variables météo pour voir l'impact immédiat sur le PM2.5.
+- **Alertes Temps Réel (SMTP)** : Abonnez-vous à une ville pour recevoir des notifications mail en cas d'alerte.
 - **Interprétabilité (SHAP)** : Compréhension détaillée de l'impact de chaque variable sur les prédictions.
-- **Tableau de Bord Interactif** : Interface utilisateur riche construite avec Streamlit.
+- **Dashboard Premium (PWA)** : Interface Next.js 15 ultra-moderne avec glassmorphism et animations fluides.
 - **API RESTful** : Backend performant avec FastAPI pour exposer le modèle de prédiction.
-- **Support PWA** : Accessible en tant que Progressive Web App.
 
 ---
 
@@ -26,17 +27,19 @@ L'arborescence des dossiers et fichiers principaux de l'application :
 
 ```text
 AirSentinel/
-├── api/                   # Code de l'API RESTful
-│   └── main.py            # Point d'entrée principal de FastAPI
-├── dashboard/             # Application interface utilisateur
-│   ├── app.py             # Script principal de l'application Streamlit
-│   ├── blocs/             # Composants modulaires de l'UI
-│   ├── utils/             # Fonctions utilitaires
-│   ├── assets.py          # Gestion des assets (images, logos)
-│   ├── chatbox.py         # Module de chat intégré
-│   ├── landing.py         # Page d'accueil du dashboard
-│   ├── themes.py          # Configuration des thèmes visuels
-│   └── translations.py    # Textes et traductions de l'application
+├── api/                   # Backend FastAPI
+│   ├── routers/           # Endpoints (Prédictions, Alertes, Users...)
+│   ├── services/          # Logique métier (Mail, Calculs, Data...)
+│   ├── models/            # Modèles de base de données (SQLAlchemy)
+│   └── main.py            # Point d'entrée principal
+├── pwa/airsentinel        # Frontend Moderne (Next.js 15)
+│   ├── src/app/dashboard  # Pages du tableau de bord
+│   └── src/services       # Clients API (Axios)
+├── dashboard/             # Ancien Dashboard (Streamlit - Backup)
+├── data/                  # Données brutes et préparées
+├── models/                # Fichiers de modèles ML (.joblib)
+├── notebooks/             # Notebooks de Data Science
+└── README.md
 ├── data/                  # Données du projet de modélisation
 │   ├── raw/               # Données brutes
 │   └── processed/         # Données nettoyées et préparées
@@ -81,29 +84,32 @@ pip install -r requirements.txt
 
 ---
 
-## 🚀 Utilisation
-
-Le projet est divisé en deux services principaux : l'API de prédiction et le Dashboard utilisateur.
+Le projet est divisé en deux services principaux : l'API de prédiction et l'interface PWA moderne.
 
 ### Lancer l'API (Backend)
-L'API sert le modèle Machine Learning (FastAPI).
+L'API sert le modèle Machine Learning et gère les abonnements aux alertes.
 ```bash
 uvicorn api.main:app --reload
 ```
-L'API sera disponible à l'adresse locale `http://127.0.0.1:8000`. Vous pouvez consulter la documentation de l'API sur `http://127.0.0.1:8000/docs`.
+Documentation Swagger : `http://127.0.0.1:8000/api/v1/docs`.
 
-### Lancer le Dashboard (Frontend)
-L'application Streamlit pour l'interaction utilisateur.
+### Lancer la PWA (Frontend Moderne)
+Navigateur recommandé : Chrome/Edge pour support PWA.
 ```bash
-streamlit run dashboard/app.py
+cd pwa/airsentinel
+npm install
+npm run dev
 ```
-Le dashboard s'ouvrira automatiquement dans votre navigateur par défaut (généralement `http://localhost:8501`).
+Accès : `http://localhost:3000/dashboard/predictions`.
+
+### Configuration des Alertes (SMTP)
+Créez un fichier `api/.env` à partir de `api/.env.example` et renseignez vos identifiants SMTP (Gmail, SendGrid, etc.) pour activer les notifications par mail.
 
 ---
 
 ## 💻 Pile Technologique
-- **Langage** : Python 3
-- **Data Science** : Pandas, NumPy, Scikit-learn, XGBoost, LightGBM, SHAP, SciPy
-- **Visualisation** : Matplotlib, Seaborn, Plotly, Folium
-- **Backend/API** : FastAPI, Uvicorn
-- **Frontend** : Streamlit
+- **Backend** : FastAPI, SQLAlchemy, Pydantic, Uvicorn
+- **Frontend** : Next.js 15 (App Router), Tailwind CSS v4, Framer Motion, Lucide Icons, Recharts
+- **Data Science** : Pandas, Scikit-learn, XGBoost, LightGBM, SHAP
+- **Base de Données & Stockage** : Supabase (Auth/Storage/Postgres)
+- **Notification** : SMTP Protocol

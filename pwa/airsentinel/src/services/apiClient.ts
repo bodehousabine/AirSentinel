@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Access the API URL, ensuring the /api/v1 prefix is present
 const rawBaseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-const baseURL = rawBaseURL.endsWith("/api/v1/") ? rawBaseURL : (rawBaseURL.endsWith("/api/v1") ? `${rawBaseURL}/` : `${rawBaseURL}/api/v1/`);
+const baseURL = rawBaseURL.endsWith("/api/v1") ? rawBaseURL : `${rawBaseURL}/api/v1`;
 
 const apiClient = axios.create({
   baseURL,

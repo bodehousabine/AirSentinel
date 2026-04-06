@@ -15,6 +15,11 @@ settings = get_settings()
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
+@router.get("/test")
+async def test_users_router():
+    return {"status": "ok", "message": "Users router is working and reachable."}
+
+
 # Initialisation du client Supabase pour le stockage
 supabase: Client = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
