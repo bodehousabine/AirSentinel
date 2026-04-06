@@ -63,8 +63,8 @@ with st.sidebar:
         <div style="position:absolute;inset:0;display:flex;flex-direction:column;
                     align-items:center;justify-content:center;text-align:center;padding:10px;">
             <div style="font-size:32px;margin-bottom:4px;">🌍</div>
-            <div style="font-size:17px;font-weight:600;color:{th['text']};">AirSentinel</div>
-            <div style="font-size:10px;color:{ th['teal'] if th['name']=='dark' else '#006b58' };letter-spacing:.16em;
+            <div style="font-size:28px;font-weight:900;color:{th['text']};letter-spacing:-0.03em;text-shadow: 0px 3px 6px rgba(0,0,0,0.5);">AirSentinel</div>
+            <div style="font-size:12px;font-weight:800;color:{ th['teal'] if th['name']=='dark' else '#006b58' };letter-spacing:.16em;
                         margin-top:3px;font-family:'DM Mono',monospace;">
                 {T['sidebar_app_subtitle']}
             </div>
@@ -82,7 +82,7 @@ with st.sidebar:
 
     # ── Paramètres (Thème & Langue) ──────────────────────────────────────────
     st.markdown(
-        f"<div style='font-size:10px;text-transform:uppercase;letter-spacing:.1em;"
+        f"<div style='font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;"
         f"color:{th['text3']};margin-bottom:8px;'>{T['sidebar_theme_title']} & {T['sidebar_lang_title']}</div>",
         unsafe_allow_html=True
     )
@@ -110,7 +110,7 @@ with st.sidebar:
 
     # ── Profil ────────────────────────────────────────────────────────────────
     st.markdown(
-        f"<div style='font-size:10px;text-transform:uppercase;letter-spacing:.1em;"
+        f"<div style='font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;"
         f"color:{th['text3']};margin-bottom:8px;'>{T['sidebar_profile_title']}</div>",
         unsafe_allow_html=True
     )
@@ -126,7 +126,7 @@ with st.sidebar:
 
     # ── Filtre années ─────────────────────────────────────────────────────────
     st.markdown(
-        f"<div style='font-size:10px;text-transform:uppercase;letter-spacing:.1em;"
+        f"<div style='font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;"
         f"color:{th['text3']};margin-bottom:8px;'>{T['sidebar_period_label']}</div>",
         unsafe_allow_html=True
     )
@@ -182,15 +182,15 @@ st.markdown(f"""
 /* Chaque onglet */
 .stTabs [data-baseweb="tab"] {{
     font-family: 'Inter', 'DM Sans', sans-serif !important;
-    font-size: 15px !important;
-    font-weight: 950 !important;
-    letter-spacing: 0.12em !important;
+    font-size: 13.5px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.04em !important;
     text-transform: uppercase !important;
     color: {th['text2']} !important; 
     background: transparent !important;
     border: none !important;
     border-radius: 6px 6px 0 0 !important;
-    padding: 12px 22px !important;
+    padding: 10px 10px !important;
     transition: all 0.25s ease !important;
 }}
 
@@ -206,46 +206,30 @@ st.markdown(f"""
     background: {th['border_soft']} !important;
     border-bottom: 3px solid {th['teal']} !important;
     font-weight: 950 !important;
-    font-size: 16px !important;
+    font-size: 15px !important;
 }}
 
 /* Cacher le highlight Streamlit par défaut */
 .stTabs [data-baseweb="tab-highlight"] {{
     display: none !important;
 }}
+
+/* TRADUCTION SANS RECHARGEMENT DE COMPOSANT STREAMLIT */
+.stTabs [data-baseweb="tab"] p {{ display: none !important; }}
+.stTabs [data-baseweb="tab"]:nth-child(1)::after {{ content: "{T['tab_carte']}"; display: block; }}
+.stTabs [data-baseweb="tab"]:nth-child(2)::after {{ content: "{T['tab_kpis']}"; display: block; }}
+.stTabs [data-baseweb="tab"]:nth-child(3)::after {{ content: "{T['tab_predictions']}"; display: block; }}
+.stTabs [data-baseweb="tab"]:nth-child(4)::after {{ content: "{T['tab_alertes']}"; display: block; }}
+.stTabs [data-baseweb="tab"]:nth-child(5)::after {{ content: "{T['tab_decision']}"; display: block; }}
+.stTabs [data-baseweb="tab"]:nth-child(6)::after {{ content: "{T['tab_contexte']}"; display: block; }}
+.stTabs [data-baseweb="tab"]:nth-child(7)::after {{ content: "{T['tab_about']}"; display: block; }}
 </style>
 """, unsafe_allow_html=True)
 
 # ── Barre d'onglets (les rubriques de contenu + À Propos) ───────────────────
-tabs = st.tabs([
-    T["tab_carte"], T["tab_kpis"], T["tab_predictions"],
-    T["tab_alertes"], T["tab_decision"], T["tab_contexte"], T["tab_about"]
-])
+tabs = st.tabs(["1", "2", "3", "4", "5", "6", "7"])
 
-# ── Mémorisation et Restauration de l'onglet actif ───────────────────────────
-import time
-import streamlit.components.v1 as components
-js_restore_tab = f"""
-<script>
-    const tabs = window.parent.document.querySelectorAll('.stTabs [data-baseweb="tab"]');
-    if (tabs.length > 0) {{
-        tabs.forEach((tab, index) => {{
-            tab.addEventListener('click', () => {{
-                window.parent.sessionStorage.setItem('air_active_tab', index);
-            }});
-        }});
-        const savedTab = window.parent.sessionStorage.getItem('air_active_tab');
-        if (savedTab !== null && tabs[savedTab]) {{
-            if (tabs[savedTab].getAttribute('aria-selected') !== 'true') {{
-                tabs[savedTab].click();
-            }}
-        }}
-    }}
-
-    // Nettoyage de l'ancien JS de sur-stylisation du bouton flottant qui n'existe plus
-</script>
-"""
-components.html(js_restore_tab, height=0, width=0)
+# (Ancien JS de restauration supprimé car Streamlit conserve l'état nativement)
 
 with tabs[0]: bloc1(profil)
 with tabs[1]: bloc2(profil)
