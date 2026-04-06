@@ -6,8 +6,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import authService from "@/services/authService";
 import userService from "@/services/userService";
-import { Mail, Lock, Eye, EyeOff, ArrowLeft, Image as ImageIcon, User, Loader2 } from "lucide-react";
+import SearchableSelect from "@/components/ui/SearchableSelect";
+import { Mail, Lock, Eye, EyeOff, ArrowLeft, Image as ImageIcon, User, Loader2, MapPin } from "lucide-react";
 import { notify } from "@/utils/toast";
+
+const DATASET_CITIES = [
+  "Abong-Mbang", "Akonolinga", "Ambam", "Bafia", "Bafoussam", 
+  "Bamenda", "Batouri", "Bertoua", "Buea", "Douala", 
+  "Dschang", "Ebolowa", "Edea", "Foumban", "Garoua", 
+  "Guider", "Kousseri", "Kribi", "Kumba", "Kumbo", 
+  "Limbe", "Loum", "Mamfe", "Maroua", "Mbalmayo", 
+  "Mbengwi", "Mbouda", "Meiganga", "Mokolo", "Ngaoundere", 
+  "Nkongsamba", "Poli", "Sangmelima", "Tibati", "Tignere", 
+  "Touboro", "Wum", "Yagoua", "Yaounde", "Yokadouma"
+].sort();
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -162,33 +174,14 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* City Field */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[13px] text-gray-300 ml-1">Ville de résidence</label>
-              <div className="relative group">
-                <select
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="w-full h-[1.1cm] bg-[#1e293b]/40 border border-white/10 rounded-xl pl-4 pr-[3.5rem] text-white text-sm focus:outline-none focus:border-[var(--teal)] focus:ring-1 focus:ring-[var(--teal)]/50 transition-all appearance-none cursor-pointer"
-                  required
-                >
-                  {["Douala", "Yaoundé", "Garoua", "Maroua", "Bafoussam", "Bamenda", "Kribi", "Bertoua", "Ebolowa", "Ngaoundéré", "Buéa"].map((c) => (
-                    <option key={c} value={c} className="bg-[#020c18] text-white">
-                      {c}
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-[var(--teal)]">
-                  <User className="w-5 h-5 opacity-90 group-focus-within:opacity-100 transition-opacity" />
-                </div>
-                {/* Custom arrow for the select */}
-                <div className="absolute inset-y-0 right-10 flex items-center pointer-events-none">
-                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </div>
-            </div>
+            {/* City Field (Smart Selector) */}
+            <SearchableSelect
+              label="Ville de résidence"
+              options={DATASET_CITIES}
+              value={city}
+              onChange={(val) => setCity(val)}
+              placeholder="Rechercher votre ville..."
+            />
 
             {/* Password Field */}
             <div className="flex flex-col gap-1.5">

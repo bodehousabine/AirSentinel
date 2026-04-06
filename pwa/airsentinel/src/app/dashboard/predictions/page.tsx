@@ -31,8 +31,6 @@ export default function PredictionsPage() {
   const [isComputing, setIsComputing] = useState(false);
   const [simulationError, setSimulationError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isSubscribing, setIsSubscribing] = useState(false);
-  const [subscribedCity, setSubscribedCity] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPredictions = async () => {
@@ -73,19 +71,6 @@ export default function PredictionsPage() {
     setFeatures(prev => ({ ...prev, [key]: value }));
   };
 
-  const handleSubscribe = async () => {
-    setIsSubscribing(true);
-    try {
-      await predictionService.subscribeToCityAlerts(selectedCity);
-      setSubscribedCity(selectedCity);
-      alert(`Super ! Vous serez alerté par mail si la qualité de l'air à ${selectedCity} devient mauvaise.`);
-    } catch (err) {
-      console.error("Erreur abonnement:", err);
-      alert("Impossible de s'abonner. Vérifiez votre connexion.");
-    } finally {
-      setIsSubscribing(false);
-    }
-  };
 
   const predictions = data.filter(p => p.is_prediction);
   const history = data.filter(p => !p.is_prediction);
@@ -254,15 +239,13 @@ export default function PredictionsPage() {
                        <h2 className="text-4xl font-black text-white tracking-tighter">AI <span className="text-[#00d4b1]">Lab</span> Control</h2>
                     </div>
                     <p className="text-gray-400 text-sm font-medium">Simulez l&apos;impact des variables environnementales sur la zone cible.</p>
-                 </div>
-
-                  <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto items-end">
-                    <div className="flex flex-col gap-2 w-full md:w-auto">
+                             <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto items-end">
+                    <div className="flex flex-col gap-2 w-full md:w-80">
                        <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest pl-1">Zone de Simulation</span>
                        <select 
                           value={selectedCity}
                           onChange={(e) => setSelectedCity(e.target.value)}
-                          className="bg-[#020617] border-2 border-white/5 rounded-2xl px-6 py-4 text-white font-black text-lg focus:border-[#00d4b1] outline-none transition-all shadow-2xl appearance-none"
+                          className="w-full bg-[#020617] border-2 border-white/5 rounded-2xl px-6 py-4 text-white font-black text-lg focus:border-[#00d4b1] outline-none transition-all shadow-2xl appearance-none"
                           style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2300d4b1\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'3\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1.5rem center', backgroundSize: '1.2rem' }}
                        >
                           {["Douala", "Yaoundé", "Bafoussam", "Garoua", "Bamenda", "Maroua", "Kribi"].map(c => (
@@ -270,21 +253,8 @@ export default function PredictionsPage() {
                           ))}
                        </select>
                     </div>
-
-                    <button 
-                       onClick={handleSubscribe}
-                       disabled={isSubscribing || subscribedCity === selectedCity}
-                       className={`h-[60px] px-8 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-2 group/btn ${subscribedCity === selectedCity ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30' : 'bg-[#00d4b1] text-[#020617] hover:bg-[#00d4b1]/80 hover:scale-105 shadow-[0_0_20px_rgba(0,212,177,0.3)]'}`}
-                    >
-                       {isSubscribing ? (
-                          <Loader2 size={18} className="animate-spin" />
-                       ) : subscribedCity === selectedCity ? (
-                          <>Abonné <Sparkles size={16} /></>
-                       ) : (
-                          <>M&apos;alerter par Mail</>
-                       )}
-                    </button>
                   </div>
+         </div>
               </header>
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">

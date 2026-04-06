@@ -6,7 +6,7 @@ const predictionService = {
     const response = await apiClient.get("predictions/short-term");
     return response.data;
   },
-  
+
   getMonthly: async (): Promise<MonthlyPM25[]> => {
     const response = await apiClient.get("predictions/monthly");
     return response.data;

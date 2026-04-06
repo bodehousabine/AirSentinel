@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { User, Home, Map as MapIcon, Bell } from "lucide-react";
+import { User, Home, Map as MapIcon, Bell, BrainCircuit, Activity, ShieldAlert, Database, Zap, Boxes, Wind, Cpu, Layers, Globe, Stethoscope, Code } from "lucide-react";
 import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
 
 const geoUrl = "/cameroon-regions.json";
@@ -71,28 +71,27 @@ function PillarCard({
   description,
   children,
 }: {
-  icon: string;
+  icon: React.ReactNode;
   title: string;
   description: string;
   children?: React.ReactNode;
 }) {
   return (
-    <div
-      className="glass-card"
-      style={{
-        padding: "28px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "14px",
-        transition: "transform 0.3s",
-      }}
-      onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-4px)")}
-      onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
-    >
-      <div style={{ fontSize: "32px" }}>{icon}</div>
-      <h3 style={{ fontSize: "20px", fontWeight: 700, color: "#e0f2fe" }}>{title}</h3>
-      <p style={{ fontSize: "14px", color: "rgba(224,242,254,0.65)", lineHeight: 1.7 }}>{description}</p>
-      {children}
+    <div className="card-premium p-8 rounded-2xl flex flex-col gap-6 relative overflow-hidden h-full">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--teal)]/5 blur-[60px] pointer-events-none" />
+      
+      <div className="icon-glow">
+        {icon}
+      </div>
+      
+      <div className="space-y-3">
+        <h3 className="text-xl font-bold text-[#e0f2fe] tracking-tight">{title}</h3>
+        <p className="text-sm text-gray-400 leading-relaxed font-medium">
+          {description}
+        </p>
+      </div>
+      
+      {children && <div className="mt-2">{children}</div>}
     </div>
   );
 }
@@ -223,21 +222,13 @@ function CameroonMap() {
   );
 }
 
-function TechBadge({ name, icon }: { name: string; icon: string }) {
+function TechBadge({ name, icon }: { name: string; icon: React.ReactNode }) {
   return (
-    <div
-      className="glass-card"
-      style={{
-        padding: "16px 20px",
-        textAlign: "center",
-        transition: "transform 0.3s",
-        cursor: "default",
-      }}
-      onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-4px)")}
-      onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
-    >
-      <div style={{ fontSize: "32px", marginBottom: "6px" }}>{icon}</div>
-      <div style={{ fontSize: "13px", fontWeight: 600, color: "rgba(224,242,254,0.8)" }}>{name}</div>
+    <div className="card-premium px-6 py-5 rounded-2xl flex flex-col items-center gap-3 transition-all cursor-default min-w-[120px]">
+      <div className="text-[var(--teal)] opacity-80 group-hover:opacity-100 transition-opacity">
+        {icon}
+      </div>
+      <div className="text-[13px] font-bold text-gray-400 uppercase tracking-widest">{name}</div>
     </div>
   );
 }
@@ -464,7 +455,7 @@ export default function LandingPage() {
             color: "#e0f2fe",
           }}
         >
-          Nos Pilliers Stratégiques
+          Nos Piliers Stratégiques
         </h2>
 
         <div
@@ -475,7 +466,7 @@ export default function LandingPage() {
           }}
         >
           <PillarCard
-            icon="🤖"
+            icon={<BrainCircuit size={28} />}
             title="Anticipation IA"
             description="Prédiction de la concentration PM2.5 à J+1 grâce à un modèle de régression entraîné sur 28 variables météo et historiques. ARIMA par zone pour les tendances à J+3."
           >
@@ -484,12 +475,12 @@ export default function LandingPage() {
 
           <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
             <PillarCard
-              icon="📍"
+              icon={<MapIcon size={28} />}
               title="Cartographie Interactive"
               description="Visualisation géospatiale en temps réel de la qualité de l'air dans les 40 grandes villes camerounaises avec l'Indice de Risque Sanitaire (IRS) par zone."
             />
             <PillarCard
-              icon="🫁"
+              icon={<ShieldAlert size={28} />}
               title="Indice de Risque Sanitaire"
               description="Algorithme exclusif combinant PM2.5, CO, Dust, UV et Ozone via PCA pour calculer un score IRS : Faible · Modéré · Élevé · Critique."
             />
@@ -527,20 +518,13 @@ export default function LandingPage() {
           Des technologies éprouvées pour une performance de production
         </p>
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: "16px",
-            flexWrap: "wrap",
-          }}
-        >
-          <TechBadge name="FastAPI" icon="⚡" />
-          <TechBadge name="Supabase" icon="🟢" />
-          <TechBadge name="Scikit-Learn" icon="🧠" />
-          <TechBadge name="Docker" icon="🐳" />
-          <TechBadge name="Next.js" icon="▲" />
-          <TechBadge name="PostgreSQL" icon="🐘" />
+        <div className="flex flex-wrap justify-center gap-6 mt-12">
+          <TechBadge name="FastAPI" icon={<Zap size={24} />} />
+          <TechBadge name="Supabase" icon={<Database size={24} />} />
+          <TechBadge name="Scikit-Learn" icon={<Cpu size={24} />} />
+          <TechBadge name="Docker" icon={<Boxes size={24} />} />
+          <TechBadge name="Next.js" icon={<Layers size={24} />} />
+          <TechBadge name="PostgreSQL" icon={<Database size={24} />} />
         </div>
       </section>
 
@@ -575,25 +559,16 @@ export default function LandingPage() {
           </p>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "14px" }}>
             <div
-              style={{
-                width: "48px",
-                height: "48px",
-                borderRadius: "50%",
-                background: "linear-gradient(135deg, #00d4b1, #0ea5e9)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "20px",
-              }}
+              className="w-14 h-14 rounded-full border-2 border-[var(--teal)]/30 flex items-center justify-center bg-slate-800 text-[var(--teal)] shadow-[0_0_20px_rgba(0,212,177,0.2)]"
             >
-              👨🏾‍⚕️
+              <Code size={28} />
             </div>
             <div style={{ textAlign: "left" }}>
               <div style={{ fontWeight: 700, color: "#e0f2fe", fontSize: "15px" }}>
-                Prt. Anuona Koungolli
+                FOFACK ALEMDJOU HENRI JOEL
               </div>
               <div style={{ fontSize: "12px", color: "rgba(224,242,254,0.5)" }}>
-                Official public de santé publique
+                4ième année Génie Informatique, ENSPY
               </div>
             </div>
           </div>

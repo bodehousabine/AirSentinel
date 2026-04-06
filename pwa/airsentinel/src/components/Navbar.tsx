@@ -5,8 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import authService from "../services/authService";
+import predictionService from "../services/predictionService";
 import { User as UserType } from "../types/auth";
-import { User, Home, LogOut, Loader2 } from "lucide-react";
+import { User, Home, LogOut, Loader2, Bell, BellOff, Mail } from "lucide-react";
 import { notify } from "@/utils/toast";
 
 export default function Navbar() {
@@ -35,6 +36,31 @@ export default function Navbar() {
     router.push("/login");
   };
 
+  const handleToggleAlerts = async () => {
+    if (!currentUser) return;
+    
+    // Si déjà abonné, on "désabonne" (null), sinon on propose d'activer sur sa ville connue
+    const isSubscribed = !!currentUser.subscribed_city;
+    const targetCity = currentUser.subscribed_city || "Douala"; // Fallback au cas où
+    
+    try {
+      const loading = notify.loading(isSubscribed ? "Désactivation..." : "Activation des alertes...");
+      
+      const newCity = isSubscribed ? "" : targetCity; // L'API s'attend à une string (vide pour désactiver)
+      
+      await predictionService.subscribeToCityAlerts(newCity);
+      
+      // Mettre à jour l'état local immédiatement
+      setCurrentUser({ ...currentUser, subscribed_city: isSubscribed ? null : targetCity });
+      
+      notify.dismiss(loading);
+      notify.success(isSubscribed ? "Alertes désactivées." : `Alertes activées pour ${targetCity} !`);
+    } catch (err) {
+      console.error("Erreur toggle alertes:", err);
+      notify.error("Impossible de modifier vos alertes.");
+    }
+  };
+
   return (
     <nav
       className="fixed top-0 left-0 right-0 z-[100] px-4 sm:px-8 h-16 flex items-center justify-between border-b border-white/5 bg-[#020c18]/80 backdrop-blur-xl"
@@ -51,6 +77,32 @@ export default function Navbar() {
           <Home size={16} />
           <span>Accueil</span>
         </Link>
+
+        {currentUser && (
+          <button
+            onClick={handleToggleAlerts}
+            className={`
+              relative flex items-center gap-2 px-3 h-9 rounded-full border transition-all duration-300 group
+              ${currentUser.subscribed_city 
+                ? "bg-[var(--teal)]/10 border-[var(--teal)]/40 text-[var(--teal)] shadow-[0_0_15px_rgba(0,212,177,0.2)]" 
+                : "bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:border-white/20"}
+            `}
+            title={currentUser.subscribed_city ? `Alertes actives (${currentUser.subscribed_city})` : "Activer les alertes mail"}
+          >
+            {currentUser.subscribed_city ? (
+              <>
+                <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[var(--teal)] rounded-full animate-pulse shadow-[0_0_8px_rgba(0,212,177,0.8)]" />
+                <Bell size={16} className="animate-wiggle" />
+                <span className="text-[11px] font-bold tracking-wider max-sm:hidden uppercase">Alertes Active</span>
+              </>
+            ) : (
+              <>
+                <BellOff size={16} />
+                <span className="text-[11px] font-medium max-sm:hidden">Alertes Off</span>
+              </>
+            )}
+          </button>
+        )}
 
         {isLoading ? (
           <Loader2 className="w-5 h-5 text-[var(--teal)] animate-spin" />
