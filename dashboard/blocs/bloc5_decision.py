@@ -33,9 +33,10 @@ def _get_p90_ville(ville):
     return sc.get('par_ville', {}).get(ville, None)
 
 # ── Carte KPI ville ───────────────────────────────────────────────────────────
-def _kpi_card(irs, snt, snc, pm25, col_ctx_hex, niv_ctx, p90_ville, th, titre="Risque Sanitaire"):
+def _kpi_card(irs, snt, snc, pm25, col_ctx_hex, niv_ctx, p90_ville, th, lang="fr", titre="Risque Sanitaire"):
     """Carte IRS + PM2.5 OMS — sans contexte camerounais."""
     pm25_col = th["green"] if pm25 <= 15 else th["red"]
+    oms_label = "PM2.5 · WHO LIMIT" if lang == "en" else "PM2.5 · SEUIL OMS"
     st.markdown(
         f'<div style="background:{th["bg_elevated"]};border:4px solid {snc};'
         f'border-radius:15px;padding:20px 15px;text-align:center;height:200px;'
@@ -47,8 +48,8 @@ def _kpi_card(irs, snt, snc, pm25, col_ctx_hex, niv_ctx, p90_ville, th, titre="R
         f'<div style="font-size:46px;font-weight:950;color:{snc};line-height:0.9;">{irs:.3f}</div>'
         f'<div style="font-size:16px;font-weight:950;margin-top:8px;text-transform:uppercase;">{snt}</div>'
         f'<div style="margin-top:8px;padding-top:6px;border-top:1px solid {snc}33;">'
-        f'<div style="font-size:9px;color:{th["text3"]};text-transform:uppercase;'
-        f'letter-spacing:.06em;">PM2.5 · Seuil OMS</div>'
+        f'<div style="font-size:9px;color:white;font-weight:bold;text-transform:uppercase;'
+        f'letter-spacing:.06em;">{oms_label}</div>'
         f'<div style="font-size:12px;font-weight:700;color:{pm25_col};">'
         f'{pm25:.1f} µg/m³ · {pm25/15:.1f}x</div>'
         f'</div>'
@@ -77,7 +78,7 @@ def _ctx_card(niv_ctx, col_ctx_hex, p90_ville, pm25, th, lang):
         f'display:flex;flex-direction:column;justify-content:center;'
         f'box-shadow:0 10px 25px {col_ctx_hex}44;">'
         f'<div style="font-size:11px;color:{th["text"]};font-weight:950;'
-        f'text-transform:uppercase;margin-bottom:6px;">{"Cameroon Context" if lang=="en" else "Contexte Cameroun"}</div>'
+        f'text-transform:uppercase;margin-bottom:6px;">{"PM2.5 THRESHOLD · CAMEROON CONTEXT" if lang=="en" else "SEUIL PM2.5 · CONTEXTE CAMEROUN"}</div>'
         f'<div style="font-size:28px;font-weight:950;color:{col_ctx_hex};line-height:1;">{niv_ctx}</div>'
         f'<div style="font-size:10px;color:{th["text3"]};margin-top:6px;">'
         f'{"Local threshold p90=" if lang=="en" else "Seuil local p90 ="} {p90_ville:.1f} µg/m³</div>'
@@ -343,16 +344,16 @@ def _generer_pdf(ville, date_rapport, pm25, irs, niveau, ratio_oms,
         c.rect(M, S4T - 0.32*cm, 0.22*cm, 0.32*cm, fill=1, stroke=0)
         c.setFillColor(DARK)
         c.setFont(TNB, 10)
-        c.drawString(M + 0.4*cm, S4T - 0.26*cm, "RECOMMANDATIONS PAR PROFIL")
+        c.drawString(M + 0.4*cm, S4T - 0.26*cm, "RECOMMENDATIONS BY PROFILE" if lang=="en" else "RECOMMANDATIONS PAR PROFIL")
         c.setStrokeColor(BORDER)
         c.setLineWidth(0.5)
         c.line(M, S4T - 0.48*cm, M + IW, S4T - 0.48*cm)
 
         profils = [
-            ("Citoyen",   _get_reco_text(snk, "citizen")),
-            ("Medecin",   _get_reco_text(snk, "health")),
-            ("Maire",     _get_reco_text(snk, "mayor")),
-            ("Chercheur", _get_reco_text(snk, "researcher")),
+            ("Citizen" if lang=="en" else "Citoyen",   _get_reco_text(snk, "citizen", lang)),
+            ("Doctor" if lang=="en" else "Medecin",    _get_reco_text(snk, "health", lang)),
+            ("Mayor" if lang=="en" else "Maire",       _get_reco_text(snk, "mayor", lang)),
+            ("Researcher" if lang=="en" else "Chercheur", _get_reco_text(snk, "researcher", lang)),
         ]
         RH = (S4H - 0.6*cm) / 4
         for i, (plbl, preco) in enumerate(profils):
@@ -378,7 +379,7 @@ def _generer_pdf(ville, date_rapport, pm25, irs, niveau, ratio_oms,
         c.rect(M, S5T - 0.32*cm, 0.22*cm, 0.32*cm, fill=1, stroke=0)
         c.setFillColor(DARK)
         c.setFont(TNB, 10)
-        c.drawString(M + 0.4*cm, S5T - 0.26*cm, "POPULATIONS VULNERABLES")
+        c.drawString(M + 0.4*cm, S5T - 0.26*cm, "VULNERABLE POPULATIONS" if lang=="en" else "POPULATIONS VULNERABLES")
         c.setStrokeColor(BORDER)
         c.setLineWidth(0.5)
         c.line(M, S5T - 0.48*cm, M + IW, S5T - 0.48*cm)
@@ -439,8 +440,8 @@ def _generer_pdf(ville, date_rapport, pm25, irs, niveau, ratio_oms,
         return None
 
 
-def _get_reco_text(snk, profil_key):
-    reco_map = {
+def _get_reco_text(snk, profil_key, lang="fr"):
+    reco_map_fr = {
         "faible":   {"citizen":"Qualité de l'air satisfaisante. Activités normales autorisées.",
                      "health":"Pas d'alerte sanitaire. Surveillance de routine suffisante.",
                      "mayor":"Situation normale. Aucune mesure d'urgence requise.",
@@ -458,6 +459,25 @@ def _get_reco_text(snk, profil_key):
                      "mayor":"CRISE — Déclencher le plan d'urgence sanitaire. Alertes SMS obligatoires.",
                      "researcher":"Dépassement critique (>75 µg/m³). Documenter l'épisode et les causes."},
     }
+    reco_map_en = {
+        "faible":   {"citizen":"Satisfactory air quality. Normal activities allowed.",
+                     "health":"No health alert. Routine surveillance is sufficient.",
+                     "mayor":"Normal situation. No emergency measures required.",
+                     "researcher":"Data complies with WHO limits. Baseline level."},
+        "modere":   {"citizen":"Reduce intense outdoor activities. Wear a mask if symptoms occur.",
+                     "health":"Monitor sensitive patients. Anticipate a slight increase in consultations.",
+                     "mayor":"Broadcast preventive recommendations. Monitor the situation.",
+                     "researcher":"IT4 exceeded (25 µg/m³). Analyze local emission sources."},
+        "eleve":    {"citizen":"Limit outings. Close windows. Avoid physical effort.",
+                     "health":"Alert asthmatic patients. Reinforce inhaler stocks.",
+                     "mayor":"Trigger public alert. Reduce local pollution sources.",
+                     "researcher":"IT3 exceeded (37.5 µg/m³). Identify the current weather episode."},
+        "critique": {"citizen":"DANGER — Stay confined. Do not go out. Consult a doctor if symptoms.",
+                     "health":"HEALTH EMERGENCY — Activate respiratory emergency protocol.",
+                     "mayor":"CRISIS — Trigger health emergency plan. Mandatory SMS alerts.",
+                     "researcher":"Critical exceedance (>75 µg/m³). Document the episode and causes."},
+    }
+    reco_map = reco_map_en if lang == "en" else reco_map_fr
     return reco_map.get(snk, {}).get(profil_key, "—")
 
 VULN_FR = {
@@ -564,10 +584,11 @@ def _render_exceptional_radial_gauge(irs, ctx, th):
     fig = go.Figure(go.Indicator(
         mode="gauge", value=irs, domain={'x':[0,1],'y':[0,1]},
         gauge={
-            'axis':{'range':[0,1],'tickwidth':3,'tickcolor':th['text'],
+            'axis':{'range':[0,1],'tickwidth':2,'tickcolor':th['text'],
                     'tickvals':[0,p50,p75,p90,1],
                     'ticktext':["<b>0</b>",f"<b>{p50:.2f}</b>",f"<b>{p75:.2f}</b>",f"<b>{p90:.2f}</b>","<b>1</b>"],
-                    'tickfont':{"size":13,"family":"Arial Black, sans-serif","color":th['text']}},
+                    'tickfont':{"size":11,"family":"Arial Black, sans-serif","color":th['text']},
+                    'ticks': ""},
             'bar':{'color':th['text'],'thickness':0.12},
             'bgcolor':"rgba(0,0,0,0.05)",
             'steps':[{'range':[0,p50],'color':th["green"]},{'range':[p50,p75],'color':th["amber"]},
@@ -577,9 +598,9 @@ def _render_exceptional_radial_gauge(irs, ctx, th):
     ))
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-        font={'color':th['text2'],'family':"Arial, sans-serif"}, height=190,
-        margin=dict(l=30,r=30,t=10,b=0),
-        annotations=[dict(text=f"<b>{irs:.3f}</b>",x=0.5,y=0.05,xref="paper",yref="paper",
+        font={'color':th['text2'],'family':"Arial, sans-serif"}, height=200,
+        margin=dict(l=28,r=28,t=12,b=0),
+        annotations=[dict(text=f"<b>{irs:.3f}</b>",x=0.5,y=0.08,xref="paper",yref="paper",
                           xanchor="center",yanchor="bottom",showarrow=False,
                           font=dict(size=28,color=th['text'],family="Arial, sans-serif"))]
     )
@@ -709,7 +730,7 @@ def render(profil):
         m_col1, m_col2, m_col3, m_col4 = st.columns([0.9, 1.3, 1.0, 1.3])
         with m_col1:
             _kpi_card(irs_ville, snt, snc, pm25_ville,
-                      col_ctx_hex, niv_ctx, p90_ville, th,
+                      col_ctx_hex, niv_ctx, p90_ville, th, lang=lang,
                       titre="Health Risk" if lang=="en" else "Risque Sanitaire")
         with m_col2:
             st.plotly_chart(_render_exceptional_radial_gauge(irs_ville, ctx, th),
@@ -738,7 +759,7 @@ def render(profil):
         m_col1_s, m_col2_s, m_col3_s, m_col4_s = st.columns([0.9, 1.3, 1.0, 1.3])
         with m_col1_s:
             _kpi_card(irs_v, snt_s, snc_s, pm25_sim,
-                      col_ctx_hex_s, niv_ctx_s, p90_ville, th,
+                      col_ctx_hex_s, niv_ctx_s, p90_ville, th, lang=lang,
                       titre="Simulated Risk" if lang=="en" else "Risque Simulé")
         with m_col2_s:
             st.plotly_chart(_render_exceptional_radial_gauge(irs_v, ctx, th),
