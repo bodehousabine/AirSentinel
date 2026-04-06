@@ -210,28 +210,55 @@ iframe[title="chatbox.render_chatbox"] {
     return enter
 
 
-def render_about_modal(lang):
+def get_themed_about_html(th):
     """
-    Lit le fichier apropos.html et l'affiche dans un dialogue Streamlit.
-    Les images locales sont encodées en base64 pour s'afficher proprement.
+    Lit apropos.html et injecte les variables CSS du thème actuel.
+    Encodage des images en base64 inclus.
     """
     about_dir = os.path.join(os.path.dirname(__file__), "about")
     html_file = os.path.join(about_dir, "apropos.html")
     
     if not os.path.exists(html_file):
-        st.error("Fichier apropos.html introuvable dans dashboard/about/")
-        return
+        return None
 
     with open(html_file, "r", encoding="utf-8") as f:
-        html_content = f.read()
+        content = f.read()
 
-    # Routine d'encodage des images en base64
+    # Injection dynamique des couleurs depuis le dictionnaire th
+    # On remplace les valeurs par défaut définies dans le :root de apropos.html
+    replacements = {
+        "--bg-primary: #020c18;": f"--bg-primary: {th['bg_primary']};",
+        "--bg-secondary: #051525;": f"--bg-secondary: {th['bg_secondary']};",
+        "--text-main: #e0f2fe;": f"--text-main: {th['text']};",
+        "--text-muted: #7fb8d4;": f"--text-muted: {th['text2']};",
+        "--accent-teal: #00d4b1;": f"--accent-teal: {th['teal']};",
+        "--border-soft: rgba(0, 212, 177, 0.2);": f"--border-soft: {th.get('border_soft', 'rgba(0,212,177,0.2)')};",
+    }
+    
+    for old, new in replacements.items():
+        content = content.replace(old, new)
+
+    # Images locales -> Base64
     for img_name in ["bsd.png", "fma.png", "fah.png", "prf.png"]:
         img_path = os.path.join(about_dir, img_name)
         if os.path.exists(img_path):
             with open(img_path, "rb") as f:
                 b64_data = base64.b64encode(f.read()).decode()
-            html_content = html_content.replace(f'src="{img_name}"', f'src="data:image/png;base64,{b64_data}"')
+            content = content.replace(f'src="{img_name}"', f'src="data:image/png;base64,{b64_data}"')
+            
+    return content
+
+def render_about_modal(lang):
+    """
+    Affiche apropos.html dans un dialogue Streamlit avec injection de thème.
+    """
+    th_name = st.session_state.get("theme_name", "dark")
+    th      = get_theme(th_name)
+    
+    html_content = get_themed_about_html(th)
+    if not html_content:
+        st.error("Fichier apropos.html introuvable.")
+        return
 
     @st.dialog("À Propos" if lang == "fr" else "About", width="large")
     def show_dialog():
@@ -279,24 +306,15 @@ def render_about_modal(lang):
 
 def render_about_inline(lang):
     """
-    Lit le fichier apropos.html et l'affiche directement dans un composant (sans modale).
+    Affiche apropos.html directement (sans modale) avec injection de thème.
     """
-    about_dir = os.path.join(os.path.dirname(__file__), "about")
-    html_file = os.path.join(about_dir, "apropos.html")
+    th_name = st.session_state.get("theme_name", "dark")
+    th      = get_theme(th_name)
     
-    if not os.path.exists(html_file):
-        st.error("Fichier apropos.html introuvable dans dashboard/about/")
+    html_content = get_themed_about_html(th)
+    if not html_content:
+        st.error("Fichier apropos.html introuvable.")
         return
-
-    with open(html_file, "r", encoding="utf-8") as f:
-        html_content = f.read()
-
-    for img_name in ["bsd.png", "fma.png", "fah.png", "prf.png"]:
-        img_path = os.path.join(about_dir, img_name)
-        if os.path.exists(img_path):
-            with open(img_path, "rb") as f:
-                b64_data = base64.b64encode(f.read()).decode()
-            html_content = html_content.replace(f'src="{img_name}"', f'src="data:image/png;base64,{b64_data}"')
-
+ 
     import streamlit.components.v1 as components
     components.html(html_content, height=800, scrolling=True)
