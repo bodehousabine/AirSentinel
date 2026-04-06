@@ -63,42 +63,25 @@ section[data-testid="stSidebar"], header[data-testid="stHeader"], footer { displ
 /* Contrôles Haut Droite */
 div[data-testid="stHorizontalBlock"]:has(div[data-testid="stSelectbox"]) {
     position: fixed !important;
-    top: 30px !important;
-    right: 40px !important;
+    top: 20px !important;
+    right: 25px !important;
     z-index: 10000 !important;
     width: auto !important;
     display: flex !important;
     align-items: center !important;
-    gap: 15px !important;
+    gap: 12px !important;
 }
 
 /* Stylisation Selectbox & About */
 .stSelectbox label { display: none !important; }
-div[data-testid="stSelectbox"] { width: 140px !important; }
+div[data-testid="stSelectbox"] { width: 110px !important; }
 div[data-testid="stSelectbox"] [data-baseweb="select"] > div {
-    background: rgba(255,255,255,0.06) !important;
-    border: 1px solid rgba(255,255,255,0.12) !important;
+    background: rgba(255,255,255,0.05) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
     color: #fff !important;
-    height: 42px !important;
-    font-size: 14px !important;
-    border-radius: 12px !important;
-}
-div[data-testid="column"]:last-child .stButton > button {
-    background: rgba(0,212,177,0.85) !important;
-    color: #fff !important;
-    font-weight: 600 !important;
-    border: none !important;
+    height: 36px !important;
+    font-size: 12.5px !important;
     border-radius: 10px !important;
-    height: 44px !important;
-    padding: 0 20px !important;
-    white-space: nowrap !important;
-    min-width: max-content !important;
-}
-
-div[data-testid="stHorizontalBlock"]:has(div[data-testid="stSelectbox"]) div[data-testid="column"]:last-child {
-    min-width: 130px !important;
-    flex: none !important;
-    width: auto !important;
 }
 
 /* --- BOUTON CTA : centrage absolu --- */
@@ -191,7 +174,7 @@ iframe[title="chatbox.render_chatbox"] {
     """, unsafe_allow_html=True)
 
     # 6. Contrôles Haut Droite
-    cols = st.columns([1, 1, 1.5])
+    cols = st.columns([1, 1])
     with cols[0]:
         th_labels = [T["sidebar_theme_dark"], T["sidebar_theme_light"]]
         th_vals   = ["dark", "light"]
@@ -208,14 +191,6 @@ iframe[title="chatbox.render_chatbox"] {
         if l_vals[l_labels.index(l_choice)] != lang:
             st.session_state["lang"] = l_vals[l_labels.index(l_choice)]
             st.rerun()
-    with cols[2]:
-        about_label = "ℹ️ À\u00a0Propos" if lang == "fr" else "ℹ️ About"
-        if st.button(about_label, key="btn_about_top"):
-            st.session_state["show_about"] = True
-
-    if st.session_state.get("show_about", False):
-        from landing import render_about_modal
-        render_about_modal(lang)
 
     return enter
 

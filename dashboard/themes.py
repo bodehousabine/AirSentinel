@@ -210,6 +210,43 @@ def build_css(th: dict, img_url: str) -> str:
         letter-spacing: .08em;
     }}
 
+    /* ── Boutons de la Sidebar (ex: Accueil) ── */
+    section[data-testid="stSidebar"] .stButton button {{
+        color: {'#e0f2fe' if th['name']=='dark' else '#0a1f33'} !important;
+        background: {'rgba(255,255,255,0.06)' if th['name']=='dark' else 'rgba(10,60,120,0.10)'} !important;
+        border: 1px solid {th['border_med']} !important;
+        border-radius: 8px !important;
+        font-family: 'Inter', sans-serif !important;
+        font-weight: 600 !important;
+    }}
+    section[data-testid="stSidebar"] .stButton button:hover {{
+        background: {'rgba(0,212,177,0.14)' if th['name']=='dark' else 'rgba(10,60,120,0.18)'} !important;
+        border-color: {th['teal']} !important;
+        color: {'#00d4b1' if th['name']=='dark' else '#003828'} !important;
+    }}
+
+    /* ── Bouton À Propos ── */
+    [data-testid="stVerticalBlockBorderWrapper-about_box"] .stButton button {{
+        color: {'#e0f2fe' if th['name']=='dark' else '#0a1f33'} !important;
+        background: {'rgba(255,255,255,0.08)' if th['name']=='dark' else 'rgba(10,60,120,0.12)'} !important;
+        border: 1.5px solid {th['teal']} !important;
+        border-radius: 50px !important;
+        font-family: 'Inter', sans-serif !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.1em !important;
+        text-transform: uppercase !important;
+        padding: 6px 20px !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        height: auto !important;
+    }}
+    [data-testid="stVerticalBlockBorderWrapper-about_box"] .stButton button:hover {{
+        background: {th['teal']} !important;
+        color: #003d38 !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 15px {th['border_teal']} !important;
+    }}
+
     /* ── Onglets ── */
     .stTabs [data-baseweb="tab-list"] {{
         background: {'rgba(5,21,37,0.95)' if th['name']=='dark' else 'rgba(212,235,248,0.97)'};

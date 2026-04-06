@@ -157,6 +157,10 @@ TRANSLATIONS = {
         "fr": "Contexte",
         "en": "Context",
     },
+    "tab_about": {
+        "fr": "À Propos",
+        "en": "About",
+    },
 
     # ══════════════════════════════════════════════════════════════════════════
     # BLOC 1 — CARTE

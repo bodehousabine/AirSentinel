@@ -138,11 +138,6 @@ with st.sidebar:
     )
 
     st.markdown("<div style='margin-top:10px;'></div>", unsafe_allow_html=True)
-    about_label = "ℹ️ À Propos" if st.session_state["lang"] == "fr" else "ℹ️ About"
-    if st.button(about_label, key="sb_about_btn", width='stretch'):
-        st.session_state["show_about"] = True
-
-    st.markdown(f"<hr style='border-color:{th['border_soft']};margin:12px 0;'>", unsafe_allow_html=True)
 
     # ── Footer ────────────────────────────────────────────────────────────────
     lines = T["sidebar_footer"].split("\n")
@@ -166,7 +161,7 @@ from blocs.bloc4_alertes     import render as bloc4
 from blocs.bloc5_decision    import render as bloc5
 from blocs.bloc6_shap        import render as bloc6
 
-# ── CSS premium pour les onglets ───────────────────────────────────────────────
+# ── CSS premium pour les onglets et le bouton À Propos ───────────────────────
 st.markdown(f"""
 <style>
 /* Conteneur des onglets — fond dynamique selon thème */
@@ -176,6 +171,8 @@ st.markdown(f"""
     border-bottom: 1px solid {th['border_soft']};
     padding: 4px 8px 0 8px;
     border-radius: 10px 10px 0 0;
+    width: fit-content !important;
+    max-width: 100%;
 }}
 
 /* Chaque onglet */
@@ -213,36 +210,60 @@ st.markdown(f"""
     display: none !important;
 }}
 
-/* ── Spécifique Sidebar : Boutons Accueil & Apropos ── */
-section[data-testid="stSidebar"] .stButton > button {{
-    background: {th['bg_tertiary']} !important;
-    color: {th['text']} !important;
-    border: 1px solid {th['border_soft']} !important;
-    border-radius: 10px !important;
-    font-weight: 600 !important;
-    transition: all 0.3s ease !important;
+/* POSITIONNEMENT DU BOUTON À PROPOS — même ligne que les onglets */
+[data-testid="stVerticalBlockBorderWrapper-about_box"] {{
+    position: fixed !important;
+    top: 130px !important;
+    right: 20px !important;
+    z-index: 9999 !important;
+    pointer-events: none !important;
+    width: auto !important;
 }}
-
-section[data-testid="stSidebar"] .stButton > button:hover {{
-    border-color: {th['teal']} !important;
-    background: {th['border_soft']} !important;
-    color: {th['teal'] if th['name']=='dark' else '#006b58'} !important;
+[data-testid="stVerticalBlockBorderWrapper-about_box"] .stButton {{
+    pointer-events: auto !important;
+}}
+[data-testid="stVerticalBlockBorderWrapper-about_box"] .stButton button {{
+    pointer-events: auto !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+    color: {'#e0f2fe' if th['name']=='dark' else '#0a1f33'} !important;
+    background: {'rgba(20,50,90,0.85)' if th['name']=='dark' else '#d4ebf8'} !important;
+    border: 1.5px solid {th['teal']} !important;
+    border-radius: 50px !important;
+    padding: 6px 20px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    height: auto !important;
+    white-space: nowrap !important;
+}}
+[data-testid="stVerticalBlockBorderWrapper-about_box"] .stButton button:hover {{
+    background: {th['teal']} !important;
+    color: #003d38 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 15px {th['border_teal']} !important;
 }}
 </style>
 """, unsafe_allow_html=True)
 
+# ── Bouton À Propos (Positionné via son conteneur ID) ────────────────────────
+with st.container(key="about_box"):
+    if st.button(T["tab_about"], key="about_tab_btn"):
+        from landing import render_about_modal
+        render_about_modal(st.session_state["lang"])
 
+# ── Barre d'onglets (les rubriques de contenu uniquement) ───────────────────
 tabs = st.tabs([
     T["tab_carte"], T["tab_kpis"], T["tab_predictions"],
     T["tab_alertes"], T["tab_decision"], T["tab_contexte"]
 ])
 
-# Capture the currently active tab from localStorage if it exists, and click it
-# We use standard JS to detect clicks on tabs and save their index.
+# ── Mémorisation et Restauration de l'onglet actif ───────────────────────────
 import time
+import streamlit.components.v1 as components
 js_restore_tab = f"""
 <script>
-    // {time.time()} 
     const tabs = window.parent.document.querySelectorAll('.stTabs [data-baseweb="tab"]');
     if (tabs.length > 0) {{
         tabs.forEach((tab, index) => {{
@@ -257,9 +278,29 @@ js_restore_tab = f"""
             }}
         }}
     }}
+
+    // Force style on À Propos button
+    function styleAboutBtn() {{
+        const allBtns = window.parent.document.querySelectorAll('button');
+        allBtns.forEach(btn => {{
+            const wrapper = btn.closest('[data-testid*="about_box"]');
+            if (wrapper) {{
+                btn.style.setProperty('color', '{"#e0f2fe" if th["name"]=="dark" else "#0a1f33"}', 'important');
+                btn.style.setProperty('background', '{"rgba(255,255,255,0.08)" if th["name"]=="dark" else "#d4ebf8"}', 'important');
+                btn.style.setProperty('border', '1.5px solid {th["teal"]}', 'important');
+                btn.style.setProperty('border-radius', '50px', 'important');
+                btn.style.setProperty('font-weight', '700', 'important');
+                btn.style.setProperty('letter-spacing', '0.1em', 'important');
+                btn.style.setProperty('text-transform', 'uppercase', 'important');
+                btn.style.setProperty('font-size', '13px', 'important');
+            }}
+        }});
+    }}
+    styleAboutBtn();
+    setTimeout(styleAboutBtn, 300);
+    setTimeout(styleAboutBtn, 1000);
 </script>
 """
-import streamlit.components.v1 as components
 components.html(js_restore_tab, height=0, width=0)
 
 with tabs[0]: bloc1(profil)
