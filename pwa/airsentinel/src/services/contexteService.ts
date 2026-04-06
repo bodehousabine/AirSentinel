@@ -27,7 +27,7 @@ export interface ContexteResponse {
 
 const contexteService = {
   getContexte: async (): Promise<ContexteResponse> => {
-    const response = await apiClient.get("/contexte");
+    const response = await apiClient.get("contexte");
     return response.data;
   }
 };

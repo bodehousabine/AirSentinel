@@ -19,7 +19,7 @@ export const authService = {
    * Enregistre un nouvel utilisateur
    */
   register: async (email: string, full_name: string, password: string): Promise<UserResponse> => {
-    const response = await apiClient.post<UserResponse>("/auth/register", {
+    const response = await apiClient.post<UserResponse>("auth/register", {
       email,
       full_name,
       password,
@@ -31,7 +31,7 @@ export const authService = {
    * Connecte un utilisateur et retourne le token
    */
   login: async (email: string, password: string): Promise<TokenResponse> => {
-    const response = await apiClient.post<TokenResponse>("/auth/login", {
+    const response = await apiClient.post<TokenResponse>("auth/login", {
       email,
       password,
     });
@@ -46,7 +46,7 @@ export const authService = {
    * Récupère le profil de l'utilisateur connecté
    */
   getMe: async (): Promise<UserResponse> => {
-    const response = await apiClient.get<UserResponse>("/auth/me");
+    const response = await apiClient.get<UserResponse>("auth/me");
     return response.data;
   },
 
