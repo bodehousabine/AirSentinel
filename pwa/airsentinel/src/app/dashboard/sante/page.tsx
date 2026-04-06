@@ -1,18 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { HeartPulse, ShieldCheck, Loader2, Wind, Activity, MapPin, ChevronDown } from "lucide-react";
-import healthService, { ProfilRecommandation } from "@/services/healthService";
+import { HeartPulse, Baby, User, UserCog, ArrowRight, Loader2, ArrowLeft, MapPin, ChevronDown } from "lucide-react";
 import mapService from "@/services/mapService";
 import { useVille } from "@/context/VilleContext";
-import { VillePoint } from "@/types/map";
+import { useRouter } from "next/navigation";
 
 export default function SantePage() {
-  const [recommendations, setRecommendations] = useState<ProfilRecommandation[]>([]);
   const [loading, setLoading] = useState(true);
   const [villes, setVilles] = useState<string[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const { ville, selectVille } = useVille();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchVilles = async () => {
@@ -22,93 +21,12 @@ export default function SantePage() {
         setVilles(sortedVilles);
       } catch (err) {
         console.error("Erreur chargement villes:", err);
-      }
-    };
-    fetchVilles();
-  }, []);
-
-  useEffect(() => {
-    if (!ville) {
-      setLoading(false);
-      return;
-    }
-
-    const fetchHealthData = async () => {
-      setLoading(true);
-      try {
-        const data = await healthService.getRealRecommendations(ville);
-        setRecommendations(data);
-      } catch (err) {
-        console.error("Erreur chargement santé:", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchHealthData();
-  }, [ville]);
-
-  const handleSelectVille = (villeChoisie: string) => {
-    selectVille(villeChoisie);
-    setShowDropdown(false);
-  };
-
-  if (!ville) {
-    return (
-      <main className="p-6 pb-24 max-w-5xl mx-auto animate-in fade-in duration-700">
-        <header className="mb-10">
-          <h1 className="text-4xl font-black text-[#e0f2fe] mb-2 tracking-tight flex items-center gap-3">
-            Santé & <span className="text-[#ef4444]">Protection</span> <HeartPulse className="text-[#ef4444]" size={32} />
-          </h1>
-          <p className="text-[#e0f2fe]/50 text-sm font-medium italic">Préconisations IA personnalisées selon la qualité de l&apos;air détectée.</p>
-        </header>
-
-        <div className="glass-card p-10 flex flex-col items-center justify-center min-h-[400px]">
-          <div className="w-20 h-20 rounded-full bg-[#00d4b1]/10 flex items-center justify-center mb-6">
-            <MapPin className="text-[#00d4b1]" size={40} />
-          </div>
-          <h2 className="text-2xl font-black text-white mb-4 text-center">Choisissez votre ville</h2>
-          <p className="text-gray-400 text-center mb-8 max-w-md">
-            Sélectionnez une ville pour obtenir des recommandations personnalisées selon la qualité de l'air local.
-          </p>
-
-          <div className="relative w-full max-w-md">
-            <button
-              onClick={() => setShowDropdown(!showDropdown)}
-              className="w-full flex items-center justify-between px-6 py-4 bg-[#020c18] border border-white/10 rounded-2xl text-white hover:border-[#00d4b1]/50 transition-colors"
-            >
-              <span className="font-medium">Sélectionner une ville...</span>
-              <ChevronDown className={`text-gray-400 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
-            </button>
-
-            {showDropdown && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-[#020c18] border border-white/10 rounded-2xl shadow-2xl overflow-hidden max-h-[300px] overflow-y-auto z-50">
-                {villes.map((v) => (
-                  <button
-                    key={v}
-                    onClick={() => handleSelectVille(v)}
-                    className="w-full text-left px-6 py-3 hover:bg-[#00d4b1]/10 text-white font-medium transition-colors"
-                  >
-                    {v}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="mt-12 p-6 bg-blue-500/5 rounded-3xl border border-blue-500/10 flex items-center gap-6">
-          <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 shrink-0">
-            <span className="text-xl font-bold">i</span>
-          </div>
-          <p className="text-xs text-gray-400 leading-relaxed font-medium">
-            <b>Note IA :</b> Ces recommandations sont basées sur les normes de l&apos;OMS. Si vous ressentez des difficultés respiratoires persistantes, contactez immédiatement les services de santé de votre district.
-          </p>
-        </div>
-
-        <div className="h-[120px] sm:hidden" />
-      </main>
-    );
-  }
+    fetchVilles();
+  }, []);
 
   if (loading) {
     return (
@@ -118,97 +36,147 @@ export default function SantePage() {
     );
   }
 
-  const globalRisk = recommendations[0]?.niveau_risque || "MODÉRÉ";
-  const globalColor = recommendations[0]?.couleur || "#FFC107";
+  const profiles = [
+    {
+      title: "Enfants",
+      subtitle: "Préconisations pour les enfants (< 12 ans)",
+      icon: "👶",
+      href: "/dashboard/sante/enfants",
+      color: "bg-blue-500/20 border-blue-500/30 hover:border-blue-500/60",
+      textColor: "text-blue-400"
+    },
+    {
+      title: "Adultes",
+      subtitle: "Préconisations pour les adultes",
+      icon: "🧑",
+      href: "/dashboard/sante/adultes",
+      color: "bg-green-500/20 border-green-500/30 hover:border-green-500/60",
+      textColor: "text-green-400"
+    },
+    {
+      title: "Seniors",
+      subtitle: "Préconisations pour les personnes âgées",
+      icon: "👴",
+      href: "/dashboard/sante/personnes-agees",
+      color: "bg-purple-500/20 border-purple-500/30 hover:border-purple-500/60",
+      textColor: "text-purple-400"
+    },
+    {
+      title: "Asthmathiques",
+      subtitle: "Préconisations pour les asthmatiques",
+      icon: "🫁",
+      href: "/dashboard/sante/asmatiques",
+      color: "bg-red-500/20 border-red-500/30 hover:border-red-500/60",
+      textColor: "text-red-400"
+    }
+  ];
 
   return (
     <main className="p-6 pb-24 max-w-5xl mx-auto animate-in fade-in duration-700">
       <header className="mb-10">
-        <div className="flex items-start justify-between">
+        <button
+          onClick={() => router.push("/dashboard")}
+          className="group flex items-center gap-3 px-5 py-2.5 bg-slate-900/60 backdrop-blur-md border border-white/20 rounded-2xl text-white hover:border-[#ef4444]/50 hover:bg-[#ef4444]/5 transition-all active:scale-95 shadow-lg mb-8"
+        >
+          <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform text-[#ef4444]" />
+          <span className="font-black text-[11px] uppercase tracking-widest">Tableau de bord</span>
+        </button>
+
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <h1 className="text-4xl font-black text-[#e0f2fe] mb-2 tracking-tight flex items-center gap-3">
               Santé & <span className="text-[#ef4444]">Protection</span> <HeartPulse className="text-[#ef4444]" size={32} />
             </h1>
-            <p className="text-[#00d4b1] text-sm font-bold mb-2 flex items-center gap-2">
-              <MapPin size={14} /> Données pour : {ville}
+            <p className="text-[#e0f2fe]/50 text-sm font-medium italic">
+              {ville ? "Choisissez un profil pour voir les recommandations." : "Sélectionnez votre ville pour commencer."}
             </p>
-            <p className="text-[#e0f2fe]/50 text-sm font-medium italic">Préconisations IA personnalisées selon la qualité de l&apos;air détectée.</p>
           </div>
-          <button
-            onClick={() => selectVille("")}
-            className="px-4 py-2 bg-[#00d4b1] text-white font-bold rounded-xl shadow-lg hover:bg-[#00b89c] hover:scale-105 transition-all active:scale-95 flex items-center gap-2 shrink-0"
-          >
-            <MapPin size={14} />
-            Changer
-          </button>
+
+          {ville && (
+            <button
+              onClick={() => selectVille("")}
+              className="px-6 py-3 bg-[#00d4b1] text-white font-black uppercase tracking-tighter text-xs rounded-2xl shadow-[0_4px_20px_rgba(0,212,177,0.4)] hover:bg-[#00b89c] hover:scale-105 transition-all active:scale-95 flex items-center gap-2 shrink-0 border border-white/20"
+            >
+              <MapPin size={16} fill="white" />
+              Changer de ville ({ville})
+            </button>
+          )}
         </div>
       </header>
 
-      <div className="glass-card mb-6 overflow-hidden relative border-[#ef4444]/20 shadow-2xl">
-        <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: globalColor }} />
-        <div className="p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
-           <div className="flex flex-col items-center md:items-start text-center md:text-left">
-              <h3 className="text-2xl font-black text-white italic tracking-tight mb-2">État Sanitaire Actuel</h3>
-              <div className="flex items-center gap-3 px-6 py-2 rounded-full border border-white/5 bg-white/5">
-                 <div className="w-3 h-3 rounded-full animate-pulse" style={{ backgroundColor: globalColor, boxShadow: `0 0 12px ${globalColor}` }} />
-                 <span className="text-sm font-black uppercase tracking-[0.2em]" style={{ color: globalColor }}>
-                   Niveau {globalRisk}
-                 </span>
-              </div>
-           </div>
-           
-           <div className="grid grid-cols-2 gap-4 w-full md:w-auto">
-              <div className="p-4 bg-white/5 rounded-2xl border border-white/5 text-center">
-                 <Wind className="text-blue-400 mx-auto mb-2" size={20} />
-                 <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Ventilation</div>
-                 <div className="text-sm font-bold text-white">{globalRisk === 'FAIBLE' ? 'Optimale' : 'Limitée'}</div>
-              </div>
-              <div className="p-4 bg-white/5 rounded-2xl border border-white/5 text-center">
-                 <Activity className="text-[#ef4444] mx-auto mb-2" size={20} />
-                 <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Effort Sportif</div>
-                 <div className="text-sm font-bold text-white">{globalRisk === 'FAIBLE' ? 'Conseillé' : 'Prudence'}</div>
-              </div>
-           </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {recommendations.map((rec, idx) => (
-          <div key={idx} className="glass-card p-6 flex flex-col gap-6 group hover:border-white/20 transition-all duration-500 border-white/5">
-            <div className="flex items-center justify-between">
-               <div className="flex items-center gap-4">
-                  <div className="text-3xl p-3 bg-white/5 rounded-2xl group-hover:scale-110 transition-transform">{rec.icone}</div>
-                  <h5 className="font-black text-xl text-white tracking-tight">{rec.profil}</h5>
-               </div>
-               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: rec.couleur }} />
-            </div>
-            
-            <div>
-               <p className="text-sm text-[#e0f2fe]/70 leading-relaxed font-medium italic mb-6">
-                  &quot;{rec.message}&quot;
-               </p>
-               <div className="space-y-3">
-                  <h6 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">Actions Correctives :</h6>
-                  {rec.actions.map((action, i) => (
-                    <div key={i} className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5 text-xs font-bold text-gray-300 group-hover:bg-white/10 transition-colors">
-                       <ShieldCheck className="text-[#00d4b1] shrink-0" size={16} />
-                       {action}
-                    </div>
-                  ))}
-               </div>
-            </div>
+      {!ville ? (
+        <div className="glass-card p-10 flex flex-col items-center justify-center min-h-[400px] border-2 border-white/5 animate-in slide-in-from-bottom-5 duration-500">
+          <div className="w-24 h-24 rounded-full bg-[#00d4b1]/10 flex items-center justify-center mb-8 relative">
+            <div className="absolute inset-0 bg-[#00d4b1]/20 rounded-full blur-xl animate-pulse" />
+            <MapPin className="text-[#00d4b1] relative z-10" size={48} />
           </div>
-        ))}
-      </div>
-      
-      <div className="mt-12 p-6 bg-blue-500/5 rounded-3xl border border-blue-500/10 flex items-center gap-6">
-         <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 shrink-0">
-            <span className="text-xl font-bold">i</span>
-         </div>
-         <p className="text-xs text-gray-400 leading-relaxed font-medium">
-            <b>Note IA :</b> Ces recommandations sont basées sur les normes de l&apos;OMS. Si vous ressentez des difficultés respiratoires persistantes, contactez immédiatement les services de santé de votre district.
-         </p>
-      </div>
+          
+          <h2 className="text-3xl font-black text-white mb-4 text-center">Où êtes-vous ?</h2>
+          <p className="text-gray-400 text-center mb-10 max-w-md text-base leading-relaxed">
+            La qualité de l&apos;air varie selon votre position. Sélectionnez une ville pour accéder aux conseils santé adaptés.
+          </p>
+
+          <div className="relative w-full max-w-md">
+            <button
+              onClick={() => setShowDropdown(!showDropdown)}
+              className="w-full flex items-center justify-between px-8 py-6 bg-[#00d4b1]/10 border-2 border-[#00d4b1]/50 rounded-[2rem] text-white hover:bg-[#00d4b1]/20 transition-all shadow-[0_0_30px_rgba(0,212,177,0.15)] group"
+            >
+              <div className="flex items-center gap-5">
+                <div className="w-12 h-12 rounded-2xl bg-[#00d4b1] flex items-center justify-center text-white shadow-xl scale-110">
+                  <MapPin size={24} fill="white" />
+                </div>
+                <span className="font-bold text-xl">Sélectionner une ville...</span>
+              </div>
+              <ChevronDown size={28} className={`text-[#00d4b1] transition-transform duration-500 ease-in-out ${showDropdown ? 'rotate-180' : ''}`} />
+            </button>
+
+            {showDropdown && (
+              <div className="absolute top-full left-0 right-0 mt-4 bg-slate-900/95 backdrop-blur-2xl border border-white/10 rounded-[2rem] shadow-2xl overflow-hidden max-h-[350px] overflow-y-auto z-50 animate-in fade-in slide-in-from-top-4 duration-300">
+                {villes.map((v) => (
+                  <button
+                    key={v}
+                    onClick={() => { selectVille(v); setShowDropdown(false); }}
+                    className="w-full text-left px-8 py-4 hover:bg-[#00d4b1]/20 text-white font-bold text-lg transition-all border-b border-white/5 last:border-0 hover:pl-10"
+                  >
+                    {v}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-in slide-in-from-bottom-5 duration-700">
+            {profiles.map((profile, idx) => (
+              <button
+                key={idx}
+                onClick={() => router.push(profile.href)}
+                className={`glass-card p-8 flex flex-col items-center text-center gap-4 border-2 transition-all duration-300 hover:scale-[1.02] ${profile.color}`}
+              >
+                <div className="text-6xl">{profile.icon}</div>
+                <div>
+                  <h3 className="text-xl font-black text-white mb-2">{profile.title}</h3>
+                  <p className="text-sm text-gray-400">{profile.subtitle}</p>
+                </div>
+                <div className={`mt-2 flex items-center gap-2 ${profile.textColor}`}>
+                  <span className="text-sm font-bold">Voir les conseils</span>
+                  <ArrowRight size={16} />
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-12 p-6 bg-blue-500/5 rounded-3xl border border-blue-500/10 flex items-center gap-6 animate-in fade-in duration-1000">
+            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 shrink-0">
+                <span className="text-xl font-bold">i</span>
+            </div>
+            <p className="text-xs text-gray-400 leading-relaxed font-medium">
+                <b>Note IA :</b> Ces recommandations sont basées sur les normes de l&apos;OMS et adaptées à chaque profil. Si vous ressentez des difficultés respiratoires persistantes, contactez immédiatement les services de santé de votre district.
+            </p>
+          </div>
+        </>
+      )}
 
       <div className="h-[120px] sm:hidden" />
     </main>

@@ -12,7 +12,10 @@ from typing import Optional
 
 from api.services.data_service import get_dataframe
 from api.services.irs_service import compute_irs
-from api.schemas.prediction import IRSInput, IRSResponse, PredictionPoint
+from api.schemas.prediction import IRSInput, IRSResponse, PredictionPoint, ComputeInput, ComputeResponse
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/predictions", tags=["Prédictions"])
 
@@ -118,3 +121,72 @@ def simulate_irs(payload: IRSInput):
     except (ValueError, FileNotFoundError, KeyError) as e:
         raise HTTPException(status_code=422, detail=str(e))
     return IRSResponse(**result)
+
+
+@router.post("/compute", response_model=ComputeResponse)
+def compute_interactive(payload: ComputeInput):
+    """
+    Simulateur Interactif : Calcule le PM2.5 prédit selon la ville et les features ajustées par les jauges.
+    """
+    logger.info(f"Simulation PM2.5 demandée pour la ville: {payload.city}")
+    city = payload.city.lower()
+    f = payload.features
+    
+    # Baselines par ville (µg/m³) - Basé sur les moyennes IndabaX
+    baselines = {
+        "douala": 35.0,
+        "yaoundé": 28.0,
+        "yaounde": 28.0,
+        "bafoussam": 22.0,
+        "garoua": 45.0,
+        "bamenda": 25.0,
+        "maroua": 50.0,
+        "kribi": 15.0,
+        "bertoua": 32.0,
+        "ebolowa": 20.0,
+        "ngaoundéré": 38.0,
+        "ngaoundere": 38.0,
+        "buéa": 18.0,
+        "buea": 18.0,
+    }
+    
+    baseline = baselines.get(city, 30.0)
+    
+    # Poids des features (Simule l'impact physique)
+    # PM2.5 = Baseline + sum(feature * weight)
+    # Les valeurs en entrée sont supposées être "normalisées" ou dans des ranges standards
+    weights = {
+        "dust": 0.15,       # Impact fort des particules sahariennes
+        "co": 1.5,          # Impact fort du trafic urbain
+        "uv": 0.3,          # Impact photochimique
+        "ozone": 0.2,       # Corrélation forte
+        "temp": 0.1,        # La chaleur peut augmenter la suspension
+        "humidity": -0.05,  # L'humidité peut faire tomber les particules
+    }
+    
+    adjustment = sum(f.get(k, 0) * w for k, w in weights.items())
+    predicted = max(2.0, baseline + adjustment)
+    
+    # Classification
+    if predicted <= 12:
+        level, color = "BON", "#10b981"
+        desc = "La qualité de l'air est jugée satisfaisante."
+    elif predicted <= 35:
+        level, color = "MODÉRÉ", "#f59e0b"
+        desc = "La qualité de l'air est acceptable."
+    elif predicted <= 55:
+        level, color = "DÉGRADÉ", "#f97316"
+        desc = "Les membres des groupes sensibles peuvent ressentir des effets sur la santé."
+    elif predicted <= 150:
+        level, color = "MAUVAIS", "#ef4444"
+        desc = "Tout le monde peut commencer à ressentir des effets sur la santé."
+    else:
+        level, color = "TRÈS MAUVAIS", "#7f1d1d"
+        desc = "Avertissements sanitaires de conditions d'urgence."
+
+    return ComputeResponse(
+        predicted_pm25=round(predicted, 2),
+        level=level,
+        color=color,
+        description=desc
+    )

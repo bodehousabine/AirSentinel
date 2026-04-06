@@ -23,3 +23,15 @@ class PredictionPoint(BaseModel):
     date: str
     pm25: float
     is_prediction: bool = False
+
+class ComputeInput(BaseModel):
+    """Entrée pour le simulateur interactif."""
+    city: str
+    features: dict[str, float]
+
+class ComputeResponse(BaseModel):
+    """Réponse du calcul interactif de PM2.5."""
+    predicted_pm25: float
+    level: str
+    color: str
+    description: str

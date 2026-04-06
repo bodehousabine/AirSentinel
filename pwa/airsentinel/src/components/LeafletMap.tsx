@@ -51,7 +51,7 @@ function HeatmapLayer({ points }: { points: VillePoint[] }) {
 
 // ── Sous-composant : PWA SEARCH BAR ─────────────────────────────────────────
 
-function MapSearch({ points, onSelect }: { points: VillePoint[], onSelect: (lat: number, lon: number) => void }) {
+function MapSearch({ points, onSelect, onSelectVille }: { points: VillePoint[], onSelect: (lat: number, lon: number) => void, onSelectVille: (ville: string) => void }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<VillePoint[]>([]);
 
@@ -94,7 +94,7 @@ function MapSearch({ points, onSelect }: { points: VillePoint[], onSelect: (lat:
                 <button
                   key={point.city}
                   onClick={() => {
-                    selectVille(point.city);
+                    onSelectVille(point.city);
                     if (point.lat && point.lon) onSelect(point.lat, point.lon);
                     setQuery("");
                     setResults([]);
@@ -227,7 +227,7 @@ export default function LeafletMap() {
 
   return (
     <div className="w-full h-full relative overflow-hidden">
-      <MapSearch points={points} onSelect={handleSelectCity} />
+      <MapSearch points={points} onSelect={handleSelectCity} onSelectVille={selectVille} />
       <MapOverlayControls map={map} />
 
       {loading && (
@@ -250,16 +250,16 @@ export default function LeafletMap() {
         className="bg-[#020c18] !z-0"
       >
         <LayersControl position="topright">
-          <LayersControl.BaseLayer checked name="📡 Satellite">
-            <TileLayer
-              attribution='&copy; Esri'
-              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-            />
-          </LayersControl.BaseLayer>
-          <LayersControl.BaseLayer name="🗺️ Plan (OSM)">
+          <LayersControl.BaseLayer checked name="🗺️ Plan (OSM)">
             <TileLayer
               attribution='&copy; OpenStreetMap'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+          </LayersControl.BaseLayer>
+          <LayersControl.BaseLayer name="📡 Satellite">
+            <TileLayer
+              attribution='&copy; Esri'
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
             />
           </LayersControl.BaseLayer>
 
@@ -268,12 +268,11 @@ export default function LeafletMap() {
           </LayersControl.Overlay>
 
           <LayersControl.Overlay checked name="📍 Stations">
-            <MarkerClusterGroup chunkedLoading showCoverageOnHover={false}>
               {points.filter(p => p.lat !== null && p.lon !== null).map((point) => (
                 <CircleMarker
                   key={point.city}
                   center={[point.lat!, point.lon!]}
-                  radius={12}
+                  radius={6}
                   pathOptions={{
                     fillColor: point.irs_color || "#22c55e",
                     color: "white",
@@ -321,7 +320,6 @@ export default function LeafletMap() {
                   </Popup>
                 </CircleMarker>
               ))}
-            </MarkerClusterGroup>
           </LayersControl.Overlay>
         </LayersControl>
       </MapContainer>
