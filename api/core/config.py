@@ -35,6 +35,14 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
+    # SMTP Notifications
+    SMTP_HOST: Optional[str] = None
+    SMTP_PORT: int = 587
+    SMTP_USER: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = None
+    EMAILS_FROM_EMAIL: str = "alerts@airsentinel.cm"
+    EMAILS_FROM_NAME: str = "AirSentinel Alerts"
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 @lru_cache()

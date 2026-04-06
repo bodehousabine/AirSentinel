@@ -8,6 +8,8 @@ from api.core.database import get_db
 from api.core.config import get_settings
 from api.models.user import User
 from api.auth.dependencies import get_current_user
+from pydantic import BaseModel
+from typing import Optional
 
 settings = get_settings()
 
@@ -105,3 +107,27 @@ async def upload_avatar(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Erreur interne lors de l'upload : {str(e)}"
         )
+class SubscriptionUpdate(BaseModel):
+    subscribed_city: Optional[str] = None
+
+@router.put("/me/subscription")
+async def update_subscription(
+    payload: SubscriptionUpdate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Met à jour la ville d'abonnement pour les alertes mail en temps réel.
+    """
+    current_user.subscribed_city = payload.subscribed_city
+    # Réinitialiser le cool-down si on change de ville pour être averti immédiatement
+    current_user.last_alert_sent = None
+    
+    await db.commit()
+    await db.refresh(current_user)
+    
+    return {
+        "status": "success",
+        "subscribed_city": current_user.subscribed_city,
+        "message": f"Vous êtes maintenant abonné aux alertes pour {payload.subscribed_city or 'aucune ville'}"
+    }

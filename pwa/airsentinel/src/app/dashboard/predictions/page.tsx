@@ -31,6 +31,8 @@ export default function PredictionsPage() {
   const [isComputing, setIsComputing] = useState(false);
   const [simulationError, setSimulationError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [subscribedCity, setSubscribedCity] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPredictions = async () => {
@@ -69,6 +71,20 @@ export default function PredictionsPage() {
 
   const handleFeatureChange = (key: string, value: number) => {
     setFeatures(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleSubscribe = async () => {
+    setIsSubscribing(true);
+    try {
+      await predictionService.subscribeToCityAlerts(selectedCity);
+      setSubscribedCity(selectedCity);
+      alert(`Super ! Vous serez alerté par mail si la qualité de l'air à ${selectedCity} devient mauvaise.`);
+    } catch (err) {
+      console.error("Erreur abonnement:", err);
+      alert("Impossible de s'abonner. Vérifiez votre connexion.");
+    } finally {
+      setIsSubscribing(false);
+    }
   };
 
   const predictions = data.filter(p => p.is_prediction);
@@ -127,7 +143,7 @@ export default function PredictionsPage() {
                <div className="flex justify-between items-start mb-10">
                   <div className="space-y-1">
                      <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Tendance 72h (PM2.5)</div>
-                     <div className="text-5xl font-black text-white tabular-nums">
+                     <div className="text-4xl font-black text-white tabular-nums">
                        {jPlus1?.pm25.toFixed(1)} <span className="text-xl font-light opacity-30 italic">µg/m³</span>
                      </div>
                   </div>
@@ -240,19 +256,35 @@ export default function PredictionsPage() {
                     <p className="text-gray-400 text-sm font-medium">Simulez l&apos;impact des variables environnementales sur la zone cible.</p>
                  </div>
 
-                 <div className="flex flex-col gap-2 w-full md:w-auto">
-                    <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest pl-1">Zone de Simulation</span>
-                    <select 
-                       value={selectedCity}
-                       onChange={(e) => setSelectedCity(e.target.value)}
-                       className="bg-[#020617] border-2 border-white/5 rounded-2xl px-6 py-4 text-white font-black text-lg focus:border-[#00d4b1] outline-none transition-all shadow-2xl appearance-none"
-                       style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2300d4b1\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'3\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1.5rem center', backgroundSize: '1.2rem' }}
+                  <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto items-end">
+                    <div className="flex flex-col gap-2 w-full md:w-auto">
+                       <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest pl-1">Zone de Simulation</span>
+                       <select 
+                          value={selectedCity}
+                          onChange={(e) => setSelectedCity(e.target.value)}
+                          className="bg-[#020617] border-2 border-white/5 rounded-2xl px-6 py-4 text-white font-black text-lg focus:border-[#00d4b1] outline-none transition-all shadow-2xl appearance-none"
+                          style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2300d4b1\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'3\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1.5rem center', backgroundSize: '1.2rem' }}
+                       >
+                          {["Douala", "Yaoundé", "Bafoussam", "Garoua", "Bamenda", "Maroua", "Kribi"].map(c => (
+                            <option key={c} value={c}>{c}</option>
+                          ))}
+                       </select>
+                    </div>
+
+                    <button 
+                       onClick={handleSubscribe}
+                       disabled={isSubscribing || subscribedCity === selectedCity}
+                       className={`h-[60px] px-8 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center gap-2 group/btn ${subscribedCity === selectedCity ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30' : 'bg-[#00d4b1] text-[#020617] hover:bg-[#00d4b1]/80 hover:scale-105 shadow-[0_0_20px_rgba(0,212,177,0.3)]'}`}
                     >
-                       {["Douala", "Yaoundé", "Bafoussam", "Garoua", "Bamenda", "Maroua", "Kribi"].map(c => (
-                         <option key={c} value={c}>{c}</option>
-                       ))}
-                    </select>
-                 </div>
+                       {isSubscribing ? (
+                          <Loader2 size={18} className="animate-spin" />
+                       ) : subscribedCity === selectedCity ? (
+                          <>Abonné <Sparkles size={16} /></>
+                       ) : (
+                          <>M&apos;alerter par Mail</>
+                       )}
+                    </button>
+                  </div>
               </header>
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
@@ -315,9 +347,9 @@ export default function PredictionsPage() {
                                </button>
                             </div>
                           ) : (
-                            <div className="space-y-6 animate-in zoom-in-95 duration-500">
+                             <div className="space-y-6 animate-in zoom-in-95 duration-500">
                                <div className="relative inline-block">
-                                  <div className="text-8xl font-black text-white tracking-tighter tabular-nums drop-shadow-[0_10px_30px_rgba(255,255,255,0.1)]">
+                                  <div className="text-6xl font-black text-white tracking-tighter tabular-nums drop-shadow-[0_10px_30px_rgba(255,255,255,0.1)]">
                                     {interactiveResult?.predicted_pm25.toFixed(1)}
                                   </div>
                                   <div className="absolute -right-12 top-2 text-2xl font-light text-gray-500 italic uppercase">µg/m³</div>

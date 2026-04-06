@@ -3,6 +3,7 @@ from datetime import datetime
 from sqlalchemy import String, Boolean, Text, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID
+from typing import Optional
 
 from api.core.database import Base
 
@@ -44,4 +45,14 @@ class User(Base):
         DateTime(timezone=True), 
         server_default=func.now(), 
         onupdate=func.now()
+    )
+    
+    # Subscriptions pour les Alertes AirSentinel
+    subscribed_city: Mapped[Optional[str]] = mapped_column(
+        String(100), 
+        nullable=True
+    )
+    last_alert_sent: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), 
+        nullable=True
     )

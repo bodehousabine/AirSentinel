@@ -14,13 +14,19 @@ const predictionService = {
 
   computeInteractive: async (city: string, features: Record<string, number>) => {
     try {
-      console.log(`[AI Lab] Computing for ${city}...`, features);
+      const fullUrl = `${apiClient.defaults.baseURL}predictions/compute`;
+      console.log(`[AI Lab] Computing via ${fullUrl}...`, features);
       const response = await apiClient.post("predictions/compute", { city, features });
       return response.data;
-    } catch (err) {
+    } catch (err: any) {
       console.error("[AI Lab] Computation failed:", err);
       throw err;
     }
+  },
+
+  subscribeToCityAlerts: async (city: string) => {
+    const response = await apiClient.put("users/me/subscription", { subscribed_city: city });
+    return response.data;
   }
 };
 
