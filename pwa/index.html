@@ -13,8 +13,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&family=DM+Mono:ital@0;1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     
-    <!-- Plotly.js pour correspondre au Dashboard Python -->
+    <!-- Leaflet.js pour une carte fluide et esthétique -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Plotly.js reste pour les graphiques de prédiction -->
     <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
 
     <style>
@@ -40,30 +45,32 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; -webkit-tap-highlight-color: transparent; }
 
         body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            height: 100dvh;
+            font-family: 'Outfit', sans-serif;
+            margin: 0; padding: 0;
+            background: #020617 url('./bg.png?v=30') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
 
         /* --- HEADER --- */
         header {
+            position: fixed; top: 0; left: 0; width: 100%;
             padding: calc(env(safe-area-inset-top) + 12px) 16px 12px;
             background: var(--bg-dark);
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid rgba(255,255,255,0.05);
-            z-index: 10;
+            z-index: 2000; /* Priorité maximale */
         }
 
         .header-title {
             font-weight: 900; font-size: 18px;
             display: flex; align-items: center; gap: 6px;
-            white-space: nowrap; flex: 1;
+            white-space: nowrap; flex: 0 1 auto; /* Moins envahissant */
         }
         .header-title span { color: var(--accent-blue); }
 
@@ -73,20 +80,20 @@
             color: white; border: 1px solid rgba(255,255,255,0.1);
             padding: 6px 26px 6px 12px; border-radius: 8px;
             font-size: 13px; font-weight: 600; outline: none;
-            appearance: none; max-width: 140px; text-overflow: ellipsis;
+            appearance: none; max-width: 105px; text-overflow: ellipsis;
         }
         .city-selector::after {
             content: "▼"; position: absolute; right: 10px; top: 50%;
             transform: translateY(-50%); font-size: 9px; color: var(--text-muted); pointer-events: none;
         }
 
-        /* --- MAIN VIEWS --- */
-        main {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-            background-color: var(--bg-dark);
+        #lang-switch, #lang-switch-welcome {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-muted); padding: 4px 10px; border-radius: 8px;
+            font-size: 11px; font-weight: 800; cursor: pointer; transition: 0.2s;
+            flex-shrink: 0; min-width: 45px; margin-left: 8px;
         }
+        #lang-switch:active, #lang-switch-welcome:active { transform: scale(0.95); background: rgba(0,212,177,0.1); color: #00d4b1; }
 
         .view {
             position: absolute;
@@ -97,6 +104,8 @@
             transition: opacity 0.3s ease;
             padding-bottom: calc(80px + env(safe-area-inset-bottom));
         }
+        #map { position: absolute; inset: 0; z-index: 1; background: #020617; }
+        #view-carte { padding-top: 70px; }
 
         .view.active {
             opacity: 1;
@@ -108,7 +117,7 @@
         #map { width: 100%; height: 100%; z-index: 1; background: #000; }
 
         /* General view padding */
-        .content-pad { padding: 16px; }
+        .content-pad { padding: 85px 16px 40px; }
 
         /* Card styles */
         .card {
@@ -179,14 +188,14 @@
             padding-bottom: env(safe-area-inset-bottom); z-index: 100;
         }
 
-        .nav-item {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: var(--text-muted); font-size: 10px; font-weight: 600;
-            width: 25%; height: 100%; border: none; background: none; transition: 0.2s;
+        .nav-item { 
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            gap: 4px; color: var(--text-muted); background: none; border: none; cursor: pointer; transition: 0.3s; 
         }
+        .nav-item .material-symbols-outlined { font-size: 24px; transition: 0.3s; }
+        .nav-item span { font-size: 10px; font-weight: 750; text-transform: uppercase; letter-spacing: 0.5px; }
         .nav-item.active { color: var(--accent-blue); }
-        .nav-item .icon { font-size: 20px; margin-bottom: 4px; filter: grayscale(1); transition: 0.2s; }
-        .nav-item.active .icon { filter: grayscale(0); transform: translateY(-2px); }
+        .nav-item.active .material-symbols-outlined { font-variation-settings: 'FILL' 1; transform: translateY(-2px); }
 
         /* Splash */
         #loading {
@@ -195,41 +204,142 @@
         }
         .spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-left-color: var(--accent-blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Styles Page d'Accueil (Landing) */
+        #view-welcome {
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            text-align: center; height: 100vh; height: 100dvh; box-sizing: border-box;
+            background: rgba(15,23,42,0.5); backdrop-filter: blur(8px);
+            overflow: hidden; /* Pas de scroll sur l'accueil */
+        }
+        .welcome-header {
+            width: 100%; padding: 12px 20px; display: flex; align-items: center; justify-content: flex-start;
+            background: rgba(0,0,0,0.4); border-bottom: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 15px; /* Réduit */
+        }
+        .welcome-header img { height: 26px; margin-right: 10px; }
+        .welcome-header span { font-weight: 800; font-size: 18px; letter-spacing: -0.5px; }
+        .welcome-header span b { color: #0ea5e9; }
+
+        .welcome-content {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 0 25px 30px; gap: 15px; /* Ajout d'un gap pour mieux répartir */
+        }
+        .central-logo {
+            width: 110px; height: 110px; border-radius: 20px; margin-bottom: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: zoomIn 1s ease;
+        }
+        @keyframes zoomIn { from { opacity:0; transform: scale(0.8); } to { opacity:1; transform: scale(1); } }
+
+        .indaba-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(14,165,233,0.1); border: 1px solid rgba(14,165,233,0.2);
+            padding: 6px 16px; border-radius: 50px; font-weight: 800; font-size: 9px;
+            letter-spacing: 1px; color: #38bdf8; text-transform: uppercase; margin-bottom: 5px;
+            animation: fadeInDown 1s ease;
+        }
+        .welcome-title {
+            font-size: 28px; font-weight: 900; line-height: 1.1; margin-bottom: 5px;
+            max-width: 320px; animation: fadeInUp 1s ease 0.2s both;
+        }
+        .welcome-title span { color: #00f2fe; text-shadow: 0 0 15px rgba(0,242,254,0.3); }
+        .welcome-subtitle {
+            font-size: 14px; color: rgba(255,255,255,0.6); line-height: 1.4;
+            max-width: 280px; margin-bottom: 20px; animation: fadeInUp 1s ease 0.4s both;
+        }
+        .btn-start {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+            border: none; color: white; padding: 14px 32px; border-radius: 50px;
+            font-weight: 800; font-size: 14px; display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 8px 25px rgba(14,165,233,0.3); cursor: pointer; transition: 0.3s;
+            animation: fadeInUp 1s ease 0.6s both;
+        }
+        .btn-start:active { transform: scale(0.95); box-shadow: 0 5px 15px rgba(14,165,233,0.3); }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .bottom-nav.hidden { display: none; }
     </style>
 </head>
 <body>
 
     <div id="loading">
+        <img src="./logo.jpg" alt="Logo" style="height:70px; margin-bottom:16px; filter: drop-shadow(0 0 12px rgba(14,165,233,0.4));">
         <div class="spinner"></div>
-        <h2 style="font-weight:300;">Air<span style="color:#0ea5e9; font-weight:800;">Sentinel</span></h2>
+        <h2 style="font-weight:300; margin-top:12px;">Air<span style="color:#0ea5e9; font-weight:800;">Sentinel</span></h2>
     </div>
 
     <!-- HEADER -->
-    <header>
-        <div class="header-title">🌍 Air<span>Sentinel</span></div>
-        <div class="city-selector">
-            <select id="citySelect">
-                <option value="" disabled selected>Ville...</option>
-            </select>
+    <header style="display:none;" id="app-header">
+        <div class="header-title" onclick="showWelcome()" style="cursor:pointer;">
+            <img src="./logo.jpg" alt="Logo" style="height:28px; width:auto; filter: drop-shadow(0 0 5px rgba(14,165,233,0.3));">
+            Air<span>Sentinel</span>
+        </div>
+        <div style="display:flex; align-items:center; gap: 8px;">
+            <div class="city-selector">
+                <select id="citySelect">
+                    <option value="" disabled selected>Ville...</option>
+                </select>
+            </div>
+            <button id="lang-switch">FR</button>
         </div>
     </header>
 
     <!-- CONTENT VIEWS -->
     <main>
+        <!-- VUE 0: ACCUEIL -->
+        <div id="view-welcome" class="view active">
+            <div class="welcome-header" style="justify-content: space-between;">
+                <div style="display:flex; align-items:center;">
+                    <img src="./logo.jpg" alt="Logo">
+                    <span>Air<b>Sentinel</b></span>
+                </div>
+                <button id="lang-switch-welcome">FR</button>
+            </div>
+            
+            <div class="welcome-content">
+                <img src="./logo.jpg" class="central-logo" alt="AirSentinel Logo">
+                
+                <div class="indaba-badge">
+                    <span style="font-size: 8px;">▲</span> <span id="txt-welcome-badge">IndabaX Cameroon 2026</span>
+                </div>
+                
+                <h1 class="welcome-title" id="txt-welcome-title">
+                    AirSentinel : <span>L'IA au Service</span> d'un Air Plus Pur au Cameroun
+                </h1>
+                
+                <p class="welcome-subtitle" id="txt-welcome-desc">
+                    Visualisez, Analysez et Anticipez la Qualité de l'Air sur Tout le Territoire
+                </p>
+                
+                <button class="btn-start" onclick="startApp()">
+                    <span id="txt-welcome-btn">Commencer</span>
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                </button>
+            </div>
+        </div>
+
         <!-- VUE 1: CARTE -->
-        <div id="view-carte" class="view active">
+        <div id="view-carte" class="view">
             <div id="map"></div>
         </div>
 
         <!-- VUE 2: DATA (KPI) -->
         <div id="view-data" class="view">
             <div class="content-pad">
-                <h3 style="margin-bottom: 12px; color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Aujourd'hui · <span id="kpi-date" style="color: white;"></span></h3>
+                <h3 style="margin-bottom: 12px; color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 1px;"><span id="txt-kpi-date-label">Aujourd'hui</span> · <span id="kpi-date" style="color: white;"></span></h3>
                 
                 <div class="card" id="kpi-card" style="border-top: 4px solid var(--current-status); text-align: center;">
                     <div class="badge" id="kpi-badge" style="background: rgba(255,255,255,0.1); margin-bottom: 15px;">--</div>
                     <div class="big-number" id="kpi-pm" style="color: var(--current-status);">--</div>
-                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 8px; font-weight: 600;">µg/m³ (Concentration PM2.5)</div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 8px; font-weight: 600;">µg/m³ (<span id="txt-kpi-pm-desc">Concentration PM2.5</span>)</div>
                     
                     <!-- Ratios OMS et CMR -->
                     <div class="ratios">
@@ -240,17 +350,17 @@
                     <div style="margin-top: 20px; display: flex; justify-content: space-around; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
                         <div>
                             <div style="font-size: 20px; font-weight:900;" id="kpi-temp">--°C</div>
-                            <div style="font-size: 10px; color:var(--text-muted); text-transform:uppercase; margin-top:4px;">Temp</div>
+                            <div style="font-size: 10px; color:var(--text-muted); text-transform:uppercase; margin-top:4px;" id="txt-kpi-temp-label">Temp</div>
                         </div>
                         <div style="width: 1px; background: rgba(255,255,255,0.05);"></div>
                         <div>
                             <div style="font-size: 20px; font-weight:900;" id="kpi-vent">--</div>
-                            <div style="font-size: 10px; color:var(--text-muted); text-transform:uppercase; margin-top:4px;">Vent</div>
+                            <div style="font-size: 10px; color:var(--text-muted); text-transform:uppercase; margin-top:4px;" id="txt-kpi-vent-label">Vent</div>
                         </div>
                         <div style="width: 1px; background: rgba(255,255,255,0.05);"></div>
                         <div>
                             <div style="font-size: 20px; font-weight:900; color:var(--accent-blue);" id="kpi-irs">--</div>
-                            <div style="font-size: 10px; color:var(--accent-blue); text-transform:uppercase; margin-top:4px;">IRS</div>
+                            <div style="font-size: 10px; color:var(--accent-blue); text-transform:uppercase; margin-top:4px;" id="txt-kpi-irs-label">IRS</div>
                         </div>
                     </div>
                 </div>
@@ -260,7 +370,7 @@
         <!-- VUE 3: PREDICTIONS -->
         <div id="view-pred" class="view">
             <div class="content-pad">
-                <h3 style="margin-bottom: 16px; color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Évolution sur 72h</h3>
+                <h3 style="margin-bottom: 16px; color: var(--text-muted); font-size: 14px; text-transform: uppercase; letter-spacing: 1px;" id="txt-pred-evolution-label">Évolution sur 72h</h3>
                 <div class="card">
                     <!-- Graphique Plotly -->
                     <div class="chart-container" id="predChart"></div>
@@ -278,8 +388,8 @@
             <div class="content-pad">
                 <div class="toggle-container">
                     <div>
-                        <div style="font-weight: 800; font-size: 15px;">Notifications SMS/Push</div>
-                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Recevoir une alerte si la zone ciblée se dégrade.</div>
+                        <div style="font-weight: 800; font-size: 15px;" id="txt-alert-notif-label">Notifications SMS/Push</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;" id="txt-alert-notif-desc">Recevoir une alerte si la zone ciblée se dégrade.</div>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="notifSwitch">
@@ -287,15 +397,15 @@
                     </label>
                 </div>
 
-                <h3 style="margin-bottom: 16px; color: var(--text-muted); font-size: 14px; text-transform: uppercase;">Décision Santé</h3>
+                <h3 style="margin-bottom: 16px; color: var(--text-muted); font-size: 14px; text-transform: uppercase;" id="txt-alert-reco-title">Décision Santé</h3>
                 <div class="card" id="reco-card" style="border-left: 4px solid var(--current-status); padding: 15px;">
                     <div class="reco-tabs">
-                        <button class="tab-btn active" data-target="citoyen">👤 Citoyen</button>
-                        <button class="tab-btn" data-target="medecin">⚕️ Médecin</button>
-                        <button class="tab-btn" data-target="maire">🏛️ Maire</button>
-                        <button class="tab-btn" data-target="chercheur">🔬 Expert</button>
+                        <button class="tab-btn active" data-target="citoyen" id="txt-tab-citoyen">👤 Citoyen</button>
+                        <button class="tab-btn" data-target="medecin" id="txt-tab-medecin">⚕️ Médecin</button>
+                        <button class="tab-btn" data-target="maire" id="txt-tab-maire">🏛️ Maire</button>
+                        <button class="tab-btn" data-target="chercheur" id="txt-tab-expert">🔬 Expert</button>
                     </div>
-                    <div class="reco-content" id="recoText" style="min-height: 80px;">
+                    <div class="reco-content" id="recoText" style="min-height: 80px;" id="txt-alert-placeholder">
                         Sélectionnez une ville.
                     </div>
                 </div>
@@ -304,30 +414,139 @@
     </main>
 
     <!-- BOTTOM NAVIGATION -->
-    <nav class="bottom-nav">
+    <nav class="bottom-nav hidden" id="app-nav">
         <button class="nav-item active" data-target="view-carte">
-            <div class="icon">🌍</div><span>Carte</span>
+            <span class="material-symbols-outlined">map</span>
+            <span id="nav-carte">Carte</span>
         </button>
         <button class="nav-item" data-target="view-data">
-            <div class="icon">📊</div><span>Data</span>
+            <span class="material-symbols-outlined">analytics</span>
+            <span id="nav-data">Data</span>
         </button>
         <button class="nav-item" data-target="view-pred">
-            <div class="icon">📈</div><span>Prédire</span>
+            <span class="material-symbols-outlined">monitoring</span>
+            <span id="nav-pred">Prédire</span>
         </button>
         <button class="nav-item" data-target="view-alertes">
-            <div class="icon">⚠️</div><span>Alertes</span>
+            <span class="material-symbols-outlined">notifications_active</span>
+            <span id="nav-alerts">Alertes</span>
         </button>
     </nav>
 
     <!-- Scripts -->
-    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
     <script>
-        const API_BASE = "http://localhost:8000";
+        const API_BASE = window.location.protocol + "//" + window.location.hostname + ":8000";
         const SEUIL_OMS = 15.0;
 
+        const TEXTS = {
+            fr: {
+                carte: "Carte", data: "Données", predire: "Prédire", alerte: "Alertes",
+                placeholder: "Ville...", all_cities: "Toutes les villes",
+                "txt-kpi-date-label": "Aujourd'hui",
+                "txt-kpi-pm-desc": "Concentration PM2.5",
+                "txt-kpi-temp-label": "Temp",
+                "txt-kpi-vent-label": "Vent",
+                "txt-kpi-irs-label": "IRS",
+                "txt-pred-evolution-label": "Évolution sur 72h",
+                "txt-alert-notif-label": "Notifications SMS/Push",
+                "txt-alert-notif-desc": "Recevoir une alerte si la zone ciblée se dégrade.",
+                "txt-alert-reco-title": "Décision Santé",
+                "txt-tab-citoyen": "👤 Citoyen",
+                "txt-tab-medecin": "⚕️ Médecin",
+                "txt-tab-maire": "🏛️ Maire",
+                "txt-tab-expert": "🔬 Expert",
+                "txt-alert-placeholder": "Sélectionnez une ville.",
+                "txt-welcome-badge": "IndabaX Cameroon 2026",
+                "txt-welcome-title": "AirSentinel : <span>L'IA au Service</span> d'un Air Plus Pur au Cameroun",
+                "txt-welcome-desc": "Visualisez, Analysez et Anticipez la Qualité de l'Air sur Tout le Territoire",
+                "txt-welcome-btn": "Commencer"
+            },
+            en: {
+                carte: "Map", data: "Data", predire: "Predict", alerte: "Alerts",
+                placeholder: "City...", all_cities: "All Cities",
+                "txt-kpi-date-label": "Today",
+                "txt-kpi-pm-desc": "PM2.5 Concentration",
+                "txt-kpi-temp-label": "Temp",
+                "txt-kpi-vent-label": "Wind",
+                "txt-kpi-irs-label": "SRI",
+                "txt-pred-evolution-label": "72h Evolution",
+                "txt-alert-notif-label": "SMS/Push Notifications",
+                "txt-alert-notif-desc": "Get an alert if the target zone degrades.",
+                "txt-alert-reco-title": "Health Decision",
+                "txt-tab-citoyen": "👤 Citizen",
+                "txt-tab-medecin": "⚕️ Doctor",
+                "txt-tab-maire": "🏛️ Mayor",
+                "txt-tab-expert": "🔬 Expert",
+                "txt-alert-placeholder": "Select a city.",
+                "txt-welcome-badge": "IndabaX Cameroon 2026",
+                "txt-welcome-title": "AirSentinel : <span>AI at the Service</span> of Cleaner Air in Cameroon",
+                "txt-welcome-desc": "Visualize, Analyze and Anticipate Air Quality Across the Territory",
+                "txt-welcome-btn": "Get Started"
+            }
+        };
+
+        const RECO_EN = {
+            0: { citoyen: "Satisfactory air quality. Normal activities authorized.", medecin: "No health alert. Routine surveillance sufficient.", maire: "Normal situation. No emergency measures required.", expert: "Data compliant with WHO AQG 2021 thresholds. Baseline level." },
+            1: { citoyen: "Reduce intense outdoor activities. Wear a mask if discomfort.", medecin: "Monitor sensitive patients. Anticipate a rise in consultations.", maire: "Disseminate preventive recommendations. Monitor developments.", expert: "Exceeding IT4 (25 µg/m³). Analyze local emission sources." },
+            2: { citoyen: "Limit outings. Close windows. Avoid physical effort.", medecin: "Alert asthmatic patients. Strengthen inhaler stocks.", maire: "Trigger a public alert. Reduce local pollution sources.", expert: "Exceeding IT3 (37.5 µg/m³). Identify the current climatic episode." },
+            3: { citoyen: "Avoid any non-essential outings. Mask mandatory.", medecin: "Strengthen respiratory emergencies. Asthma protocol activated.", maire: "Public SMS alerts. Closure of outdoor school activities.", expert: "Exceeding IT2 (50 µg/m³). Analyze dust/harmattan correlation." },
+            4: { citoyen: "DANGER — Stay confined. Consult a doctor if symptoms.", medecin: "EMERGENCY — Activate respiratory emergency protocol.", maire: "CRISIS — Health emergency plan. Mandatory alerts.", expert: "Exceeding IT1 (75 µg/m³). Document and analyze the episode." },
+            5: { citoyen: "EXTREME DANGER — Do not go out. Call emergency if crisis.", medecin: "MAXIMUM EMERGENCY — All medical resources mobilized.", maire: "HEALTH CATASTROPHE — Trigger national emergency plan.", expert: "Exceptional peak. Document immediately. Alert authorities." }
+        };
+
+        function startApp() {
+            document.getElementById('view-welcome').classList.remove('active');
+            document.getElementById('view-carte').classList.add('active');
+            document.getElementById('app-header').style.display = 'flex';
+            document.getElementById('app-nav').classList.remove('hidden');
+            if (map) setTimeout(() => map.invalidateSize(), 150);
+        }
+
+        function translateUI() {
+            const t = TEXTS[currentLang];
+            document.getElementById('lang-switch').textContent = currentLang.toUpperCase();
+            if (document.getElementById('lang-switch-welcome')) {
+                document.getElementById('lang-switch-welcome').textContent = currentLang.toUpperCase();
+            }
+            
+            // City Selector
+            const citySelect = document.getElementById('citySelect');
+            if(citySelect && citySelect.options[0]) citySelect.options[0].textContent = t.placeholder;
+
+            // Nav Bar
+            document.getElementById('nav-carte').textContent = t.carte;
+            document.getElementById('nav-data').textContent = t.data;
+            document.getElementById('nav-pred').textContent = t.predire;
+            document.getElementById('nav-alerts').textContent = t.alerte;
+
+            // Generic IDs
+            Object.keys(t).forEach(id => {
+                const el = document.getElementById(id);
+                if(el) {
+                    if (id.includes('title')) el.innerHTML = t[id]; // Support HTML pour les titres (Cyan)
+                    else el.textContent = t[id];
+                }
+            });
+            
+            setTodayDate();
+        }
+
+        function showWelcome() {
+            document.getElementById('view-welcome').classList.add('active');
+            document.getElementById('app-header').style.display = 'none';
+            document.getElementById('app-nav').classList.add('hidden');
+            // Cacher les autres vues
+            document.querySelectorAll('.view').forEach(v => {
+                if(v.id !== 'view-welcome') v.classList.remove('active');
+            });
+        }
+
         // Global State
+        let currentLang = localStorage.getItem('pwa_lang') || 'fr';
+        let activeView = 'view-carte';
         let map;
-        let markers = {};
+        let markersGroup;
         let activeCity = null;
         let pwaData = { villes: [], alerteCache: {}, predCache: {}, dataCache: {} };
         let pollingInterval = null;
@@ -336,12 +555,15 @@
 
         // Initialisation de la VRAIE date d'aujourd'hui
         function setTodayDate() {
+            const locale = currentLang === 'fr' ? 'fr-FR' : 'en-US';
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('kpi-date').textContent = new Date().toLocaleDateString('fr-FR', options);
+            document.getElementById('kpi-date').textContent = new Date().toLocaleDateString(locale, options);
         }
 
         async function boot() {
             try {
+                console.log("PWA: Booting...");
+                translateUI();
                 setTodayDate();
                 registerServiceWorker();
                 await loadCities();
@@ -379,7 +601,7 @@
                     targetView.classList.add('active');
                     
                     if (item.dataset.target === 'view-carte' && map) {
-                        setTimeout(() => Plotly.Plots.resize('map'), 50);
+                        setTimeout(() => map.invalidateSize(), 50);
                     }
                     
                     // Relance l'animation de dessin lors du clic sur l'onglet Prédire
@@ -395,73 +617,61 @@
             });
 
             window.addEventListener('resize', () => {
-                if (document.getElementById('map') && document.getElementById('map').data) {
-                    Plotly.Plots.resize('map');
-                }
+                if (map) map.invalidateSize();
                 if (document.getElementById('predChart') && document.getElementById('predChart').data) {
                     Plotly.Plots.resize('predChart');
                 }
             });
         }
 
+
         function drawMap(dataVilles, highlightedCity = null) {
-            let filterData = highlightedCity && highlightedCity !== "Toutes les villes" 
-                ? dataVilles.filter(v => v.ville === highlightedCity && v.latitude && v.longitude)
-                : dataVilles.filter(v => v.latitude && v.longitude);
-
-            const displayData = filterData.length > 0 ? filterData : dataVilles.filter(v => v.latitude && v.longitude);
-
-            const lats = displayData.map(v => v.latitude);
-            const lons = displayData.map(v => v.longitude);
-            const texts = displayData.map(v => v.ville);
-            const sizes = displayData.map(v => Math.max(10, Math.min(25, v.pm25_actuel)));
-            const colors = displayData.map(v => v.pm25_actuel);
-
-            // Same colorscale as dashboard
-            const cscale = [[0,'#10b981'],[0.4,'#f59e0b'],[0.7,'#f97316'],[1,'#ef4444']];
-
-            const trace = {
-                type: 'scattermapbox',
-                lat: lats, lon: lons,
-                mode: highlightedCity && highlightedCity !== "Toutes les villes" ? 'markers+text' : 'markers',
-                marker: { 
-                    size: highlightedCity && highlightedCity !== "Toutes les villes" ? 24 : sizes,
-                    color: colors,
-                    colorscale: cscale,
-                    cmin: 5, cmax: 80
-                },
-                text: texts,
-                textposition: "top center",
-                textfont: { size: 14, color: '#00d4b1' },
-                hovertemplate: "<b>%{text}</b><br>PM2.5 : %{marker.color:.1f} µg/m³<extra></extra>"
-            };
-
-            let centerVar = {lat: 7.35, lon: 12.35};
-            let zoomVar = 4.8;
-            if (highlightedCity && highlightedCity !== "Toutes les villes" && displayData.length > 0) {
-                centerVar = {lat: displayData[0].latitude, lon: displayData[0].longitude};
-                zoomVar = 8.5;
+            if (!map) {
+                map = L.map('map', { zoomControl: false }).setView([7.35, 12.35], 6);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OSM'
+                }).addTo(map);
+                markersGroup = L.layerGroup().addTo(map);
             }
 
-            const layout = {
-                paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
-                margin: { l: 0, r: 0, t: 0, b: 0 },
-                mapbox: { style: "carto-darkmatter", center: centerVar, zoom: zoomVar },
-                showlegend: false
-            };
+            markersGroup.clearLayers();
 
-            Plotly.newPlot('map', [trace], layout, { displayModeBar: false, responsive: true });
+            dataVilles.forEach(v => {
+                if (!v.latitude || !v.longitude) return;
+                
+                const isSelected = highlightedCity && highlightedCity === v.ville;
+                const val = v.pm25_actuel;
+                const color = val < 15 ? '#10b981' : (val < 45 ? '#f59e0b' : '#ef4444');
+                
+                const marker = L.circleMarker([v.latitude, v.longitude], {
+                    radius: isSelected ? 12 : 8,
+                    fillColor: color,
+                    color: '#fff',
+                    weight: isSelected ? 3 : 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                });
 
-            document.getElementById('map').on('plotly_click', function(data){
-                if(data.points.length > 0) {
-                    const selectedCity = data.points[0].text;
+                marker.bindTooltip(`<b>${v.ville}</b><br>PM2.5: ${val.toFixed(1)}`, {
+                    permanent: isSelected,
+                    direction: 'top'
+                });
+
+                marker.on('click', () => {
                     const select = document.getElementById('citySelect');
-                    if (Array.from(select.options).some(o => o.value === selectedCity)) {
-                        select.value = selectedCity;
-                        triggerCityChange(selectedCity);
-                    }
-                }
+                    select.value = v.ville;
+                    triggerCityChange(v.ville);
+                });
+
+                markersGroup.addLayer(marker);
             });
+
+            if (highlightedCity && highlightedCity !== "Toutes les villes") {
+                const city = dataVilles.find(v => v.ville === highlightedCity);
+                if (city) map.setView([city.latitude, city.longitude], 10);
+            } else {
+                map.fitBounds(dataVilles.map(v => [v.latitude, v.longitude]), { padding: [30, 30] });
+            }
         }
 
         async function loadCities() {
@@ -495,14 +705,27 @@
         function setupInteractions() {
             document.getElementById('citySelect').addEventListener('change', (e) => triggerCityChange(e.target.value));
 
+            const toggleLang = () => {
+                currentLang = currentLang === 'fr' ? 'en' : 'fr';
+                localStorage.setItem('pwa_lang', currentLang);
+                translateUI();
+                if(activeCity) updateAllViews(activeCity);
+                // Re-remplir le sélecteur de villes avec les bons noms traduits pour les options spéciales (mais garder les noms de villes tels quels)
+                const select = document.getElementById('citySelect');
+                if(select.options[1]) select.options[1].textContent = TEXTS[currentLang].all_cities;
+            };
+
+            document.getElementById('lang-switch').addEventListener('click', toggleLang);
+            if (document.getElementById('lang-switch-welcome')) {
+                document.getElementById('lang-switch-welcome').addEventListener('click', toggleLang);
+            }
+
             const tabs = document.querySelectorAll('.reco-tabs .tab-btn');
             tabs.forEach(t => {
                 t.addEventListener('click', (e) => {
                     tabs.forEach(b => b.classList.remove('active'));
                     e.target.classList.add('active');
-                    if (activeCity && pwaData.alerteCache[activeCity]) {
-                        document.getElementById('recoText').textContent = pwaData.alerteCache[activeCity].recommandations[e.target.dataset.target];
-                    }
+                    if (activeCity) updateAllViews(activeCity);
                 });
             });
 
@@ -641,16 +864,34 @@
                 name: 'IC'
             });
 
-            // Predictions
+            // Predictions - mode sans text (on utilise annotations à la place)
             traces.push({
                 x: predDates, y: predVals,
-                type: 'scatter', mode: 'lines+markers+text',
+                type: 'scatter', mode: 'lines+markers',
                 line: { color: '#f59e0b', width: 3, dash: 'dash' },
                 marker: { size: 10, color: '#f59e0b', symbol: 'diamond', line: { color: '#1e293b', width: 2 } },
-                text: predVals.map(v => v.toFixed(1)),
-                textposition: 'top center',
-                textfont: { color: '#f59e0b', size: 12, family: 'DM Mono', weight: 'bold' },
                 name: 'Prédiction'
+            });
+
+            predVals.forEach((val, i) => {
+                const offsets = [-30, -55, -80]; // Décalages fixes pour disperser les labels
+                annotations.push({
+                    x: predDates[i],
+                    y: val,
+                    text: `<b>${val.toFixed(1)}</b>`,
+                    showarrow: true,
+                    arrowhead: 2,
+                    arrowsize: 1,
+                    arrowwidth: 1.5,
+                    arrowcolor: '#f59e0b',
+                    ax: 0,
+                    ay: offsets[i] || -30, // Éparpillage vertical
+                    font: { color: '#f59e0b', size: 11, family: 'DM Mono' },
+                    bgcolor: 'rgba(15,23,42,0.75)',
+                    bordercolor: 'rgba(245,158,11,0.4)',
+                    borderwidth: 1,
+                    borderpad: 3
+                });
             });
 
             // Seuil OMS
@@ -709,11 +950,27 @@
 
 
             // 3. Alertes View
-            document.getElementById('reco-card').style.borderColor = color;
-            const activeTab = document.querySelector('.reco-tabs .active').dataset.target;
+            const recoCard = document.getElementById('reco-card');
+            if (recoCard) recoCard.style.borderColor = color;
             
-            if (alerte.recommandations) {
-                document.getElementById('recoText').textContent = alerte.recommandations[activeTab] || "Données indisponibles";
+            const activeTabEl = document.querySelector('.reco-tabs .tab-btn.active');
+            const activeTab = activeTabEl ? activeTabEl.dataset.target : 'citoyen';
+            
+            if (alerte && alerte.recommandations) {
+                const recoTextEl = document.getElementById('recoText');
+                if (recoTextEl) {
+                    let recommendation = alerte.recommandations[activeTab] || alerte.recommandations['chercheur'] || "Données indisponibles";
+                    
+                    // Traduction à la volée si Anglais
+                    if (currentLang === 'en') {
+                        const levelCode = alerte.niveau.code;
+                        if (RECO_EN[levelCode]) {
+                            recommendation = RECO_EN[levelCode][activeTab] || recommendation;
+                        }
+                    }
+                    
+                    recoTextEl.textContent = recommendation;
+                }
             }
         }
 

@@ -13,7 +13,7 @@
 =============================================================================
 """
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import pandas as pd
@@ -22,6 +22,10 @@ import joblib
 import os
 from datetime import datetime, timedelta, date
 from typing import Optional
+import time
+
+LAST_DATASET_PATH = None
+LAST_DATASET_MTIME = 0
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CONFIGURATION
@@ -102,6 +106,7 @@ def _get_base_dir():
 
 def _load_dataset():
     """Charge le dataset depuis parquet ou xlsx."""
+    global LAST_DATASET_PATH, LAST_DATASET_MTIME
     base = _get_base_dir()
     chemins = [
         os.path.join(base, "data", "processed", "dataset_final.parquet"),
@@ -111,6 +116,8 @@ def _load_dataset():
         if os.path.exists(chemin):
             df = pd.read_parquet(chemin)
             df["date"] = pd.to_datetime(df["date"])
+            LAST_DATASET_PATH = chemin
+            LAST_DATASET_MTIME = os.path.getmtime(chemin)
             return df
     raise FileNotFoundError("Dataset introuvable — vérifier data/processed/dataset_final.parquet")
 
@@ -145,14 +152,34 @@ try:
     DF         = _load_dataset()
     MODELS     = _load_models()
     SEUILS_CTX = _load_seuils_ctx()
-    print(f"✅ Dataset chargé : {len(DF):,} lignes · {DF['date'].max().date()}")
-    print(f"✅ Modèles : {'chargés' if MODELS else 'non disponibles'}")
-    print(f"✅ Seuils Contextuels : {'chargés' if SEUILS_CTX else 'non disponibles'}")
+    print(f"[OK] Dataset chargé : {len(DF):,} lignes · {DF['date'].max().date()}")
+    print(f"[OK] Modèles : {'chargés' if MODELS else 'non disponibles'}")
+    print(f"[OK] Seuils Contextuels : {'chargés' if SEUILS_CTX else 'non disponibles'}")
 except Exception as e:
-    print(f"❌ Erreur chargement : {e}")
+    print(f"[ERROR] Erreur chargement : {e}")
     DF         = None
     MODELS     = None
     SEUILS_CTX = None
+
+# Middleware Watchdog pour recharger automatiquement si le fichier change
+@app.middleware("http")
+async def watchdog_middleware(request: Request, call_next):
+    global DF, LAST_DATASET_PATH, LAST_DATASET_MTIME
+    if LAST_DATASET_PATH and os.path.exists(LAST_DATASET_PATH):
+        try:
+            current_mtime = os.path.getmtime(LAST_DATASET_PATH)
+            if current_mtime > LAST_DATASET_MTIME:
+                print(f"[RELOAD] Fichier de données modifié. Rechargement...")
+                temp_df = pd.read_parquet(LAST_DATASET_PATH)
+                temp_df["date"] = pd.to_datetime(temp_df["date"])
+                DF = temp_df
+                LAST_DATASET_MTIME = current_mtime
+                print(f"[OK] Base de données actualisée en temps réel ({len(DF):,} lignes).")
+        except Exception as e:
+            print(f"[ERROR] Impossible d'actualiser la base de données: {e}")
+            
+    response = await call_next(request)
+    return response
 
 # ─────────────────────────────────────────────────────────────────────────────
 # FONCTIONS UTILITAIRES
