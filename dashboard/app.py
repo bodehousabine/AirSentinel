@@ -209,54 +209,13 @@ st.markdown(f"""
 .stTabs [data-baseweb="tab-highlight"] {{
     display: none !important;
 }}
-
-/* POSITIONNEMENT DU BOUTON À PROPOS — même ligne que les onglets */
-[data-testid="stVerticalBlockBorderWrapper-about_box"] {{
-    position: fixed !important;
-    top: 130px !important;
-    right: 20px !important;
-    z-index: 9999 !important;
-    pointer-events: none !important;
-    width: auto !important;
-}}
-[data-testid="stVerticalBlockBorderWrapper-about_box"] .stButton {{
-    pointer-events: auto !important;
-}}
-[data-testid="stVerticalBlockBorderWrapper-about_box"] .stButton button {{
-    pointer-events: auto !important;
-    font-family: 'Inter', sans-serif !important;
-    font-size: 13px !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.1em !important;
-    text-transform: uppercase !important;
-    color: {'#e0f2fe' if th['name']=='dark' else '#0a1f33'} !important;
-    background: {'rgba(20,50,90,0.85)' if th['name']=='dark' else '#d4ebf8'} !important;
-    border: 1.5px solid {th['teal']} !important;
-    border-radius: 50px !important;
-    padding: 6px 20px !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    height: auto !important;
-    white-space: nowrap !important;
-}}
-[data-testid="stVerticalBlockBorderWrapper-about_box"] .stButton button:hover {{
-    background: {th['teal']} !important;
-    color: #003d38 !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 4px 15px {th['border_teal']} !important;
-}}
 </style>
 """, unsafe_allow_html=True)
 
-# ── Bouton À Propos (Positionné via son conteneur ID) ────────────────────────
-with st.container(key="about_box"):
-    if st.button(T["tab_about"], key="about_tab_btn"):
-        from landing import render_about_modal
-        render_about_modal(st.session_state["lang"])
-
-# ── Barre d'onglets (les rubriques de contenu uniquement) ───────────────────
+# ── Barre d'onglets (les rubriques de contenu + À Propos) ───────────────────
 tabs = st.tabs([
     T["tab_carte"], T["tab_kpis"], T["tab_predictions"],
-    T["tab_alertes"], T["tab_decision"], T["tab_contexte"]
+    T["tab_alertes"], T["tab_decision"], T["tab_contexte"], T["tab_about"]
 ])
 
 # ── Mémorisation et Restauration de l'onglet actif ───────────────────────────
@@ -279,26 +238,7 @@ js_restore_tab = f"""
         }}
     }}
 
-    // Force style on À Propos button
-    function styleAboutBtn() {{
-        const allBtns = window.parent.document.querySelectorAll('button');
-        allBtns.forEach(btn => {{
-            const wrapper = btn.closest('[data-testid*="about_box"]');
-            if (wrapper) {{
-                btn.style.setProperty('color', '{"#e0f2fe" if th["name"]=="dark" else "#0a1f33"}', 'important');
-                btn.style.setProperty('background', '{"rgba(255,255,255,0.08)" if th["name"]=="dark" else "#d4ebf8"}', 'important');
-                btn.style.setProperty('border', '1.5px solid {th["teal"]}', 'important');
-                btn.style.setProperty('border-radius', '50px', 'important');
-                btn.style.setProperty('font-weight', '700', 'important');
-                btn.style.setProperty('letter-spacing', '0.1em', 'important');
-                btn.style.setProperty('text-transform', 'uppercase', 'important');
-                btn.style.setProperty('font-size', '13px', 'important');
-            }}
-        }});
-    }}
-    styleAboutBtn();
-    setTimeout(styleAboutBtn, 300);
-    setTimeout(styleAboutBtn, 1000);
+    // Nettoyage de l'ancien JS de sur-stylisation du bouton flottant qui n'existe plus
 </script>
 """
 components.html(js_restore_tab, height=0, width=0)
@@ -309,8 +249,11 @@ with tabs[2]: bloc3(profil)
 with tabs[3]: bloc4(profil)
 with tabs[4]: bloc5(profil)
 with tabs[5]: bloc6(profil)
+with tabs[6]:
+    from landing import render_about_inline
+    render_about_inline(st.session_state["lang"])
 
 # 7. Modals
 if st.session_state.get("show_about", False):
-    from landing import render_about_modal
-    render_about_modal(st.session_state["lang"])
+    st.session_state["show_about"] = False
+    st.rerun()

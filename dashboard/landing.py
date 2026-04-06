@@ -261,3 +261,27 @@ def render_about_modal(lang):
             st.session_state["show_about"] = False
             st.rerun()
     show_dialog()
+
+def render_about_inline(lang):
+    """
+    Lit le fichier apropos.html et l'affiche directement dans un composant (sans modale).
+    """
+    about_dir = os.path.join(os.path.dirname(__file__), "about")
+    html_file = os.path.join(about_dir, "apropos.html")
+    
+    if not os.path.exists(html_file):
+        st.error("Fichier apropos.html introuvable dans dashboard/about/")
+        return
+
+    with open(html_file, "r", encoding="utf-8") as f:
+        html_content = f.read()
+
+    for img_name in ["bsd.png", "fma.png", "fah.png", "prf.png"]:
+        img_path = os.path.join(about_dir, img_name)
+        if os.path.exists(img_path):
+            with open(img_path, "rb") as f:
+                b64_data = base64.b64encode(f.read()).decode()
+            html_content = html_content.replace(f'src="{img_name}"', f'src="data:image/png;base64,{b64_data}"')
+
+    import streamlit.components.v1 as components
+    components.html(html_content, height=800, scrolling=True)

@@ -160,6 +160,26 @@ def render(profil):
         mae       = 3.456
         pred_high = [p + mae for p in preds]
         pred_low  = [max(0, p - mae) for p in preds]
+        
+        # ── Chargement seuil contextuel CMR ───────────────────────────────
+        def _load_seuils_ctx_b3():
+            base = os.path.dirname(os.path.abspath(__file__))
+            for c in [os.path.join(base, '..', 'models'), os.path.join(base, '..', '..', 'models')]:
+                p = os.path.join(c, 'seuils_contextuels.pkl')
+                if os.path.exists(p):
+                    return joblib.load(p)
+            return None
+
+        _sc = _load_seuils_ctx_b3()
+        seuil_ctx_pred = None
+        if _sc:
+            if v == v_all:
+                p90s = _sc.get('par_ville', {}).values()
+                if p90s:
+                    seuil_ctx_pred = round(sum(p90s) / len(p90s), 1)
+            else:
+                if v in _sc.get('par_ville', {}):
+                    seuil_ctx_pred = round(_sc['par_ville'][v], 1)
 
         # ── Graphique agrandi ─────────────────────────────────────────────
         fig = go.Figure()
@@ -215,6 +235,16 @@ def render(profil):
             annotation_text="OMS 15 µg/m³",
             annotation_font_color=th["red"], annotation_font_size=11
         )
+        
+        # Seuil Contexte Camerounais
+        if seuil_ctx_pred:
+            fig.add_hline(
+                y=seuil_ctx_pred,
+                line=dict(color=th.get("teal", "#14b8a6"), width=1.5, dash="dot"),
+                annotation_text=f"Contexte CMR · {seuil_ctx_pred:.1f} µg/m³",
+                annotation_font_color=th.get("teal", "#14b8a6"), annotation_font_size=10,
+                annotation_position="top right"
+            )
 
         # Zone de prédiction annotée
         fig.add_vrect(
@@ -259,6 +289,24 @@ def render(profil):
             elif pred_val <= 37.5: niv = "🟠 Élevé"          if lang == "fr" else "🟠 High"
             else:                  niv = "🔴 Critique"        if lang == "fr" else "🔴 Critical"
 
+            if seuil_ctx_pred:
+                ratio_cmr = pred_val / seuil_ctx_pred
+                lbl_cmr = "CMR"
+                lbl_oms = "OMS" if lang == "fr" else "WHO"
+                
+                col_cmr = th.get("teal", "#14b8a6") if ratio_cmr <= 1.0 else th.get("coral", "#f43f5e")
+                col_oms = th.get("green", "#10b981") if ratio <= 1.0 else th.get("red", "#ef4444")
+                
+                ratio_html = (
+                    f'<div style="display:flex; justify-content:center; gap:8px; margin-top:10px;">'
+                    f'<div style="border:1px solid {col_oms}44; color:{col_oms}; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:700; background:rgba(0,0,0,0.15);">{ratio:.1f}x {lbl_oms}</div>'
+                    f'<div style="border:1px solid {col_cmr}44; color:{col_cmr}; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:700; background:rgba(0,0,0,0.15);">{ratio_cmr:.1f}x {lbl_cmr}</div>'
+                    f'</div>'
+                )
+            else:
+                lbl_oms = "seuil OMS" if lang == "fr" else "WHO threshold"
+                ratio_html = f'<div style="font-size:10px;color:{th["text3"]};margin-top:8px;">{ratio:.1f}x {lbl_oms}</div>'
+
             with col:
                 st.markdown(
                     f'<div style="background:linear-gradient(145deg,{th["bg_tertiary"]},{th["bg_elevated"]});'
@@ -274,8 +322,7 @@ def render(profil):
                     f'line-height:1;text-shadow:0 0 20px {color}44;">{pred_val:.1f}</div>'
                     f'<div style="font-size:11px;color:{th["text3"]};margin-top:4px;">µg/m³</div>'
                     f'<div style="font-size:12px;color:{color};margin-top:8px;font-weight:600;">{niv}</div>'
-                    f'<div style="font-size:10px;color:{th["text3"]};margin-top:6px;">'
-                    f'{ratio:.1f}x seuil OMS</div>'
+                    f'{ratio_html}'
                     f'</div>',
                     unsafe_allow_html=True
                 )
