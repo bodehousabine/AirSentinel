@@ -10,6 +10,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    subscribed_city: Optional[str] = None
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -18,6 +19,7 @@ class UserLogin(BaseModel):
 class UserResponse(UserBase):
     id: UUID
     avatar_url: Optional[str] = None
+    subscribed_city: Optional[str] = None
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

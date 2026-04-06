@@ -35,6 +35,7 @@ async def register(user_in: UserCreate, db: AsyncSession = Depends(get_db)):
         email=user_in.email,
         full_name=user_in.full_name,
         hashed_password=hash_password(user_in.password),
+        subscribed_city=user_in.subscribed_city,
         is_active=True
     )
     

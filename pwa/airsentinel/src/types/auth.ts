@@ -4,6 +4,7 @@ export interface User {
   full_name: string | null;
   is_active: boolean;
   avatar_url: string | null;
+  subscribed_city: string | null;
   created_at: string; // ISO datetime string
 }
 
@@ -11,6 +12,7 @@ export interface UserCreate {
   email: string;
   full_name: string;
   password: string;
+  subscribed_city?: string;
 }
 
 export interface UserLogin {

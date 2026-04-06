@@ -15,6 +15,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [city, setCity] = useState("Douala");
   const [avatar, setAvatar] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -35,7 +36,8 @@ export default function RegisterPage() {
       await authService.register({
         email,
         full_name: fullName,
-        password
+        password,
+        subscribed_city: city
       });
 
       notify.success("Compte créé avec succès ! Bienvenue.");
@@ -156,6 +158,34 @@ export default function RegisterPage() {
                 />
                 <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-[var(--teal)]">
                   <Mail className="w-5 h-5 opacity-90 group-focus-within:opacity-100 transition-opacity" />
+                </div>
+              </div>
+            </div>
+
+            {/* City Field */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[13px] text-gray-300 ml-1">Ville de résidence</label>
+              <div className="relative group">
+                <select
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  className="w-full h-[1.1cm] bg-[#1e293b]/40 border border-white/10 rounded-xl pl-4 pr-[3.5rem] text-white text-sm focus:outline-none focus:border-[var(--teal)] focus:ring-1 focus:ring-[var(--teal)]/50 transition-all appearance-none cursor-pointer"
+                  required
+                >
+                  {["Douala", "Yaoundé", "Garoua", "Maroua", "Bafoussam", "Bamenda", "Kribi", "Bertoua", "Ebolowa", "Ngaoundéré", "Buéa"].map((c) => (
+                    <option key={c} value={c} className="bg-[#020c18] text-white">
+                      {c}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-[var(--teal)]">
+                  <User className="w-5 h-5 opacity-90 group-focus-within:opacity-100 transition-opacity" />
+                </div>
+                {/* Custom arrow for the select */}
+                <div className="absolute inset-y-0 right-10 flex items-center pointer-events-none">
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                  </svg>
                 </div>
               </div>
             </div>
