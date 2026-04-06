@@ -9,6 +9,33 @@ from datetime import date, timedelta
 from utils import get_context, banner, sources_bar, empty_state, irs_level
 from assets import IMAGES
 
+# ── Icônes SVG robustes pour blocs HTML personnalisés ────────────────────────
+SVG_ICONS = {
+    "track_changes": '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5.5-8c0-3.03 2.47-5.5 5.5-5.5s5.5 2.47 5.5 5.5-2.47 5.5-5.5 5.5-5.5-2.47-5.5-5.5z"></path></svg>',
+    "straighten": '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M21 6H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 10H3V8h2v4h2V8h2v4h2V8h2v4h2V8h2v4h2V8h2v8z"></path></svg>',
+    "warning": '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"></path></svg>',
+    "check_circle": '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg>',
+    "today": '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"></path></svg>',
+    "online_prediction": '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 10h3l-4 4-4-4h3V8h2v4z"></path></svg>',
+    "thermostat": '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M15 13V5c0-1.66-1.34-3-3-3S9 3.34 9 5v8c-1.21.91-2 2.37-2 4 0 2.76 2.24 5 5 5s5-2.24 5-5c0-1.63-.79-3.09-2-4zm-3-9c.55 0 1 .45 1 1v3h-2V5c0-.55.45-1 1-1z"></path></svg>',
+    "air": '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M13 3.17c2.34.62 4 2.76 4 5.24 0 1.13-.34 2.21-.93 3.12l-1.43-1.43c.22-.52.36-1.1.36-1.69 0-1.65-1.35-3-3-3s-3 1.35-3 3h-2c0-2.76 2.24-5 5-5zm0 13.66c-2.34-.62-4-2.76-4-5.24 0-1.13.34-2.21.93-3.12l1.43 1.43c-.22.52-.36 1.1-.36 1.69 0 1.65 1.35 3 3 3s3-1.35 3-3h2c0 2.76-2.24 5-5 5z"></path></svg>',
+    "grain": '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M10 12c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM6 8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12-8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm-4 8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm4-4c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-4-4c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-4-4c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>',
+    "rainy": '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 2c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"></path></svg>',
+    "thunderstorm": '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M18 15v3H6v-3H4v3c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-3h-2zm-1-4l-1.41-1.41L13 12.17V4h-2v8.17L8.41 9.59 7 11l5 5 5-5z"></path></svg>',
+    "cyclone": '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6z"></path></svg>',
+    "local_fire_department": '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M19.48 12.35c-1.57-4.08-7.16-4.3-5.81-10.23.1-.44-.37-.78-.7-.5-1.92 1.64-3.66 4.04-4.22 6.48-.57 2.48-.18 4.7 1.22 6.55.14.19-.05.47-.28.41-2.02-.5-3.32-2.15-3.32-4.14 0-1.25.46-2.52 1.34-3.54.43-.51-.12-1.26-.74-.95C4.84 7.6 3.5 10.35 3.5 13.3c0 4.69 3.81 8.5 8.5 8.5s8.5-3.81 8.5-8.5c0-.28-.02-.56-.05-.83-.06-.5-.65-.72-.97-.47z"></path></svg>',
+    "error": '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"></path></svg>',
+    "dangerous": '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M15.73 3H8.27L3 8.27v7.46L8.27 21h7.46L21 15.73V8.27L15.73 3zM12 17.3c-.72 0-1.3-.58-1.3-1.3 0-.72.58-1.3 1.3-1.3s1.3.58 1.3 1.3c0 .72-.58 1.3-1.3 1.3zm1-4.3h-2V7h2v6z"></path></svg>',
+    "block": '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9C4.63 15.55 4 13.85 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1C19.37 8.45 20 10.15 20 12c0 4.42-3.58 8-8 8z"></path></svg>',
+    "push_pin": '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M16 9V4l1 0c.55 0 1-.45 1-1s-.45-1-1-1H7c-.55 0-1 .45-1 1s.45 1 1 1l1 0v5c0 1.66-1.34 3-3 3v2h5.97v7l1 1 1-1v-7H19v-2c-1.66 0-3-1.34-3-3z"></path></svg>',
+    "science": '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M20.8 18.4L15 5.4V4h1c.55 0 1-.45 1-1s-.45-1-1-1H8c-.55 0-1 .45-1 1s-.45 1-1 1h1v1.4L3.2 18.4C2.3 20.3 3.7 22 5.7 22h12.6c2 0 3.4-1.7 2.5-3.6zM13 6.1l2.7 6H8.3l2.7-6V4h2v2.1z"></path></svg>',
+    "trending_up": '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"></path></svg>',
+    "trending_down": '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M16 18l2.29-2.29-4.88-4.88-4 4L2 7.41 3.41 6l6 6 4-4 6.3 6.29L22 12v6z"></path></svg>'
+}
+
+def get_icon(name, size=24):
+    return SVG_ICONS.get(name, "").replace('width="24"', f'width="{size}"').replace('height="24"', f'height="{size}"')
+
 # ── Zones INS Cameroun (2019) ─────────────────────────────────────────────────
 ZONES_REGIONS = {
     'Zone équatoriale':        ['Centre', 'Est', 'Sud', 'Littoral', 'Sud-Ouest', 'Ouest', 'Nord-Ouest'],
@@ -92,7 +119,7 @@ def render(profil):
         v_all = T["all_cities"]
         v_list = [v_all] + sorted(df["ville"].unique().tolist())
         v = st.selectbox(
-            "**SÉLECTIONNER UNE VILLE**" if lang == "fr" else "**SELECT A CITY**",
+            ":material/location_on: " + ("**SÉLECTIONNER UNE VILLE**" if lang == "fr" else "**SELECT A CITY**"),
             v_list, index=0, key="p_v"
         )
 
@@ -108,10 +135,10 @@ def render(profil):
     modele, scaler, features, arima = _load_models()
     modeles_ok = all(x is not None for x in [modele, scaler, features, arima])
 
-    pred_lbl  = "🔮 Prédiction J/J+1/J+2" if lang == "fr" else "🔮 Forecast D/D+1/D+2"
-    perf_lbl  = "📊 Performance" if lang == "fr" else "📊 Performance"
-    sim_lbl   = "🎛️ Simulateur" if lang == "fr" else "🎛️ Simulator"
-    month_lbl = "📅 Calendrier" if lang == "fr" else "📅 Calendar"
+    pred_lbl  = ":material/insights: " + ("Prédiction" if lang == "fr" else "Forecast")
+    perf_lbl  = ":material/analytics: Performance"
+    sim_lbl   = ":material/tune: " + ("Simulateur" if lang == "fr" else "Simulator")
+    month_lbl = ":material/calendar_month: " + ("Calendrier" if lang == "fr" else "Calendar")
 
     tabs = st.tabs([pred_lbl, perf_lbl, sim_lbl, month_lbl])
 
@@ -276,18 +303,25 @@ def render(profil):
 
         # ── KPIs prédiction — plus visibles ──────────────────────────────
         k1, k2, k3 = st.columns(3)
-        labels_j  = ["📅 Aujourd'hui", "🔮 Demain", "🔮 Après-demain"] if lang == "fr" \
-                    else ["📅 Today", "🔮 Tomorrow", "🔮 Day after"]
+        labels_j  = [
+            f"<div style='display:inline-flex;align-items:center;gap:6px;'>{get_icon('today', 16)} Aujourd'hui</div>",
+            f"<div style='display:inline-flex;align-items:center;gap:6px;'>{get_icon('online_prediction', 16)} Demain</div>",
+            f"<div style='display:inline-flex;align-items:center;gap:6px;'>{get_icon('online_prediction', 16)} Après-demain</div>"
+        ] if lang == "fr" else [
+            f"<div style='display:inline-flex;align-items:center;gap:6px;'>{get_icon('today', 16)} Today</div>",
+            f"<div style='display:inline-flex;align-items:center;gap:6px;'>{get_icon('online_prediction', 16)} Tomorrow</div>",
+            f"<div style='display:inline-flex;align-items:center;gap:6px;'>{get_icon('online_prediction', 16)} Day after</div>"
+        ]
         niveaux   = ["FAIBLE","MODÉRÉ","ÉLEVÉ","CRITIQUE"]
 
         for col, pred_val, lbl_j, jour in zip([k1, k2, k3], preds, labels_j, jours):
             color = th["green"] if pred_val <= 15 else th["amber"] if pred_val <= 25 \
                     else th["coral"] if pred_val <= 37.5 else th["red"]
             ratio = pred_val / 15
-            if   pred_val <= 15:   niv = "✅ Conforme OMS"   if lang == "fr" else "✅ WHO Compliant"
-            elif pred_val <= 25:   niv = "⚠️ Modéré"         if lang == "fr" else "⚠️ Moderate"
-            elif pred_val <= 37.5: niv = "🟠 Élevé"          if lang == "fr" else "🟠 High"
-            else:                  niv = "🔴 Critique"        if lang == "fr" else "🔴 Critical"
+            if   pred_val <= 15:   niv = f"<div style='display:inline-flex;align-items:center;gap:6px;'>{get_icon('check_circle', 15)} Conforme OMS</div>" if lang == "fr" else f"<div style='display:inline-flex;align-items:center;gap:6px;'>{get_icon('check_circle', 15)} WHO Compliant</div>"
+            elif pred_val <= 25:   niv = f"<div style='display:inline-flex;align-items:center;gap:6px;'>{get_icon('warning', 15)} Modéré</div>" if lang == "fr" else f"<div style='display:inline-flex;align-items:center;gap:6px;'>{get_icon('warning', 15)} Moderate</div>"
+            elif pred_val <= 37.5: niv = f"<div style='display:inline-flex;align-items:center;gap:6px;'>{get_icon('error', 15)} Élevé</div>" if lang == "fr" else f"<div style='display:inline-flex;align-items:center;gap:6px;'>{get_icon('error', 15)} High</div>"
+            else:                  niv = f"<div style='display:inline-flex;align-items:center;gap:6px;'>{get_icon('dangerous', 15)} Critique</div>" if lang == "fr" else f"<div style='display:inline-flex;align-items:center;gap:6px;'>{get_icon('dangerous', 15)} Critical</div>"
 
             if seuil_ctx_pred:
                 ratio_cmr = pred_val / seuil_ctx_pred
@@ -329,9 +363,9 @@ def render(profil):
 
         st.markdown(
             f'<div style="font-size:10px;color:{th["text3"]};margin-top:10px;'
-            f'font-family:DM Mono,monospace;padding:8px 12px;'
+            f'font-family:DM Mono,monospace;padding:8px 12px;display:flex;align-items:center;gap:6px;'
             f'background:{th["bg_tertiary"]};border-radius:8px;">'
-            f'🔬 {source_pred} · IC = ±{mae} µg/m³ · WHO AQG 2021 · NCBI NBK574591</div>',
+            f'{get_icon("science", 14)} {source_pred} · IC = ±{mae} µg/m³ · WHO AQG 2021 · NCBI NBK574591</div>',
             unsafe_allow_html=True
         )
 
@@ -368,10 +402,10 @@ def render(profil):
                 # KPIs performance — plus frappants
                 k1, k2, k3, k4 = st.columns(4)
                 kpi_data = [
-                    (k1, f"{perf['r2']:.4f}",         "R²",              "Explained variance" if lang=="en" else "Variance expliquée", th["green"],  "🎯"),
-                    (k2, f"{perf['mae']:.3f}",         "MAE (µg/m³)",     "Mean error" if lang=="en" else "Erreur moyenne",     th["amber"],  "📏"),
-                    (k3, f"{perf['err_max']:.1f}",     "Max error" if lang=="en" else "Erreur max",      "µg/m³",              th["coral"],  "⚠️"),
-                    (k4, f"{100-perf['pct_10']:.1f}%",  "Accuracy" if lang=="en" else "Précision" ,       "Error < 10 µg/m³" if lang=="en" else "Erreur < 10 µg/m³",  th["blue"],   "✅"),
+                    (k1, f"{perf['r2']:.4f}",         "R²",              "Explained variance" if lang=="en" else "Variance expliquée", th["green"],  "track_changes"),
+                    (k2, f"{perf['mae']:.3f}",         "MAE (µg/m³)",     "Mean error" if lang=="en" else "Erreur moyenne",     th["amber"],  "straighten"),
+                    (k3, f"{perf['err_max']:.1f}",     "Max error" if lang=="en" else "Erreur max",      "µg/m³",              th["coral"],  "warning"),
+                    (k4, f"{100-perf['pct_10']:.1f}%",  "Accuracy" if lang=="en" else "Précision" ,       "Error < 10 µg/m³" if lang=="en" else "Erreur < 10 µg/m³",  th["blue"],   "check_circle"),
                 ]
                 for col, val, lbl, sub, color, emoji in kpi_data:
                     with col:
@@ -380,7 +414,7 @@ def render(profil):
                             f'border:1px solid {color}55;border-top:4px solid {color};'
                             f'border-radius:14px;padding:20px 12px;text-align:center;'
                             f'box-shadow:0 6px 24px {color}22;">'
-                            f'<div style="font-size:24px;margin-bottom:8px;">{emoji}</div>'
+                            f'<div style="font-size:32px;margin-bottom:8px;color:{color};">{get_icon(emoji, 32)}</div>'
                             f'<div style="font-size:28px;font-weight:800;color:{color};'
                             f'line-height:1;text-shadow:0 0 20px {color}44;">{val}</div>'
                             f'<div style="font-size:12px;font-weight:600;color:{th["text"]};'
@@ -467,8 +501,8 @@ def render(profil):
              # Le simulateur nécessite une ville de référence pour le contexte zones
              # On prend la première ville disponible si "Toutes villes" est sélectionné
              ville_sim = sorted(df["ville"].unique().tolist())[0]
-             st.info(f"💡 Simulation basée sur le contexte de {ville_sim} (par défaut)." if lang == "fr" else 
-                     f"💡 Simulation based on context: {ville_sim} (default).")
+             st.info(f":material/lightbulb: Simulation basée sur le contexte de {ville_sim} (par défaut)." if lang == "fr" else 
+                     f":material/lightbulb: Simulation based on context: {ville_sim} (default).")
         else:
              ville_sim = v
 
@@ -481,36 +515,42 @@ def render(profil):
         with col_sliders:
             st.markdown(
                 f'<div style="font-size:11px;font-weight:700;color:{th["text3"]};'
-                f'text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;">'
-                + ("🌡️ Weather conditions" if lang=="en" else "🌡️ Conditions météorologiques")
+                f'text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;display:flex;align-items:center;gap:6px;">'
+                f'{get_icon("thermostat", 14)} '
+                + ("Weather conditions" if lang=="en" else "Conditions météorologiques")
                 + "</div>",
                 unsafe_allow_html=True
             )
             c1, c2 = st.columns(2)
             with c1:
-                temp = st.slider("🌡️ Temperature (°C)" if lang=="en" else "Température (°C)", 20, 45,
-                                 int(min(45, max(20, _m("temperature_2m_max", 30)))), key="s_t")
-                vent = st.slider("💨 Wind (km/h)" if lang=="en" else "💨 Vent (km/h)", 0, 60,
-                                 int(min(60, max(0, _m("wind_speed_10m_max", 15)))), key="s_v")
+                st.markdown(f"<div style='display:flex;align-items:center;gap:6px;font-size:13px;color:{th['text']}'>{get_icon('thermostat', 16)} " + ("Temperature (°C)" if lang=="en" else "Température (°C)") + "</div>", unsafe_allow_html=True)
+                temp = st.slider("label_t", 20, 45, int(min(45, max(20, _m("temperature_2m_max", 30)))), key="s_t", label_visibility="collapsed")
+                
+                st.markdown(f"<div style='display:flex;align-items:center;gap:6px;font-size:13px;color:{th['text']}'>{get_icon('air', 16)} " + ("Wind (km/h)" if lang=="en" else "Vent (km/h)") + "</div>", unsafe_allow_html=True)
+                vent = st.slider("label_v", 0, 60, int(min(60, max(0, _m("wind_speed_10m_max", 15)))), key="s_v", label_visibility="collapsed")
             with c2:
-                dust = st.slider("🏜️ Dust (µg/m³)", 0, 300,
-                                 int(min(300, max(0, _m("dust_moyen", 80)))), key="s_d")
-                precip = st.slider("🌧️ Precipitation (mm)" if lang=="en" else "🌧️ Précipitations (mm)", 0, 50,
-                                   int(min(50, max(0, _m("precipitation_sum", 2)))), key="s_p")
+                st.markdown(f"<div style='display:flex;align-items:center;gap:6px;font-size:13px;color:{th['text']}'>{get_icon('grain', 16)} Dust (µg/m³)</div>", unsafe_allow_html=True)
+                dust = st.slider("label_d", 0, 300, int(min(300, max(0, _m("dust_moyen", 80)))), key="s_d", label_visibility="collapsed")
+                
+                st.markdown(f"<div style='display:flex;align-items:center;gap:6px;font-size:13px;color:{th['text']}'>{get_icon('rainy', 16)} " + ("Precipitation (mm)" if lang=="en" else "Précipitations (mm)") + "</div>", unsafe_allow_html=True)
+                precip = st.slider("label_p", 0, 50, int(min(50, max(0, _m("precipitation_sum", 2)))), key="s_p", label_visibility="collapsed")
             st.markdown("<div style='margin-top:12px;'></div>", unsafe_allow_html=True)
             st.markdown(
                 f'<div style="font-size:11px;font-weight:700;color:{th["text3"]};'
-                f'text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;">'
-                + ("⚡ Climate episodes" if lang=="en" else "⚡ Épisodes climatiques")
+                f'text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;display:flex;align-items:center;gap:6px;">'
+                f'{get_icon("thunderstorm", 14)} '
+                + ("Climate episodes" if lang=="en" else "Épisodes climatiques")
                 + "</div>",
                 unsafe_allow_html=True
             )
             c3, c4 = st.columns(2)
             with c3:
-                harm = st.checkbox("🌪️ Intense Harmattan" if lang=="en" else "🌪️ Harmattan intense", key="s_harm",
+                st.markdown(f"<div style='display:flex;align-items:center;gap:6px;font-size:13px;color:{th['text']}'>{get_icon('cyclone', 16)} " + ("Intense Harmattan" if lang=="en" else "Harmattan intense") + "</div>", unsafe_allow_html=True)
+                harm = st.checkbox("label_h", key="s_harm", label_visibility="collapsed",
                                    help="Dust > p90 AND precipitation < p10 · Schepanski et al. (2007)")
             with c4:
-                feux = st.checkbox("🔥 Fire episode" if lang=="en" else "🔥 Épisode feux", key="s_feux",
+                st.markdown(f"<div style='display:flex;align-items:center;gap:6px;font-size:13px;color:{th['text']}'>{get_icon('local_fire_department', 16)} " + ("Fire episode" if lang=="en" else "Épisode feux") + "</div>", unsafe_allow_html=True)
+                feux = st.checkbox("label_f", key="s_feux", label_visibility="collapsed",
                                    help="CO > p90 in dry season · Barker et al. (2020)")
 
         # ── Calcul vrai modèle (avant d'afficher la jauge) ────────────────
@@ -530,26 +570,26 @@ def render(profil):
                 zone_sim   = _get_zone(region_sim)
                 p_arima    = arima[zone_sim].forecast(steps=1).iloc[-1]
                 pm25_s     = max(0, p_rl + p_arima)
-                source_sim = f"✅ Modèle Hybride RL+ARIMA · {zone_sim}"
+                source_sim = f'<div style="display:inline-flex;align-items:center;gap:4px;">{get_icon("check_circle", 12)} Modèle Hybride RL+ARIMA · {zone_sim}</div>'
             except:
                 pm25_s     = max(5, 10 + 0.4*temp - 0.3*vent + 0.05*dust
                                  + (15 if harm else 0) + (20 if feux else 0))
-                source_sim = "⚠️ Fallback formule approx."
+                source_sim = f'<div style="display:inline-flex;align-items:center;gap:4px;">{get_icon("warning", 12)} Fallback formule approx.</div>'
         else:
             pm25_s     = max(5, 10 + 0.4*temp - 0.3*vent + 0.05*dust
                              + (15 if harm else 0) + (20 if feux else 0))
-            source_sim = "⚠️ Modèle non disponible · formule approx."
+            source_sim = f'<div style="display:inline-flex;align-items:center;gap:4px;">{get_icon("warning", 12)} Modèle non disponible · formule approx.</div>'
 
         irs_s     = min(1.0, pm25_s/80*0.35 + dust/300*0.25 + 0.10)
         nc, nt, _ = irs_level(irs_s, ctx["p50"], ctx["p75"], ctx["p90"], T, th)
         ecart     = irs_s - ctx["irs_moy"]
-        ecart_sgn = "↑" if ecart > 0 else "↓"
+        ecart_sgn = get_icon("trending_up", 28) if ecart > 0 else get_icon("trending_down", 28)
         ecart_col = th["red"] if ecart > 0 else th["green"]
-        if   pm25_s <= 15:   oms_niv = "✅ WHO Compliant"  if lang=="en" else "✅ Conforme OMS"
-        elif pm25_s <= 25:   oms_niv = "⚠️ IT4 exceeded"   if lang=="en" else "⚠️ IT4 dépassé"
-        elif pm25_s <= 37.5: oms_niv = "🟠 IT3 exceeded"   if lang=="en" else "🟠 IT3 dépassé"
-        elif pm25_s <= 50:   oms_niv = "🔴 IT2 exceeded"   if lang=="en" else "🔴 IT2 dépassé"
-        else:                oms_niv = "⛔ Critical"        if lang=="en" else "⛔ Critique"
+        if   pm25_s <= 15:   oms_niv = f'<div style="display:inline-flex;align-items:center;gap:4px;">{get_icon("check_circle", 15)} ' + ("WHO Compliant" if lang=="en" else "Conforme OMS") + "</div>"
+        elif pm25_s <= 25:   oms_niv = f'<div style="display:inline-flex;align-items:center;gap:4px;">{get_icon("warning", 15)} ' + ("IT4 exceeded" if lang=="en" else "IT4 dépassé") + "</div>"
+        elif pm25_s <= 37.5: oms_niv = f'<div style="display:inline-flex;align-items:center;gap:4px;">{get_icon("error", 15)} ' + ("IT3 exceeded" if lang=="en" else "IT3 dépassé") + "</div>"
+        elif pm25_s <= 50:   oms_niv = f'<div style="display:inline-flex;align-items:center;gap:4px;">{get_icon("dangerous", 15)} ' + ("IT2 exceeded" if lang=="en" else "IT2 dépassé") + "</div>"
+        else:                oms_niv = f'<div style="display:inline-flex;align-items:center;gap:4px;">{get_icon("block", 15)} ' + ("Critical" if lang=="en" else "Critique") + "</div>"
 
         # Jauge dans la colonne droite — même bloc que les sliders
         with col_gauge:
@@ -663,8 +703,8 @@ def render(profil):
             f'<div style="text-align:center;padding:0 20px;">'
             f'<div style="font-size:10px;color:#64748b;text-transform:uppercase;'
             f'letter-spacing:.1em;margin-bottom:6px;">{"vs Average" if lang=="en" else "vs Moyenne"}</div>'
-            f'<div style="font-size:32px;font-weight:800;color:{ecart_col};line-height:1;">'
-            f'{ecart_sgn}{abs(ecart):.3f}</div>'
+            f'<div style="font-size:32px;font-weight:800;color:{ecart_col};line-height:1;display:flex;align-items:center;justify-content:center;gap:4px;">'
+            f'{ecart_sgn} {abs(ecart):.3f}</div>'
             f'<div style="font-size:11px;color:#94a3b8;margin-top:4px;">{ctx["scope_annees"]}</div>'
             f'</div>'
 
@@ -672,7 +712,7 @@ def render(profil):
 
             f'<div style="font-size:9px;color:#475569;margin-top:14px;padding-top:10px;'
             f'border-top:1px solid #1e293b;font-family:DM Mono,monospace;text-align:center;">'
-            f'{source_sim} · WHO AQG 2021 · NCBI NBK574591</div>'
+            f'<div style="display:inline-flex;align-items:center;gap:4px;">{source_sim}</div> · WHO AQG 2021 · NCBI NBK574591</div>'
             f'</div>',
             unsafe_allow_html=True
         )
@@ -686,7 +726,7 @@ def render(profil):
         with col_sel1:
             annees_dispo = sorted(df["date"].dt.year.unique().tolist())
             an = st.selectbox(
-                "📅 Année" if lang == "fr" else "📅 Year",
+                ":material/calendar_month: " + ("Année" if lang == "fr" else "Year"),
                 annees_dispo, index=len(annees_dispo)-1, key="lt_a"
             )
         
@@ -733,7 +773,7 @@ def render(profil):
         st.markdown(
             f'<div style="font-size:15px;font-weight:600;color:{th["text"]};'
             f'margin-bottom:16px;text-align:center;">'
-            f'📅 {titre_cal}</div>',
+            f'<div style="display:inline-flex;align-items:center;gap:8px;">{get_icon("calendar_month", 22)} {titre_cal}</div></div>',
             unsafe_allow_html=True
         )
 
@@ -783,7 +823,7 @@ def render(profil):
                             f'<div style="font-size:12px;font-weight:700;color:{th["text"]};'
                             f'text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">'
                             f'{mois_nom}'
-                            f'{"  🔵" if is_current else ""}</div>'
+                            f' {get_icon("push_pin", 14) if is_current else ""}</div>'
 
                             # PM2.5 moyen — grand chiffre
                             f'<div style="font-size:30px;font-weight:900;color:{color};'
@@ -804,8 +844,8 @@ def render(profil):
                             # Min/Max
                             f'<div style="display:flex;justify-content:space-between;'
                             f'margin-top:8px;padding-top:6px;border-top:1px solid {color}22;">'
-                            f'<span style="font-size:9px;color:{th["text3"]};">↓ {row["pm25_min"]:.1f}</span>'
-                            f'<span style="font-size:9px;color:{th["text3"]};">↑ {row["pm25_max"]:.1f}</span>'
+                            f'<span style="font-size:9px;color:{th["text3"]};display:flex;align-items:center;gap:2px;">{get_icon("trending_down", 10)} {row["pm25_min"]:.1f}</span>'
+                            f'<span style="font-size:9px;color:{th["text3"]};display:flex;align-items:center;gap:2px;">{get_icon("trending_up", 10)} {row["pm25_max"]:.1f}</span>'
                             f'</div>'
                             f'</div>',
                             unsafe_allow_html=True
