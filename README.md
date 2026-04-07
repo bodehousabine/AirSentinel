@@ -2,7 +2,7 @@
 title: AirSentinel API
 emoji: 🌬️
 colorFrom: blue
-colorTo: sky
+colorTo: blue
 sdk: docker
 app_port: 7860
 pinned: false
