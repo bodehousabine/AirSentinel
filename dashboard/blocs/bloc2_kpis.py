@@ -171,8 +171,8 @@ def render(profil):
     # ── 3 Colonnes sur la même ligne ───────────────────────────────────────────
     PL = dict(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor=th["plot_bg"],
               font=dict(color=th["text2"], size=12), margin=dict(l=40,r=15,t=40,b=30))
-    # Police des axes ultra lisible (blanche et en gras/épaisse)
-    font_axes = dict(color="#ffffff", size=12, family="Arial Black, Inter, sans-serif")
+    # Police des axes ultra lisible (adaptative selon thème)
+    font_axes = dict(color=th["text2"], size=12, family="Arial Black, Inter, sans-serif")
     GRID = dict(gridcolor=th["grid_color"], linecolor=th["line_color"], zeroline=False, tickfont=font_axes)
 
     c1, c2, c3 = st.columns([1, 1, 1])
@@ -251,7 +251,12 @@ def render(profil):
                 moy = float(df_local[p["col"]].mean())
                 rc = risk_color(moy, p["seuil"], th)
                 ratio = moy / p["seuil"]
-                badge = "✅" if moy <= p["seuil"] else ("⚠️" if moy <= p["seuil"] * 1.5 else "🔴")
+                # Badges SVG au lieu des emojis
+                icon_check = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+                icon_warn  = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
+                icon_crit  = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>'
+                
+                badge = icon_check if moy <= p["seuil"] else (icon_warn if moy <= p["seuil"] * 1.5 else icon_crit)
                 nom_p = p["nom_fr"] if lang == "fr" else p["nom_en"]
                 
                 rows_data.append({
@@ -264,7 +269,7 @@ def render(profil):
                         f'<div style="font-size:12px;font-weight:700;color:{c_txt};">{nom_p}</div>'
                         f'<div style="font-size:14px;color:{rc};font-weight:800;text-align:right;font-family:monospace;'
                         f'text-shadow:0 0 6px {rc}33;">{moy:.1f}</div>'
-                        f'<div style="font-size:11px;color:{c_t3};text-align:right;font-family:monospace;opacity:0.7;">{p["seuil"]}</div>'
+                        f'<div style="font-size:11px;color:{th["text2"]};text-align:right;font-family:monospace;">{p["seuil"]}</div>'
                         f'<div style="font-size:15px;text-align:center;">{badge}</div></div>'
                     )
                 })
@@ -277,7 +282,8 @@ def render(profil):
             f'<div style="background:{c_tert};border:1px solid {c_bdr};border-radius:10px;'
             'padding:8px 12px;height:auto;box-sizing:border-box;">'
             f'<div style="font-size:13px;font-weight:800;color:{c_txt};margin-bottom:6px;'
-            f'padding-bottom:4px;border-bottom:3px solid {th["blue"]};">⚗️ {lbl6}</div>'
+            f'padding-bottom:4px;border-bottom:3px solid {th["blue"]};display:flex;align-items:center;">'
+            f'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8; margin-right:8px; vertical-align:text-bottom;"><path d="M6 3h12"/><path d="M9 3v15a3 3 0 0 0 3 3 3 3 0 0 0 3-3V3"/><path d="M9 11h6"/></svg> {lbl6}</div>'
             + header + "".join(rows_p) + '</div>'
         )
         st.markdown(html_poll, unsafe_allow_html=True)

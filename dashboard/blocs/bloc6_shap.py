@@ -364,7 +364,7 @@ def render(profil):
     with col_zones6:
         st.markdown("<div style='height:8px;'></div>", unsafe_allow_html=True)
         zone_sel = st.radio(
-            label='Climate Zone' if lang == 'en' else 'Zone climatique',
+            label='**CLIMATE ZONE**' if lang == 'en' else '**ZONE CLIMATIQUE**',
             options=list(ZONES.keys()),
             format_func=lambda z: get_zones_meta(lang).get(z, {}).get('name', z),
             horizontal=False,

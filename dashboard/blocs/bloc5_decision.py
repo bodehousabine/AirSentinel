@@ -481,54 +481,63 @@ def _get_reco_text(snk, profil_key, lang="fr"):
     return reco_map.get(snk, {}).get(profil_key, "—")
 
 VULN_FR = {
-    "faible":   {"enfants":"✅ Excellente qualité d'air. Privilégiez les jeux et sports en plein air.",
-                 "enceintes":"✅ Profitez de l'extérieur sans restriction. Aérez bien votre intérieur.",
-                 "ages":"✅ Moment idéal pour vos promenades et activités physiques régulières.",
-                 "asthma":"✅ Risque très faible. Poursuivez vos traitements de fond normalement.",
-                 "agricult":"✅ Conditions de travail optimales. Aucune restriction respiratoire."},
-    "modere":   {"enfants":"⚠️ Les enfants sensibles doivent éviter les efforts sportifs intenses.",
-                 "enceintes":"⚠️ Limitez le temps passé à proximité des grands axes routiers.",
-                 "ages":"⚠️ Réduisez les efforts cardio-vasculaires prolongés en extérieur.",
-                 "asthma":"⚠️ Surveillez l'apparition de toux. Ayez vos secours sur vous.",
-                 "agricult":"⚠️ Restez vigilants face aux poussières. Masque conseillé si épandage."},
-    "eleve":    {"enfants":"🚨 Évitez strictement les sports extérieurs. Limitez les récréations.",
-                 "enceintes":"🚨 Sorties brèves uniquement. Éloignez-vous des zones à fort trafic.",
-                 "ages":"🚨 Évitez toute sortie non essentielle. Gardez les fenêtres fermées.",
-                 "asthma":"🚨 Prenez votre traitement préventif. Ne sortez qu'en cas d'urgence.",
-                 "agricult":"🚨 Décalez les travaux pénibles tôt le matin. Port d'un masque FFP2 requis."},
-    "critique": {"enfants":"🔴 DANGER — Confinement total à l'intérieur. Aucune activité physique.",
-                 "enceintes":"🔴 DANGER — Restez à domicile. Consultez au moindre doute respiratoire.",
-                 "ages":"🔴 DANGER — Confinement strict. N'aérez que très tard la nuit.",
-                 "asthma":"🔴 DANGER CRITIQUE — Risque de crise. Médicament d'urgence à portée, appelez le 15.",
-                 "agricult":"🔴 DANGER — Arrêt impératif des travaux manuels extérieurs. Cabine filtrée uniquement."},
+    "faible":   {"enfants":"Excellente qualité d'air. Privilégiez les jeux et sports en plein air.",
+                 "enceintes":"Profitez de l'extérieur sans restriction. Aérez bien votre intérieur.",
+                 "ages":"Moment idéal pour vos promenades et activités physiques régulières.",
+                 "asthma":"Risque très faible. Poursuivez vos traitements de fond normalement.",
+                 "agricult":"Conditions de travail optimales. Aucune restriction respiratoire."},
+    "modere":   {"enfants":"Les enfants sensibles doivent éviter les efforts sportifs intenses.",
+                 "enceintes":"Limitez le temps passé à proximité des grands axes routiers.",
+                 "ages":"Réduisez les efforts cardio-vasculaires prolongés en extérieur.",
+                 "asthma":"Surveillez l'apparition de toux. Ayez vos secours sur vous.",
+                 "agricult":"Restez vigilants face aux poussières. Masque conseillé si épandage."},
+    "eleve":    {"enfants":"Évitez strictement les sports extérieurs. Limitez les récréations.",
+                 "enceintes":"Sorties brèves uniquement. Éloignez-vous des zones à fort trafic.",
+                 "ages":"Évitez toute sortie non essentielle. Gardez les fenêtres fermées.",
+                 "asthma":"Prenez votre traitement préventif. Ne sortez qu'en cas d'urgence.",
+                 "agricult":"Décalez les travaux pénibles tôt le matin. Port d'un masque FFP2 requis."},
+    "critique": {"enfants":"DANGER — Confinement total à l'intérieur. Aucune activité physique.",
+                 "enceintes":"DANGER — Restez à domicile. Consultez au moindre doute respiratoire.",
+                 "ages":"DANGER — Confinement strict. N'aérez que très tard la nuit.",
+                 "asthma":"DANGER CRITIQUE — Risque de crise. Médicament d'urgence à portée, appelez le 15.",
+                 "agricult":"DANGER — Arrêt impératif des travaux manuels extérieurs. Cabine filtrée uniquement."},
 }
 VULN_EN = {
-    "faible":   {"enfants":"✅ Excellent air quality. Favour outdoor play and sports.",
-                 "enceintes":"✅ Enjoy outdoors without restriction. Ventilate your home well.",
-                 "ages":"✅ Perfect time for walks and regular physical outdoor activities.",
-                 "asthma":"✅ Very low risk. Continue your basic treatments normally.",
-                 "agricult":"✅ Optimal field working conditions. No respiratory restrictions."},
-    "modere":   {"enfants":"⚠️ Sensitive children should limit intense outdoor sports.",
-                 "enceintes":"⚠️ Limit prolonged time spent along heavy traffic roads.",
-                 "ages":"⚠️ Reduce prolonged cardiovascular efforts outdoors.",
-                 "asthma":"⚠️ Watch for signs of cough. Keep rescue inhaler at hand.",
-                 "agricult":"⚠️ Stay vigilant with dust. Mask recommended if spraying."},
-    "eleve":    {"enfants":"🚨 Strictly avoid outdoor sports. Limit playground activities.",
-                 "enceintes":"🚨 Brief outings only. Avoid high traffic and congested areas.",
-                 "ages":"🚨 Avoid non-essential outings. Keep windows closed during peaks.",
-                 "asthma":"🚨 Take preventive medication. Go out only in emergencies.",
-                 "agricult":"🚨 Shift hard work to early morning. FFP2 mask is required."},
-    "critique": {"enfants":"🔴 DANGER — Strict indoor confinement. No physical activity at all.",
-                 "enceintes":"🔴 DANGER — Stay home. Consult a doctor at any respiratory doubt.",
-                 "ages":"🔴 DANGER — Strict confinement. Ventilate only very late at night.",
-                 "asthma":"🔴 CRITICAL DANGER — High crisis risk. Emergency meds nearby, call 911/15.",
-                 "agricult":"🔴 DANGER — Stop all outdoor manual work. Filtered cabin machinery only."},
+    "faible":   {"enfants":"Excellent air quality. Favour outdoor play and sports.",
+                 "enceintes":"Enjoy outdoors without restriction. Ventilate your home well.",
+                 "ages":"Perfect time for walks and regular physical outdoor activities.",
+                 "asthma":"Very low risk. Continue your basic treatments normally.",
+                 "agricult":"Optimal field working conditions. No respiratory restrictions."},
+    "modere":   {"enfants":"Sensitive children should limit intense outdoor sports.",
+                 "enceintes":"Limit prolonged time spent along heavy traffic roads.",
+                 "ages":"Reduce prolonged cardiovascular efforts outdoors.",
+                 "asthma":"Watch for signs of cough. Keep rescue inhaler at hand.",
+                 "agricult":"Stay vigilant with dust. Mask recommended if spraying."},
+    "eleve":    {"enfants":"Strictly avoid outdoor sports. Limit playground activities.",
+                 "enceintes":"Brief outings only. Avoid high traffic and congested areas.",
+                 "ages":"Avoid non-essential outings. Keep windows closed during peaks.",
+                 "asthma":"Take preventive medication. Go out only in emergencies.",
+                 "agricult":"Shift hard work to early morning. FFP2 mask is required."},
+    "critique": {"enfants":"DANGER — Strict indoor confinement. No physical activity at all.",
+                 "enceintes":"DANGER — Stay home. Consult a doctor at any respiratory doubt.",
+                 "ages":"DANGER — Strict confinement. Ventilate only very late at night.",
+                 "asthma":"DANGER CRITIQUE — High crisis risk. Emergency meds nearby, call 911/15.",
+                 "agricult":"DANGER — Stop all outdoor manual work. Filtered cabin machinery only."},
 }
 
 def _vuln_section(snk, lang, th):
     data = VULN_FR[snk] if lang == "fr" else VULN_EN[snk]
     color_map = {"faible":th["green"],"modere":th["amber"],"eleve":th["coral"],"critique":th["red"]}
     cc = color_map[snk]
+    
+    # Icône de statut SVG (petite pour les cartes)
+    icon_check = f'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{cc}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+    icon_warn  = f'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{cc}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
+    icon_siren = f'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{cc}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18v-6a5 5 0 1 1 10 0v6"/><path d="M5 21h14"/><path d="M12 7v5"/><path d="M12 17v2"/></svg>'
+    icon_crit  = f'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{cc}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>'
+    
+    icon_status = {"faible":icon_check,"modere":icon_warn,"eleve":icon_siren,"critique":icon_crit}[snk]
+
     svg_child  = f'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="{cc}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>'
     svg_women  = f'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="{cc}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M12 13v9"/><path d="M9 18h6"/></svg>'
     svg_senior = f'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="{cc}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M14 15a2 2 0 0 0-4 0"/><path d="M2.5 13L5 7c.7-1.3 1.4-2 3-2"/><path d="M21.5 13L19 7c-.7-1.3-1.5-2-3-2"/></svg>'
@@ -549,23 +558,25 @@ def _vuln_section(snk, lang, th):
     cols = st.columns(len(pops))
     for col, (icon, label, key) in zip(cols, pops):
         with col:
-            msg = data[key].replace("✅","<b>✅</b>").replace("⚠️","<b>⚠️</b>").replace("🚨","<b>🚨</b>").replace("🔴","<b>🔴</b>")
             st.markdown(
                 f'<div style="background:{th["bg_elevated"]};border:1px solid {th["border_soft"]};'
                 f'border-radius:12px;padding:12px 10px;height:145px;text-align:center;">'
                 f'<div style="font-size:28px;margin-bottom:6px;">{icon}</div>'
                 f'<div style="font-size:12px;font-weight:950;color:{cc};margin-bottom:8px;letter-spacing:1px;">{label}</div>'
-                f'<div style="font-size:12px;color:{th["text"]};line-height:1.4;text-align:left;font-weight:800;">{msg}</div>'
+                f'<div style="font-size:12px;color:{th["text"]};line-height:1.4;text-align:left;font-weight:800;display:flex;align-items:flex-start;gap:6px;">'
+                f'<span style="margin-top:2px; flex-shrink:0;">{icon_status}</span>'
+                f'<span>{data[key]}</span></div>'
                 f'</div>', unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
 def _rec_content(profil, profil_map, snk, tkey, snc, snt, ctx, th, T, scope_label, lang="fr"):
     pk = profil_map.get(profil, "citizen")
+    icon_mayor = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px; vertical-align:text-bottom;"><path d="M7 18v-6a5 5 0 1 1 10 0v6"/><path d="M5 21h14"/><path d="M12 7v5"/><path d="M12 17v2"/></svg>'
     if pk == "health":
         primary_action = T.get(f"bloc5_med_{tkey}", "Stable status." if lang=="en" else "Statut stable.")
     elif pk == "mayor":
         acts = T.get(f"bloc5_mayor_{tkey}", ["Veille administrative active."])
-        primary_action = f"\U0001F6A8 {acts[0]}" if len(acts) > 0 else ("Active watch." if lang=="en" else "Veille active.")
+        primary_action = f"{icon_mayor} {acts[0]}" if len(acts) > 0 else ("Active watch." if lang=="en" else "Veille active.")
     else:
         primary_action = T.get(f"bloc4_msg_{snk}_{pk}", T.get(f"bloc4_msg_{snk}_citizen", "\u2014"))
     if len(primary_action) > 120:
@@ -618,7 +629,7 @@ def render(profil):
                   T["sidebar_profile_mayor"]:"mayor", T["sidebar_profile_researcher"]:"researcher"}
 
     dec_title   = "DÉCISION SANITAIRE" if lang == "fr" else "HEALTH DECISION"
-    choisir_lbl = "**FILTRER VILLE**" if lang == "fr" else "**FILTER CITY**"
+    choisir_lbl = ":material/location_on: " + ("**FILTRER VILLE**" if lang == "fr" else "**FILTER CITY**")
 
     villes_dispo = sorted(df["ville"].unique().tolist())
     hcol1, hcol2, hcol3 = st.columns([2.2, 0.8, 1.3])
@@ -710,7 +721,7 @@ def render(profil):
                 niv_ctx=niv_ctx, p90_ville=p90_ville
             )
             if pdf_bytes:
-                st.download_button(label="📄 DOWNLOAD PDF" if lang=="en" else "📄 TÉLÉCHARGER PDF", data=pdf_bytes,
+                st.download_button(label=":material/description: DOWNLOAD PDF" if lang=="en" else ":material/description: TÉLÉCHARGER PDF", data=pdf_bytes,
                     file_name=f"airsentinel_{ville_dec}_{date_rapport}.pdf",
                     mime="application/pdf", key="v5_btn_pdf_top")
         with c_c:
@@ -718,7 +729,7 @@ def render(profil):
                         'niveau_sanitaire','polluant_dominant','temperature_2m_max',
                         'wind_speed_10m_max','precipitation_sum','dust_moyen','us_aqi_moyen']
             csv_data = (df_ville[[c for c in cols_csv if c in df_ville.columns]].copy())
-            st.download_button(label="📥 DOWNLOAD CSV" if lang=="en" else "📥 TÉLÉCHARGER CSV",
+            st.download_button(label=":material/download: DOWNLOAD CSV" if lang=="en" else ":material/download: TÉLÉCHARGER CSV",
                 data=csv_data.to_csv(index=False).encode('utf-8'),
                 file_name=f"airsentinel_{ville_dec}_{date_rapport}.csv",
                 mime="text/csv", key="v5_btn_csv_top")
@@ -772,4 +783,4 @@ def render(profil):
         _vuln_section(snk_s, lang, th)
 
     st.markdown("<div style='margin-top:40px;'></div>", unsafe_allow_html=True)
-    sources_bar(f"📊 DECISIONAL ANALYSIS · INDABAX 2026" if lang=="en" else f"📊 ANALYSE DÉCISIONNELLE · INDABAX 2026", th)
+    sources_bar(f":material/analytics: DECISIONAL ANALYSIS · INDABAX 2026" if lang=="en" else f":material/analytics: ANALYSE DÉCISIONNELLE · INDABAX 2026", th)

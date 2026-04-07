@@ -204,7 +204,7 @@ iframe[title="chatbox.render_chatbox"] {
         <div style="font-size:16px;color:{th['text2']};line-height:1.6;max-width:580px;margin:0 auto;">
             {T["landing_desc"]}
         </div>
-        <div style="margin-top:25px;font-size:11px;color:rgba(248,250,252,0.3);font-family:'DM Mono',monospace;letter-spacing:0.15em;">
+        <div style="margin-top:10px;font-size:11px;color:rgba(248,250,252,0.3);font-family:'DM Mono',monospace;letter-spacing:0.15em;">
             {T["sidebar_footer"].splitlines()[0]}
         </div>
     </div>
@@ -232,13 +232,14 @@ iframe[title="chatbox.render_chatbox"] {
     return enter
 
 
-def get_themed_about_html(th):
+def get_themed_about_html(th, lang="fr"):
     """
     Lit apropos.html et injecte les variables CSS du thème actuel.
     Encodage des images en base64 inclus.
     """
     about_dir = os.path.join(os.path.dirname(__file__), "about")
-    html_file = os.path.join(about_dir, "apropos.html")
+    fname = "apropos_en.html" if lang == "en" else "apropos.html"
+    html_file = os.path.join(about_dir, fname)
     
     if not os.path.exists(html_file):
         return None
@@ -277,7 +278,7 @@ def render_about_modal(lang):
     th_name = st.session_state.get("theme_name", "dark")
     th      = get_theme(th_name)
     
-    html_content = get_themed_about_html(th)
+    html_content = get_themed_about_html(th, lang)
     if not html_content:
         st.error("Fichier apropos.html introuvable.")
         return
@@ -333,7 +334,7 @@ def render_about_inline(lang):
     th_name = st.session_state.get("theme_name", "dark")
     th      = get_theme(th_name)
     
-    html_content = get_themed_about_html(th)
+    html_content = get_themed_about_html(th, lang)
     if not html_content:
         st.error("Fichier apropos.html introuvable.")
         return

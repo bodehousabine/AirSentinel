@@ -46,20 +46,20 @@ TRANSLATIONS = {
         "en": "MY PROFILE",
     },
     "sidebar_profile_citizen": {
-        "fr": "👤 Citoyen",
-        "en": "👤 Citizen",
+        "fr": "Citoyen",
+        "en": "Citizen",
     },
     "sidebar_profile_health": {
-        "fr": "🩺 Professionnel de santé",
-        "en": "🩺 Health professional",
+        "fr": "Professionnel de santé",
+        "en": "Health professional",
     },
     "sidebar_profile_mayor": {
-        "fr": "🏛️ Décideur / Maire",
-        "en": "🏛️ Decision maker / Mayor",
+        "fr": "Décideur / Maire",
+        "en": "Decision maker / Mayor",
     },
     "sidebar_profile_researcher": {
-        "fr": "🔬 Chercheur",
-        "en": "🔬 Researcher",
+        "fr": "Chercheur",
+        "en": "Researcher",
     },
     "sidebar_filters_title": {
         "fr": "FILTRES GLOBAUX",
@@ -134,8 +134,8 @@ TRANSLATIONS = {
     # TABS
     # ══════════════════════════════════════════════════════════════════════════
     "tab_carte": {
-        "fr": "CARTE INTERACTIVE",
-        "en": "INTERACTIVE MAP",
+        "fr": "VUE GÉOGRAPHIQUE",
+        "en": "GEOGRAPHIC VIEW",
     },
     "tab_kpis": {
         "fr": "INDICATEURS KPI",
@@ -154,8 +154,8 @@ TRANSLATIONS = {
         "en": "HEALTH DECISION",
     },
     "tab_contexte": {
-        "fr": "CONTEXTE",
-        "en": "CONTEXT",
+        "fr": "PROFIL CLIMATIQUE",
+        "en": "CLIMATE PROFILE",
     },
     "tab_about": {
         "fr": "À PROPOS",
@@ -166,8 +166,8 @@ TRANSLATIONS = {
     # BLOC 1 — CARTE
     # ══════════════════════════════════════════════════════════════════════════
     "bloc1_label": {
-        "fr": "CARTE INTERACTIVE",
-        "en": "INTERACTIVE MAP",
+        "fr": "VUE GÉOGRAPHIQUE",
+        "en": "GEOGRAPHIC VIEW",
     },
     "bloc1_subtitle": {
         "fr": "PM2.5 · IRS · Épisodes climatiques · Données 2020–2025",
@@ -285,7 +285,7 @@ TRANSLATIONS = {
         "fr": "Court terme 24h–72h · Simulateur IRS · Calendrier mensuel",
         "en": "Short term 24h–72h · HRI simulator · Monthly calendar",
     },
-    "bloc3_tab_short": {
+    "bloc3_tab_72h": {
         "fr": ":material/insights: Prédiction 72h",
         "en": ":material/insights: 72h Prediction",
     },
@@ -310,8 +310,8 @@ TRANSLATIONS = {
         "en": ":material/analytics: PERFORMANCE",
     },
     "bloc3_sub_ong_3": {
-        "fr": ":material/tune: SIMULATEUR IRS",
-        "en": ":material/tune: HRI SIMULATOR",
+        "fr": ":material/tune: SIMULATEUR",
+        "en": ":material/tune: SIMULATOR",
     },
     "bloc3_sub_ong_4": {
         "fr": ":material/calendar_month: CALENDRIER",
@@ -413,20 +413,20 @@ TRANSLATIONS = {
         "fr": "Jours par niveau IRS",
         "en": "Days per HRI level",
     },
-    # Messages par niveau et par profil
-    "bloc4_msg_faible_citizen":     {"fr": "✅ Air sain — sortez normalement",                          "en": "✅ Clean air — go out normally"},
+    # Messages par niveau et par profil (Epurés des emojis pour inclusion d'icônes SVG)
+    "bloc4_msg_faible_citizen":     {"fr": "Air sain — sortez normalement",                          "en": "Clean air — go out normally"},
     "bloc4_msg_faible_health":      {"fr": "Flux de consultations normal attendu",                       "en": "Normal consultation flow expected"},
     "bloc4_msg_faible_mayor":       {"fr": "Aucune action requise",                                      "en": "No action required"},
     "bloc4_msg_faible_researcher":  {"fr": "< p50 — médiane historique",                                 "en": "< p50 — historical median"},
-    "bloc4_msg_modere_citizen":     {"fr": "⚠️ Groupes sensibles : réduire l'exposition",                "en": "⚠️ Sensitive groups: reduce exposure"},
+    "bloc4_msg_modere_citizen":     {"fr": "Groupes sensibles : réduire l'exposition",                "en": "Sensitive groups: reduce exposure"},
     "bloc4_msg_modere_health":      {"fr": "Surveiller les patients asthmatiques",                       "en": "Monitor asthmatic patients"},
     "bloc4_msg_modere_mayor":       {"fr": "Informer les établissements scolaires",                      "en": "Inform schools and institutions"},
     "bloc4_msg_modere_researcher":  {"fr": "p50–p75 — pire que 50% des jours observés",                 "en": "p50–p75 — worse than 50% of observed days"},
-    "bloc4_msg_eleve_citizen":      {"fr": "🚨 Restez à l'intérieur si possible",                       "en": "🚨 Stay indoors if possible"},
+    "bloc4_msg_eleve_citizen":      {"fr": "Restez à l'intérieur si possible",                       "en": "Stay indoors if possible"},
     "bloc4_msg_eleve_health":       {"fr": "Préparer les médicaments respiratoires",                     "en": "Prepare respiratory medications"},
     "bloc4_msg_eleve_mayor":        {"fr": "Annuler les événements sportifs extérieurs",                 "en": "Cancel outdoor sports events"},
     "bloc4_msg_eleve_researcher":   {"fr": "p75–p90 — pire que 75% · PM2.5 > OMS",                      "en": "p75–p90 — worse than 75% · PM2.5 > WHO"},
-    "bloc4_msg_critique_citizen":   {"fr": "🔴 DANGER CRITIQUE — masques obligatoires",                 "en": "🔴 CRITICAL DANGER — masks required"},
+    "bloc4_msg_critique_citizen":   {"fr": "DANGER CRITIQUE — masques obligatoires",                 "en": "CRITICAL DANGER — masks required"},
     "bloc4_msg_critique_health":    {"fr": "URGENCE : activer le protocole sanitaire",                   "en": "EMERGENCY: activate health protocol"},
     "bloc4_msg_critique_mayor":     {"fr": "SMS d'alerte · Plan communal sanitaire",                     "en": "Alert SMS · Community health plan"},
     "bloc4_msg_critique_researcher":{"fr": "≥ p90 — pire que 90% des jours historiques",                "en": "≥ p90 — worse than 90% of historical days"},

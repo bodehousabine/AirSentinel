@@ -290,16 +290,16 @@ def render(profil):
             **PL, height=420,
             title=dict(text=titre_pred, font=dict(color=th["text"], size=15, family="Arial Black, sans-serif")),
             legend=dict(
-                font=dict(color=th["text"], size=12, family="Arial, sans-serif"),
+                font=dict(color=th["text"], size=12, family="Arial Black, sans-serif"),
                 bgcolor="rgba(0,0,0,0.3)",
                 bordercolor=th["border_soft"], borderwidth=1,
                 orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1
             ),
             margin=dict(l=44, r=20, t=60, b=36)
         )
-        fig.update_xaxes(**GRID, tickfont=dict(size=12, color=th["text"], family="Arial, sans-serif"))
-        fig.update_yaxes(**GRID, tickfont=dict(size=12, color=th["text"], family="Arial, sans-serif"),
-                         title_font=dict(size=13, color=th["text"], family="Arial, sans-serif"))
+        fig.update_xaxes(**GRID, tickfont=dict(size=12, color=th["text"], family="Arial Black, sans-serif"))
+        fig.update_yaxes(**GRID, tickfont=dict(size=12, color=th["text"], family="Arial Black, sans-serif"),
+                         title_font=dict(size=13, color=th["text"], family="Arial Black, sans-serif"))
         st.plotly_chart(fig, width="stretch")
 
         # ── KPIs prédiction — plus visibles ──────────────────────────────
@@ -472,12 +472,12 @@ def render(profil):
                         text=f"{'Actual vs Predicted' if lang=='en' else 'Réel vs Prédit'} · {ville_ref} · 2025 · R²={perf['r2']:.4f} · MAE={perf['mae']:.3f} µg/m³",
                         font=dict(color=th["text"], size=14, family="Arial Black, sans-serif")
                     ),
-                    xaxis=dict(**GRID, tickfont=dict(size=12, color=th["text"], family="Arial, sans-serif")),
+                    xaxis=dict(**GRID, tickfont=dict(size=12, color=th["text"], family="Arial Black, sans-serif")),
                     yaxis=dict(**GRID, title="PM2.5 (µg/m³)",
-                               title_font=dict(size=13, color=th["text"], family="Arial, sans-serif"),
-                               tickfont=dict(size=12, color=th["text"], family="Arial, sans-serif")),
+                               title_font=dict(size=13, color=th["text"], family="Arial Black, sans-serif"),
+                               tickfont=dict(size=12, color=th["text"], family="Arial Black, sans-serif")),
                     legend=dict(
-                        font=dict(color=th["text"], size=12, family="Arial, sans-serif"),
+                        font=dict(color=th["text"], size=12, family="Arial Black, sans-serif"),
                         bgcolor="rgba(0,0,0,0.3)",
                         bordercolor=th["border_soft"], borderwidth=1,
                         orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1
@@ -630,7 +630,7 @@ def render(profil):
                         tickcolor="#94a3b8",
                         tickvals=[0, 15, 25, 37.5, 75, 100],
                         ticktext=["0", "<b>15</b>", "<b>25</b>", "<b>37</b>", "<b>75</b>", "100"],
-                        tickfont=dict(size=13, color="#e2e8f0", family="Arial Black, sans-serif")
+                        tickfont=dict(size=13, color=th["text2"], family="Arial Black, sans-serif")
                     ),
                     bar=dict(color=nc, thickness=0.04),
                     bgcolor="#1e293b",
@@ -723,13 +723,35 @@ def render(profil):
     # ══════════════════════════════════════════════════════════════════════════
     with tabs[3]:
         # Sélection ANNEE (Conservée comme demandé)
-        col_sel1, col_sel2 = st.columns([1, 2])
+        col_sel1, col_sel2 = st.columns([1.2, 4])
         with col_sel1:
             annees_dispo = sorted(df["date"].dt.year.unique().tolist())
             an = st.selectbox(
                 ":material/calendar_month: " + ("Année" if lang == "fr" else "Year"),
                 annees_dispo, index=len(annees_dispo)-1, key="lt_a"
             )
+        
+        with col_sel2:
+            st.markdown("<div style='margin-top: 28px;'></div>", unsafe_allow_html=True)
+            legend_html = (
+                f'<div style="display:flex; justify-content:space-between; flex-wrap:wrap; align-items:center; '
+                f'background:{th["bg_tertiary"]}; padding:8px 24px; border-radius:10px; '
+                f'border:1px solid {th["border_soft"]}; width:100%;">'
+                + "".join([
+                    f'<div style="display:flex; align-items:center; gap:8px;">'
+                    f'<div style="width:14px; height:14px; border-radius:50%; background:{c}; '
+                    f'box-shadow:0 0 8px {c}66;"></div>'
+                    f'<span style="font-size:12px; font-weight:600; color:{th["text"]}; white-space:nowrap;">{l}</span></div>'
+                    for c, l in [
+                        (th["green"], "< 15 µg/m³ · " + ("WHO" if lang=="en" else "Conforme OMS")),
+                        (th["amber"], "15–25 · " + ("Mod." if lang=="en" else "Modéré")),
+                        (th["coral"], "25–37.5 · " + ("High" if lang=="en" else "Élevé")),
+                        (th["red"],   "> 37.5 · " + ("Crit." if lang=="en" else "Critique")),
+                    ]
+                ])
+                + '</div>'
+            )
+            st.markdown(legend_html, unsafe_allow_html=True)
         
         # Sélection Ville (Supprimée car centralisée dans l'en-tête)
         ville_cal = v # Utilise la valeur de l'en-tête
@@ -865,24 +887,6 @@ def render(profil):
                             unsafe_allow_html=True
                         )
 
-        # Légende calendrier
-        st.markdown("<div style='margin-top:16px;'></div>", unsafe_allow_html=True)
-        st.markdown(
-            f'<div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;">'
-            + "".join([
-                f'<div style="display:flex;align-items:center;gap:6px;">'
-                f'<div style="width:12px;height:12px;border-radius:50%;background:{c};"></div>'
-                f'<span style="font-size:11px;color:{th["text3"]};">{l}</span></div>'
-                for c, l in [
-                    (th["green"], "< 15 µg/m³ · " + ("WHO Compliant" if lang=="en" else "Conforme OMS")),
-                    (th["amber"], "15–25 µg/m³ · " + ("Moderate" if lang=="en" else "Modéré")),
-                    (th["coral"], "25–37.5 µg/m³ · " + ("High" if lang=="en" else "Élevé")),
-                    (th["red"],   "> 37.5 µg/m³ · " + ("Critical" if lang=="en" else "Critique")),
-                ]
-            ])
-            + f'</div>',
-            unsafe_allow_html=True
-        )
 
     sources_bar(
         ("Hybrid Model Regression+ARIMA · Box & Jenkins (1976) · "

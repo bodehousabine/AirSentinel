@@ -11,6 +11,123 @@ import plotly.graph_objects as go
 import joblib, os, base64
 from themes import get_theme, THEMES
 from translations import get_t
+import time
+
+def render_transition_loader(lang="fr", duration=2.5):
+    """
+    Affiche un écran de transition haute-fidélité (Sentinel Eye + Progress Bar) 
+    pour masquer le passage du Landing au Dashboard.
+    """
+    msg = "Initialisation du Dashboard..." if lang=="fr" else "Initializing Dashboard..."
+    anim_duration = duration 
+    
+    st.markdown(f"""
+        <div class="transition-container">
+            <div class="sentinel-loader">
+                <div class="ring outer"></div>
+                <div class="ring middle"></div>
+                <div class="core-pulse"></div>
+            </div>
+            <div class="msg-text">{msg}</div>
+            <div class="progress-track">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+        <style>
+            .transition-container {{
+                position: fixed; inset: 0;
+                background: radial-gradient(circle at center, #071e35 0%, #020c18 100%);
+                z-index: 1000000;
+                display: flex; flex-direction: column;
+                justify-content: center; align-items: center;
+                font-family: 'Inter', sans-serif;
+            }}
+            
+            .sentinel-loader {{
+                position: relative; width: 140px; height: 140px;
+                margin-bottom: 50px;
+                display: flex; justify-content: center; align-items: center;
+            }}
+            
+            .ring {{
+                position: absolute; border-radius: 50%;
+                border: 2px solid transparent;
+            }}
+            
+            .outer {{
+                width: 130px; height: 130px;
+                border-top-color: #00d4b1;
+                border-bottom-color: #00d4b1;
+                animation: rotate-cw 3s linear infinite;
+            }}
+            
+            .middle {{
+                width: 90px; height: 90px;
+                border-left-color: #f59e0b;
+                border-right-color: #f59e0b;
+                animation: rotate-ccw 2s linear infinite;
+                opacity: 0.8;
+            }}
+            
+            .core-pulse {{
+                width: 45px; height: 45px;
+                background: #00d4b1;
+                border-radius: 50%;
+                box-shadow: 0 0 30px #00d4b188;
+                animation: core-glow 1.5s ease-in-out infinite alternate;
+            }}
+            
+            @keyframes rotate-cw {{
+                from {{ transform: rotate(0deg); }}
+                to {{ transform: rotate(360deg); }}
+            }}
+            
+            @keyframes rotate-ccw {{
+                from {{ transform: rotate(0deg); }}
+                to {{ transform: rotate(-360deg); }}
+            }}
+            
+            @keyframes core-glow {{
+                0% {{ transform: scale(0.9); box-shadow: 0 0 15px #00d4b166; }}
+                100% {{ transform: scale(1.1); box-shadow: 0 0 45px #00d4b1cc; }}
+            }}
+            
+            .msg-text {{
+                color: #00d4b1; font-size: 18px; font-weight: 800;
+                margin-bottom: 25px; letter-spacing: 2px;
+                text-transform: uppercase;
+                text-shadow: 0 0 15px rgba(0, 212, 177, 0.4);
+                animation: text-pulse 2s ease-in-out infinite;
+            }}
+            
+            @keyframes text-pulse {{
+                0%, 100% {{ opacity: 0.7; }}
+                50% {{ opacity: 1; }}
+            }}
+            
+            .progress-track {{
+                width: 350px; height: 4px;
+                background: rgba(255,255,255,0.08); 
+                border-radius: 20px;
+                overflow: hidden;
+            }}
+            
+            .progress-bar {{
+                width: 0%; height: 100%;
+                background: linear-gradient(90deg, #00d4b1, #f59e0b);
+                box-shadow: 0 0 10px #00d4b188;
+                animation: fill-bar {anim_duration}s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            }}
+            
+            @keyframes fill-bar {{
+                0% {{ width: 0%; }}
+                100% {{ width: 100%; }}
+            }}
+            
+            .stApp {{ visibility: hidden !important; }}
+        </style>
+    """, unsafe_allow_html=True)
 
 def get_img_as_base64(file):
     try:
@@ -304,31 +421,36 @@ def banner(img_url, height, title, subtitle, th, accent=None, tint_hex=None, tin
     # Hauteur fixe 120px pour l'unification visuelle
     h = 120 
     
-    st.markdown(f"""
-    <div style="position:relative;width:100%;height:{h}px;border-radius:12px;
-                overflow:hidden;margin-bottom:24px;
-                border:{border_style};
-                box-shadow:{shadow_style};">
-        <img src="{img_url}"
-             style="position:absolute;inset:0;width:100%;height:100%;
-                    object-fit:cover;object-position:center;
-                    filter:brightness(0.3);"
-             onerror="this.style.opacity='0'"/>
-        <div style="position:absolute;inset:0;
-                    background:linear-gradient(125deg,
-                        rgba({r},{g},{b},{tint_strength}) 0%,
-                        transparent 100%);"></div>
-        <div style="position:absolute;inset:0;padding:20px 30px;
-                    display:flex;flex-direction:column;justify-content:flex-end;">
-            <div style="font-size:clamp(22px, 5vw, 42px);font-weight:950;color:#f0f9ff;line-height:1.1;
-                        text-transform:uppercase;letter-spacing:1px;
-                        text-shadow:0 4px 12px rgba(0,0,0,0.5);"> {title}</div>
-            <div style="font-size:clamp(14px, 3vw, 20px);color:rgba(255,255,255,0.9);
-                        font-weight:950;text-transform:uppercase;margin-top:4px;
-                        letter-spacing:0.8px;">{subtitle}</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    # Nettoyage et préparation des données
+    clean_sub = subtitle.replace('👤','').replace('🩺','').replace('🏛️','').replace('🔬','').strip()
+    icon_svg  = _get_profile_svg(subtitle, '#f0f9ff')
+    icon_html = f'<div style="margin-right:10px;display:flex;align-items:center;height:24px;">{icon_svg}</div>' if icon_svg else ''
+
+    # Construction du HTML sur une seule ligne pour éviter les bugs de rendu Streamlit
+    html_banner = (
+        f'<div style="position:relative;width:100%;height:{h}px;border-radius:12px;overflow:hidden;margin-bottom:24px;border:{border_style};box-shadow:{shadow_style};">'
+        f'<img src="{img_url}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;filter:brightness(0.3);" onerror="this.style.opacity=\'0\'"/>'
+        f'<div style="position:absolute;inset:0;background:linear-gradient(125deg,rgba({r},{g},{b},{tint_strength}) 0%,transparent 100%);"></div>'
+        f'<div style="position:absolute;inset:0;padding:20px 30px;display:flex;flex-direction:column;justify-content:flex-end;">'
+        f'<div style="font-size:clamp(22px,5vw,42px);font-weight:950;color:#f0f9ff;line-height:1.1;text-transform:uppercase;letter-spacing:1px;text-shadow:0 4px 12px rgba(0,0,0,0.5);">{title}</div>'
+        f'<div style="display:flex;align-items:center;margin-top:6px;">{icon_html}'
+        f'<div style="font-size:clamp(14px,3vw,20px);color:rgba(255,255,255,0.9);font-weight:950;text-transform:uppercase;letter-spacing:0.8px;line-height:24px;">{clean_sub}</div>'
+        f'</div></div></div>'
+    )
+    st.markdown(html_banner, unsafe_allow_html=True)
+
+def _get_profile_svg(label, color):
+    # Mapping simple pour injecter des SVG pro
+    lbl = label.upper()
+    if "CITOYEN" in lbl or "CITIZEN" in lbl:
+        return f'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
+    if "PROFESSIONNEL" in lbl or "HEALTH" in lbl or "DOCTOR" in lbl:
+        return f'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m19 10-5.05-1.01a1 1 0 0 1-.81-.68L12 4l-1.14 4.31a1 1 0 0 1-.81.68L5 10l4.31 1.14c.45.12.76.5.76.97V20h4v-7.89c0-.47.31-.85.76-.97L19 10Z"/><path d="M7 20h10"/></svg>'
+    if "MAIRE" in lbl or "MAYOR" in lbl or "DÉCIDEUR" in lbl:
+        return f'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M3 7v1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7H3Z"/><path d="M5 21V10.85"/><path d="M19 21V10.85"/><path d="M9 21v-4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v4"/></svg>'
+    if "CHERCHEUR" in lbl or "RESEARCHER" in lbl:
+        return f'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.31"/><path d="M14 2v7.31"/><path d="M14 9a2 2 0 0 1 2 2v10H8V11a2 2 0 0 1 2-2h4Z"/><path d="M20 20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2h16v2Z"/></svg>'
+    return ""
 
 
 def img_card(img_url, height, label, desc, th, accent=None, tint_hex=None, tint_strength=0.28, no_frame=False):

@@ -111,8 +111,8 @@ def render(profil):
 
     # ── Mode + Région — colonne droite, dans la hauteur de la bannière ─────
     with col_controls:
-        auj_lbl  = "📅 Aujourd'hui" if lang == "fr" else "📅 Today"
-        hist_lbl = "📊 Historique"  if lang == "fr" else "📊 Historical"
+        auj_lbl  = "AUJOURD'HUI" if lang == "fr" else "TODAY"
+        hist_lbl = "HISTORIQUE"  if lang == "fr" else "HISTORICAL"
 
         regions_dispo = sorted(df["region"].unique().tolist())
         all_reg_label = "Toutes les régions" if lang == "fr" else "All regions"
@@ -123,6 +123,13 @@ def render(profil):
         div[data-testid="stVerticalBlock"] > div:has(> div[data-testid="stRadio"]) {
             padding-top: 0 !important;
             margin-top: 0 !important;
+        }
+        /* Rendre les labels du radio plus visibles */
+        div[data-testid="stRadio"] label {
+            font-weight: 800 !important;
+            font-size: 14px !important;
+            letter-spacing: 0.05em !important;
+            color: {th['text']} !important;
         }
         </style>
         """, unsafe_allow_html=True)
@@ -145,7 +152,7 @@ def render(profil):
             placeholder="Toutes les régions" if lang == "fr" else "All regions"
         )
 
-    mode_today = "Aujourd'hui" in mode or "Today" in mode
+    mode_today = "AUJOURD'HUI" in mode or "TODAY" in mode
 
     if mode_today:
         # ── Données prédites pour aujourd'hui ─────────────────────────────
@@ -254,18 +261,23 @@ def render(profil):
                 geo_center = dict(lat=7.35, lon=12.35)
                 geo_zoom   = 5.4
 
-        titre_carte = f"{T['bloc1_map_title']} · {periode_label}"
-        if ville_sel_carte != all_label:
-            titre_carte += f" · {ville_sel_carte}"
+        # Titre de la carte stylisé avec icône SVG au lieu de l'emoji
+        icon_cal = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.85; display:inline-block; vertical-align:middle; margin-top:-2px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'
+        titre_periode = periode_label.replace("📅 ", "")
+        
+        st.markdown(f"""
+            <div style="font-size:14px;font-weight:600;color:{th['text']};margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+                {T['bloc1_map_title']} · {icon_cal if "📅" in periode_label else ""} {titre_periode} {f" · {ville_sel_carte}" if ville_sel_carte != all_label else ""}
+            </div>
+        """, unsafe_allow_html=True)
 
         fig.update_layout(
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor=th["plot_bg"],
             font=dict(color=th["text2"], size=12),
-            margin=dict(l=0, r=0, t=35, b=0),
+            margin=dict(l=0, r=0, t=10, b=0),
             height=710,
-            title=dict(text=titre_carte, font=dict(color=th["text"], size=14), y=1, yanchor='top'),
             mapbox=dict(style="open-street-map", center=geo_center, zoom=geo_zoom))
-        st.plotly_chart(fig, use_container_width=True, config={
+        st.plotly_chart(fig, width='stretch', config={
             'scrollZoom': True,
             'displayModeBar': True,
             'displaylogo': False,
@@ -290,7 +302,7 @@ def render(profil):
                     box-shadow:0 4px 15px rgba(0,0,0,0.2);">
             <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
                         color:{th['text']};margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-                <span style="font-size:16px;">📍</span> {lbl_legend}
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.9;"><path d="M9.59 4.59A2 2 0 1 1 11 8H2"/><path d="M12.59 19.41A2 2 0 1 0 14 16H2"/><path d="M15.83 7.17a2 2 0 0 1 1.44 2.83H2"/><path d="M10.28 13.59a2 2 0 0 1 1.72 2.41H2"/></svg> {lbl_legend}
             </div>
             {"".join([
                 f'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">'
@@ -338,17 +350,23 @@ def render(profil):
             annotation_text="OMS 15", annotation_font_color=th["red"], annotation_font_size=9)
         fig_reg.update_layout(**PL, height=350, showlegend=False,
             title=dict(text=lbl, font=dict(color=th["text"], size=12)))
-        fig_reg.update_xaxes(**GRID, tickfont=dict(size=8), tickangle=-35)
-        fig_reg.update_yaxes(**GRID)
-        st.plotly_chart(fig_reg, use_container_width=True)
+        fig_reg.update_xaxes(**GRID, tickfont=dict(size=8, color=th["text2"], family="Arial Black, sans-serif"), tickangle=-35)
+        fig_reg.update_yaxes(**GRID, tickfont=dict(size=8, color=th["text2"], family="Arial Black, sans-serif"))
+        st.plotly_chart(fig_reg, width='stretch')
 
     st.markdown("<hr style='border-color:rgba(99,160,255,0.06);margin:8px 0 2px;'>", unsafe_allow_html=True)
 
     # ══ ANALYSES ENRICHIES — toujours basées sur données historiques réelles ══
-    titre_analyses = ("Analyses détaillées · " if lang == "fr" else "Detailed analyses · ") + periode_label
+    # Titre des analyses avec icônes SVG
+    icon_bar = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.85; margin-right:4px; vertical-align:text-bottom;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>'
+    icon_cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8; margin:0 4px; vertical-align:text-bottom;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'
+    
+    clean_periode = periode_label.replace("📅 ", "")
+    titre_text = ("Analyses détaillées" if lang == "fr" else "Detailed analyses")
+    
     st.markdown(f"""
-    <div style="font-size:16px;font-weight:600;color:{th['text']};margin-top:-10px;margin-bottom:16px;">
-        📊 {titre_analyses}
+    <div style="font-size:16px;font-weight:600;color:{th['text']};margin-top:-10px;margin-bottom:16px;display:flex;align-items:center;">
+        {icon_bar} {titre_text} · {icon_cal if "📅" in periode_label else ""} {clean_periode}
     </div>""", unsafe_allow_html=True)
 
     # Pour les analyses enrichies, utiliser les données historiques réelles
@@ -357,12 +375,11 @@ def render(profil):
     c1, c2 = st.columns(2)
 
     with c1:
-        lbl3 = "Top 3 polluants · National" if lang == "fr" else "Top 3 pollutants · National"
+        lbl3 = "Top polluants · National" if lang == "fr" else "Top pollutants · National"
         if "polluant_dominant" in df_analyse.columns:
             top3  = df_analyse["polluant_dominant"].value_counts().head(3)
             total = top3.sum()
-            medal_colors = [th["amber"], th.get("gray", "#6b7280"), th["coral"]]
-            medals = ["🥇", "🥈", "🥉"]
+            medal_colors = [th["amber"], "#c0c0c0", th["coral"]]
             bg_el  = th["bg_elevated"]
             c_text = th["text"]
             c_t3   = th["text3"]
@@ -370,13 +387,15 @@ def render(profil):
             c_bdr  = th["border_soft"]
             unit   = "j" if lang == "fr" else "d"
             rows_t3 = []
+            medal_svg = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="{MC}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>'
             for i, (poll, cnt) in enumerate(top3.items()):
                 pct_v = cnt / total * 100 if total > 0 else 0
                 mc    = medal_colors[i] if i < len(medal_colors) else th["blue"]
                 w     = f"{pct_v:.0f}%"
+                icon_m = medal_svg.replace("{MC}", mc)
                 rows_t3.append(
                     '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">'
-                    + f'<div style="font-size:20px;line-height:1;">{medals[i]}</div>'
+                    + f'<div style="line-height:1; flex-shrink:0;">{icon_m}</div>'
                     + '<div style="flex:1;min-width:0;">'
                     + '<div style="display:flex;justify-content:space-between;margin-bottom:4px;">'
                     + f'<span style="font-size:13px;color:{c_text};font-weight:600;">{poll}</span>'
@@ -387,17 +406,18 @@ def render(profil):
                     + f'<div style="font-size:10px;color:{c_t3};margin-top:2px;">{cnt:,} {unit}</div>'
                     + '</div></div>'
                 )
+            icon_trophy = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.9; margin-right:8px; vertical-align:text-bottom;"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>'
             html_top3 = (
                 f'<div style="background:{c_bg};border:1px solid {c_bdr};'
                 'border-radius:12px;padding:20px 22px;height:320px;box-sizing:border-box;">'
-                + f'<div style="font-size:14px;font-weight:700;color:{c_text};margin-bottom:18px;">🏆 {lbl3}</div>'
+                + f'<div style="font-size:14px;font-weight:700;color:{c_text};margin-bottom:18px;display:flex;align-items:center;">{icon_trophy} {lbl3}</div>'
                 + "".join(rows_t3)
                 + '</div>'
             )
             st.markdown(html_top3, unsafe_allow_html=True)
 
     with c2:
-        lbl4 = "Top 5 villes · Alerte critique IRS" if lang == "fr" else "Top 5 cities · Critical HRI"
+        lbl4 = "Top villes · Alerte critique IRS" if lang == "fr" else "Top cities · Critical HRI"
         df_analyse["niv_num"] = np.searchsorted(
             [ctx["p50"], ctx["p75"], ctx["p90"]], df_analyse["IRS"].values, side="right"
         ).clip(0, 3)
@@ -415,6 +435,7 @@ def render(profil):
         c_tert = th["bg_tertiary"]
         c_t3   = th["text3"]
         rows_t5 = []
+        icon_pin = f'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{c_cor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px; vertical-align:middle; opacity:0.9;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>'
         if len(crit_v) == 0:
             rows_t5.append(f'<div style="font-size:11px;color:{c_t3};">Aucune ville en alerte critique.</div>')
         for _, row in crit_v.iterrows():
@@ -423,17 +444,18 @@ def render(profil):
             rows_t5.append(
                 '<div style="margin-bottom:14px;">'
                 + '<div style="display:flex;justify-content:space-between;margin-bottom:4px;">'
-                + f'<span style="font-size:13px;color:{c_txt};font-weight:600;">📍 {row["ville"]}</span>'
+                + f'<span style="font-size:13px;color:{c_txt};font-weight:600;display:flex;align-items:center;">{icon_pin} {row["ville"]}</span>'
                 + f'<span style="font-size:12px;color:{c_red};font-weight:700;">{row["n_jours"]} {unit}</span>'
                 + '</div>'
                 + f'<div style="background:{c_elev};border-radius:4px;height:8px;overflow:hidden;">'
                 + f'<div style="background:linear-gradient(to right,{c_cor},{c_red});height:100%;width:{w};border-radius:4px;"></div></div>'
                 + '</div>'
             )
+        icon_alert = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.9; margin-right:8px; vertical-align:text-bottom;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'
         html_top5 = (
             f'<div style="background:{c_tert};border:1px solid rgba(239,68,68,0.35);'
             'border-radius:12px;padding:20px 22px;height:320px;box-sizing:border-box;">'
-            + f'<div style="font-size:14px;font-weight:700;color:{c_red};margin-bottom:18px;">🚨 {lbl4}</div>'
+            + f'<div style="font-size:14px;font-weight:700;color:{c_red};margin-bottom:18px;display:flex;align-items:center;">{icon_alert} {lbl4}</div>'
             + "".join(rows_t5)
             + '</div>'
         )
