@@ -134,15 +134,14 @@ cd dashboard
 streamlit run app.py
 ```
 
-Le dashboard sera disponible sur `http://localhost:8501`
+Le dashboard sera disponible sur `https://airsentinel-cameroon.streamlit.app/`
 
 ### Lancer l'API
 
 ```bash
 uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 ```
-
-Documentation interactive : `http://localhost:8000/docs`
+L'API sera disponible sur : `https://airsentinel-api.onrender.com/`
 
 ### Mise à jour manuelle des données
 
