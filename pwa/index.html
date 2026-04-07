@@ -438,9 +438,17 @@
     <!-- Scripts -->
 <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
     <script>
-        // Configuration API (Hugging Face Spaces - Plus stable que Render)
-        const API_BASE = 'https://sabine2004-airsentinel.hf.space'; 
-        const CACHE_NAME = 'airsentinel-cities-v53'; // On incrémente le cache pour forcer la MAJ
+        // Configuration API (Modèle pour Render et Hugging Face)
+        // Par défaut, nous utilisons l'URL de l'API déployée. Changez l'URL onrender.com si Render vous a attribué un suffixe.
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'http://localhost:8000' 
+            : window.location.origin.includes('hf.space') 
+                ? 'https://sabine2004-airsentinel.hf.space' 
+                : 'https://airsentinel-jpmc.onrender.com'; // Automatiquement mis à jour vers l'URL correcte Render !
+
+        const CACHE_NAME = 'airsentinel-cities-v55'; // Incrémenté
+
+
         const FETCH_TIMEOUT = 60000; // 60s pour laisser le temps au Space de démarrer si besoin
         const SEUIL_OMS = 15.0;
 
