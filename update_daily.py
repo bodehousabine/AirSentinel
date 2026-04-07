@@ -43,12 +43,7 @@ PATH_DATASET = 'data/processed/dataset_final.xlsx'
 # Date à télécharger — aujourd'hui
 AUJOURD_HUI = (datetime.today() - timedelta(days=1)).strftime('%Y-%m-%d')
 
-def log(msg, end='\n'):
-    """Print horodaté."""
-    t = datetime.now().strftime('%H:%M:%S')
-    print(f'[{t}] {msg}', end=end, flush=True)
-
-log(f'📅 Mise à jour pour le : {AUJOURD_HUI}')
+print(f'📅 Mise à jour pour le : {AUJOURD_HUI}')
 
 # APIs Open-Meteo
 URL_METEO = 'https://api.open-meteo.com/v1/forecast'
@@ -171,14 +166,6 @@ VILLES_CAMEROUN = [
 
 cache_session    = requests_cache.CachedSession('.cache_daily', expire_after=3600)
 retry_session    = retry(cache_session, retries=5, backoff_factor=0.5)
-
-# Patch pour forcer un timeout sur TOUTES les requêtes
-old_request = retry_session.request
-def request_with_timeout(*args, **kwargs):
-    kwargs.setdefault('timeout', 15) # 15 secondes max par requête
-    return old_request(*args, **kwargs)
-retry_session.request = request_with_timeout
-
 openmeteo_client = openmeteo_requests.Client(session=retry_session)
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -319,15 +306,8 @@ def calculer_variables_derivees(df_new, df_historique, date):
     # ── Log PM2.5 ─────────────────────────────────────────────────────────
     df_new['pm2_5_log'] = np.log1p(df_new['pm2_5_moyen'])
 
-    # ── OPTIMISATION : Ne garder que les 60 derniers jours d'historique ──
-    # Au lieu de charger tout l'historique (des milliers de lignes),
-    # on ne garde que ce qui est nécessaire pour les lags (7j/30j).
-    # 60 jours pour 40 villes = ~2400 lignes max (très rapide).
-    seuil_date = pd.Timestamp(date) - pd.Timedelta(days=60)
-    df_hist_reduit = df_historique[df_historique['date'] >= seuil_date].copy()
-
-    # ── Combinaison historique (60j) + nouvelles données pour les lags ──
-    df_combined = pd.concat([df_hist_reduit, df_new], ignore_index=True)
+    # ── Combinaison historique + nouvelles données pour les lags ──────────
+    df_combined = pd.concat([df_historique, df_new], ignore_index=True)
     df_combined = df_combined.sort_values(['ville', 'date']).reset_index(drop=True)
 
     # ── Lags par ville ────────────────────────────────────────────────────
@@ -461,7 +441,7 @@ def main():
 
     for i, ville_info in enumerate(VILLES_CAMEROUN, 1):
         nom = ville_info['ville']
-        log(f'  [{i:02d}/{len(VILLES_CAMEROUN)}] {nom}...', end=' ')
+        print(f'  [{i:02d}/{len(VILLES_CAMEROUN)}] {nom}...', end=' ', flush=True)
 
         # Télécharger météo
         row_meteo = telecharger_meteo_ville(ville_info, AUJOURD_HUI)

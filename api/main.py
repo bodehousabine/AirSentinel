@@ -281,17 +281,6 @@ def root():
     }
 
 
-@app.get("/health", tags=["Info"])
-def health():
-    """Vérifie que l'API est en ligne et fonctionnelle."""
-    return {
-        "status": "online",
-        "timestamp": datetime.now().isoformat(),
-        "dataset_loaded": DF is not None,
-        "models_loaded": MODELS is not None
-    }
-
-
 @app.get("/villes", tags=["Données"])
 def liste_villes():
     """Retourne la liste des 40 villes disponibles avec leurs coordonnées et données en temps réel."""
