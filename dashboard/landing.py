@@ -176,7 +176,7 @@ iframe[title="chatbox.render_chatbox"] {
             <span class="brand-air">Air</span><span class="brand-sentinel">Sentinel</span>
         </div>
         <div style="font-size:13px;color:{'#00d4b1' if th['name']=='dark' else '#00826e'};letter-spacing:0.7em;text-transform:uppercase;font-family:'DM Mono',monospace;font-weight:700;margin-top:8px;">
-            CAMEROUN
+            {T["landing_subtitle"]}
         </div>
         <div style="display:flex;align-items:center;justify-content:center;gap:20px;margin:20px auto;max-width:320px;width:90%;">
             <div style="flex:1;height:1px;background:linear-gradient(to right,transparent,{'rgba(0,212,177,0.5)' if th['name']=='dark' else 'rgba(0,130,110,0.4)'});"></div>
@@ -184,11 +184,11 @@ iframe[title="chatbox.render_chatbox"] {
             <div style="flex:1;height:1px;background:linear-gradient(to left,transparent,{'rgba(0,212,177,0.5)' if th['name']=='dark' else 'rgba(0,130,110,0.4)'});"></div>
         </div>
         <div class="slogan-text" style="font-weight:800;color:{th['text']};font-family:'Inter',sans-serif;margin-bottom:30px;display:flex;align-items:center;justify-content:center;gap:15px;flex-wrap:wrap;font-size:30px;">
-            <span>Anticiper</span>
+            <span>{T["landing_slogan"].split(". ")[0]}</span>
             <span style="color:{'#00d4b1' if th['name']=='dark' else '#00826e'};font-size:26px;">•</span>
-            <span>Alerter</span>
+            <span>{T["landing_slogan"].split(". ")[1]}</span>
             <span style="color:{'#00d4b1' if th['name']=='dark' else '#00826e'};font-size:26px;">•</span>
-            <span>Protéger</span>
+            <span>{T["landing_slogan"].split(". ")[2]}</span>
         </div>
     </div>
     """, unsafe_allow_html=True)

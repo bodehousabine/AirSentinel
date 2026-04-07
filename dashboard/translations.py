@@ -592,8 +592,8 @@ TRANSLATIONS = {
         "en": "CAMEROON",
     },
     "landing_slogan": {
-        "fr": "Anticiper. Alerter. Protéger.",
-        "en": "Anticipate. Alert. Protect.",
+        "fr": "Anticiper. Alerter. Protéger",
+        "en": "Anticipate. Alert. Protect",
     },
     "landing_desc": {
         "fr": "Aide à la décision sanitaire par l'IA<br>40 villes · 10 régions · 50 760 observations",
