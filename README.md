@@ -143,6 +143,8 @@ uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 ```
 L'API sera disponible sur : `https://airsentinel-api.onrender.com/`
 
+app mobile : `https://airsentinel-chi.vercel.app/`
+
 ### Mise à jour manuelle des données
 
 ```bash
