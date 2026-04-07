@@ -277,6 +277,17 @@ def root():
     }
 
 
+@app.get("/health", tags=["Info"])
+def health():
+    """Vérifie que l'API est en ligne et fonctionnelle."""
+    return {
+        "status": "online",
+        "timestamp": datetime.now().isoformat(),
+        "dataset_loaded": DF is not None,
+        "models_loaded": MODELS is not None
+    }
+
+
 @app.get("/villes", tags=["Données"])
 def liste_villes():
     """Retourne la liste des 40 villes disponibles avec leurs coordonnées et données en temps réel."""
@@ -611,4 +622,7 @@ def historique_ville(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("api:app", host="0.0.0.0", port=8000, reload=True)
+    # Récupération du port dynamique (obligatoire pour Render)
+    port = int(os.environ.get("PORT", 8000))
+    # Correction du module : le fichier s'appelle main.py, donc main:app
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
