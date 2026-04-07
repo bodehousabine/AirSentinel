@@ -248,8 +248,7 @@ def render(profil):
                     cmin=5, cmax=80,
                     colorbar=dict(title="PM2.5 µg/m³", thickness=20, len=1.0, y=1, yanchor='top')),
                 text=agg["ville"],
-                hovertemplate="<b>%{text}</b><br>PM2.5 : %{marker.color:.1f} µg/m³<br>IRS : %{customdata:.3f}<extra></extra>",
-                customdata=agg["IRS"]))
+                hovertemplate="<b>%{text}</b><br>PM2.5 : %{marker.color:.1f} µg/m³<extra></extra>"))
             # Zoom sur la région sélectionnée si filtrée
             if region_sel and len(agg) > 0:  # au lieu de region_sel != all_reg_label
                 geo_center = dict(

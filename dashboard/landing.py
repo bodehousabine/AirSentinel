@@ -262,7 +262,7 @@ def get_themed_about_html(th, lang="fr"):
         content = content.replace(old, new)
 
     # Images locales -> Base64
-    for img_name in ["bsd.png", "fma.png", "fah.png", "prf.png"]:
+    for img_name in ["about_us.png", "our_mission.png", "air_quality.png", "bsd.png", "fma.png", "fah.png", "prf.png"]:
         img_path = os.path.join(about_dir, img_name)
         if os.path.exists(img_path):
             with open(img_path, "rb") as f:
