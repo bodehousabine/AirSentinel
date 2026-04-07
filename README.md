@@ -1,14 +1,4 @@
----
-title: AirSentinel API
-emoji: 🌬️
-colorFrom: blue
-colorTo: blue
-sdk: docker
-app_port: 7860
-pinned: false
----
-
-# 🌬️ AirSentinel Cameroun
+# AirSentinel Cameroun
 
 > **Système d'aide à la décision sanitaire basé sur l'IA — Surveillance et prédiction de la qualité de l'air pour 40 villes camerounaises**
 
