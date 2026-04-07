@@ -48,7 +48,7 @@ def _kpi_card(irs, snt, snc, pm25, col_ctx_hex, niv_ctx, p90_ville, th, lang="fr
         f'<div style="font-size:46px;font-weight:950;color:{snc};line-height:0.9;">{irs:.3f}</div>'
         f'<div style="font-size:16px;font-weight:950;margin-top:8px;text-transform:uppercase;">{snt}</div>'
         f'<div style="margin-top:8px;padding-top:6px;border-top:1px solid {snc}33;">'
-        f'<div style="font-size:9px;color:white;font-weight:bold;text-transform:uppercase;'
+        f'<div style="font-size:9px;color:{th["text"]};font-weight:bold;text-transform:uppercase;'
         f'letter-spacing:.06em;">{oms_label}</div>'
         f'<div style="font-size:12px;font-weight:700;color:{pm25_col};">'
         f'{pm25:.1f} µg/m³ · {pm25/15:.1f}x</div>'
