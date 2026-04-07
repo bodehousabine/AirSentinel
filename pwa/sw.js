@@ -27,8 +27,7 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // Ignorer les appels API pour tjrs avoir de la donnée fraiche
-  if (e.request.url.includes('localhost:') || e.request.url.includes('127.0.0.1')) {
+  if (e.request.url.includes('localhost:') || e.request.url.includes('127.0.0.1') || e.request.url.includes('airsentinel-jpmc.onrender.com')) {
     return;
   }
   
