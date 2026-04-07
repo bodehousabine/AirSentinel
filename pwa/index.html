@@ -274,6 +274,8 @@
         <img src="./logo.jpg" alt="Logo" style="height:70px; margin-bottom:16px; filter: drop-shadow(0 0 12px rgba(14,165,233,0.4));">
         <div class="spinner"></div>
         <h2 style="font-weight:300; margin-top:12px;">Air<span style="color:#0ea5e9; font-weight:800;">Sentinel</span></h2>
+        <p id="loading-status" style="font-size: 12px; color: var(--text-muted); margin-top: 20px; font-family: 'DM Mono', monospace;">Initialisation...</p>
+        <button id="retry-btn" style="display:none; margin-top: 20px; background: var(--bg-elevated); color: white; border: 1px solid var(--accent-blue); padding: 8px 16px; border-radius: 8px; font-size: 12px;">Réessayer</button>
     </div>
 
     <!-- HEADER -->
@@ -675,16 +677,26 @@
         }
 
         async function loadCities() {
+            const status = document.getElementById('loading-status');
+            if(status) status.textContent = "Connexion au serveur (Réveil de l'IA)...";
+            
             try {
-                const res = await fetch(`${API_BASE}/villes`);
-                if (!res.ok) return;
+                // Timeout de 15 secondes pour le réveil de Render
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 15000);
+                
+                const res = await fetch(`${API_BASE}/villes`, { signal: controller.signal });
+                clearTimeout(timeout);
+                
+                if (!res.ok) throw new Error("Réponse serveur KO");
+                
                 const data = await res.json();
                 pwaData.villes = data.villes;
                 const select = document.getElementById('citySelect');
 
                 // Option Toutes les Villes
                 const optA = document.createElement('option');
-                optA.value = "Toutes les villes"; optA.textContent = "Toutes les villes";
+                optA.value = "Toutes les villes"; optA.textContent = currentLang === 'fr' ? "Toutes les villes" : "All Cities";
                 select.appendChild(optA);
 
                 // Trier par ordre alphabétique
@@ -695,11 +707,28 @@
                 });
 
                 select.value = "Toutes les villes";
+                if(status) status.textContent = "Données récupérées !";
                 
                 // Dessiner Map Initiale
                 drawMap(pwaData.villes, "Toutes les villes");
                 triggerCityChange("Toutes les villes");
-            } catch (err) { console.error(err); }
+            } catch (err) { 
+                console.error(err); 
+                if(status) {
+                    status.style.color = "#ef4444";
+                    status.textContent = "Le serveur tarde à répondre (Sommeil Render).";
+                    const btn = document.getElementById('retry-btn');
+                    if(btn) {
+                        btn.style.display = "block";
+                        btn.onclick = () => window.location.reload();
+                    }
+                }
+                // Ne pas bloquer l'app si possible
+                setTimeout(() => {
+                    document.getElementById('loading').style.opacity = 0;
+                    setTimeout(() => document.getElementById('loading').style.display = 'none', 400);
+                }, 3000);
+            }
         }
 
         function setupInteractions() {
