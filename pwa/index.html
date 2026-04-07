@@ -984,14 +984,22 @@
                     if (!res.ok) return;
                     const data = await res.json();
                     if (data.niveau.code >= 2) {
-                        new Notification(`AirSentinel : Alerte pollution à ${activeCity}`, {
-                            body: `Niveau Actuel: ${data.niveau.niveau} (${data.pm25} µg/m³).`,
-                            icon: './manifest.json'
-                        });
+                        if (navigator.serviceWorker) {
+                            navigator.serviceWorker.ready.then(reg => {
+                                reg.showNotification(`AirSentinel : Alerte pollution à ${activeCity}`, {
+                                    body: `Niveau Actuel: ${data.niveau.niveau} (${data.pm25} µg/m³).`,
+                                    icon: './logo.jpg'
+                                });
+                            });
+                        }
                     }
                 } catch (e) {}
             }, 60000); 
-            new Notification('AirSentinel Activé', {body: 'Alertes locales actives.'});
+            if (navigator.serviceWorker) {
+                navigator.serviceWorker.ready.then(reg => {
+                    reg.showNotification('AirSentinel Activé', {body: 'Alertes locales actives.', icon: './logo.jpg'});
+                });
+            }
         }
         function stopPolling() { if (pollingInterval) clearInterval(pollingInterval); pollingInterval = null; }
 
