@@ -100,8 +100,8 @@ SEUIL_IT3 = 37.5   # Interim Target 3
 SEUIL_IT2 = 50.0   # Interim Target 2
 SEUIL_IT1 = 75.0   # Interim Target 1
 
-# Temps d'attente entre les villes (éviter limite API)
-TEMPS_ATTENTE = 6
+# Temps d'attente entre les villes (éviter limite API 'concurrent requests')
+TEMPS_ATTENTE = 10
 
 # ─────────────────────────────────────────────────────────────────────────────
 # LISTE DES 40 VILLES
@@ -167,7 +167,12 @@ VILLES_CAMEROUN = [
 cache_session    = requests_cache.CachedSession('.cache_daily', expire_after=3600)
 retry_session    = retry(cache_session, retries=5, backoff_factor=0.5)
 
-# Ajout d'un timeout de 30 secondes pour éviter les blocages infinis (GitHub Actions)
+# Ajout d'une identité de navigateur (User-Agent) pour éviter d'être rejeté
+retry_session.headers.update({
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+})
+
+# Ajout d'un timeout de 30 secondes pour éviter les blocages infinis
 old_request = retry_session.request
 def request_with_timeout(*args, **kwargs):
     kwargs.setdefault('timeout', 30)
