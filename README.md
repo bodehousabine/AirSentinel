@@ -1,3 +1,13 @@
+---
+title: AirSentinel API
+emoji: 🌬️
+colorFrom: blue
+colorTo: sky
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # 🌍 AirSentinel Cameroun
 Système IA de prédiction qualité air — IndabaX 2026
 Ce projet est conçu pour apporter des solutions technologiques concrètes et  innovantes aux défis de notre environnement. 
