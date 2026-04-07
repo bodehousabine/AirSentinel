@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌍 AirSentinel PWA (Frontend)
 
-## Getting Started
+Bienvenue dans l'interface de **AirSentinel**, une Progressive Web App (PWA) ultra-moderne développée pour interagir avec le modèle d'Intelligence Artificielle de prédiction de la qualité de l'air au Cameroun.
 
-First, run the development server:
+## ✨ Caractéristiques Principales
+- **Tech Stack** : Next.js 15 (App Router), React 19, TypeScript
+- **Stylisation** : Tailwind CSS v4, Glassmorphism UI
+- **Animations** : Framer Motion
+- **Iconographie** : Lucide React
+- **Graphiques** : Recharts
+- **Cartographie** : Leaflet (React-Leaflet) intégré avec surcouche interactive
+
+## 🚀 Démarrage Rapide
+
+### 1. Prérequis
+- **Node.js** (v18+ recommandé)
+- **npm** ou **yarn**
+- API Backend (FastAPI) en cours d'exécution sur votre machine (port par défaut `8000`).
+
+### 2. Variables d'Environnement
+Assurez-vous qu'un fichier `.env.local` est présent à la racine du projet frontend (`pwa/airsentinel/`) avec la configuration adéquate menant à l'API :
+
+```env
+NEXT_PUBLIC_API_URL=http://127.0.0.1:8000
+```
+> **Note** : Le serveur Next.js en développement requiert `127.0.0.1` à la place de `localhost` pour éviter les soucis de résolution IPv6 vers le backend Python si vous êtes sous Windows/WSL.
+
+### 3. Installation et Exécution
+Installez les paquets et lancez le serveur de développement :
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ensuite, rendez-vous sur : [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📁 Architecture du Projet
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```text
+pwa/airsentinel/
+├── public/                 # Images et assets (joel1.jpg, etc.)
+├── src/
+│   ├── app/                # Next.js App Router (pages: register, dashboard, etc.)
+│   ├── components/         # Composants React réutilisables
+│   ├── context/            # React Contexts (ex: VilleContext pour le filtre global)
+│   ├── services/           # Services Axios pour contacter le backend (API FastAPI)
+│   └── types/              # Définitions TypeScript
+├── .env.local              # Fichier d'environnement (API URL)
+├── next.config.ts          # Configurations avancées Next.js
+└── tailwind.config.ts      # Tokens de design de l'application
+```
 
-## Learn More
+## 🛠️ Modèles de Déploiement
 
-To learn more about Next.js, take a look at the following resources:
+Pour générer un build de production optimisé :
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run build
+npm start
+```
+Ce projet est compatible nativement pour un déploiement Vercel, Render ou toute plateforme Node.js standard.

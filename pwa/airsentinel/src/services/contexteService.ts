@@ -26,8 +26,13 @@ export interface ContexteResponse {
 }
 
 const contexteService = {
-  getContexte: async (): Promise<ContexteResponse> => {
-    const response = await apiClient.get("contexte");
+  /**
+   * Récupère les données contextuelles (donuts, comparaison annuelle, UV/Ozone).
+   * @param city Ville à filtrer (optionnel, null ou "CAMEROON" = données nationales)
+   */
+  getContexte: async (city?: string | null): Promise<ContexteResponse> => {
+    const filter = (city && city !== "CAMEROON") ? `?city=${encodeURIComponent(city)}` : "";
+    const response = await apiClient.get(`contexte${filter}`);
     return response.data;
   }
 };

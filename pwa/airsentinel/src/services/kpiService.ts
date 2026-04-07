@@ -2,9 +2,10 @@ import apiClient from "./apiClient";
 import { KPIResponse, AlerteHistorique } from "../types/pollution";
 
 const kpiService = {
-  getNationalKPIs: async (city?: string): Promise<KPIResponse> => {
-    const url = city ? `kpis?city=${encodeURIComponent(city)}` : "kpis";
-    const response = await apiClient.get(url);
+  getNationalKPIs: async (city?: string | null): Promise<KPIResponse> => {
+    // Si la ville est "CAMEROON" ou nulle, on ne filtre pas (données nationales)
+    const filter = (city && city !== "CAMEROON") ? `?city=${encodeURIComponent(city)}` : "";
+    const response = await apiClient.get(`kpis${filter}`);
     return response.data;
   },
 

@@ -47,7 +47,7 @@ def _find_col(df, candidates):
 
 
 @router.get("", response_model=ContexteResponse)
-def get_contexte():
+def get_contexte(city: Optional[str] = None):
     """
     Retourne les données contextuelles :
     - Donut répartition des niveaux IRS (FAIBLE / MODÉRÉ / ÉLEVÉ / CRITIQUE)
@@ -59,6 +59,13 @@ def get_contexte():
         df = get_dataframe()
     except FileNotFoundError as e:
         raise HTTPException(status_code=503, detail=str(e))
+
+    # Filtre par ville si spécifiée (et différente de CAMEROON)
+    if city and city.upper() != "CAMEROON":
+        from api.services.data_service import apply_filters
+        df = apply_filters(df, villes=[city])
+        if df.empty:
+            raise HTTPException(status_code=404, detail=f"Aucune donnée pour la ville '{city}'.")
 
     pm25_col = _find_col(df, ["pm2_5_moyen", "pm2_5", "pm25", "PM2.5", "PM25"])
 

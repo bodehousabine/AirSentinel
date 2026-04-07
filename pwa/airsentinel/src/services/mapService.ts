@@ -12,9 +12,11 @@ const mapService = {
 
   /**
    * Récupère les analyses globales enrichies pour la carte et le dashboard.
+   * @param city Ville à filtrer (optionnel, null ou "CAMEROON" = données nationales)
    */
-  async getMapAnalyses(): Promise<CarteAnalyses> {
-    const response = await apiClient.get<CarteAnalyses>("/carte/analyses");
+  async getMapAnalyses(city?: string | null): Promise<CarteAnalyses> {
+    const filter = (city && city !== "CAMEROON") ? `?city=${encodeURIComponent(city)}` : "";
+    const response = await apiClient.get<CarteAnalyses>(`/carte/analyses${filter}`);
     return response.data;
   }
 };

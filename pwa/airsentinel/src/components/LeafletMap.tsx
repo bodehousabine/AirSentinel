@@ -7,11 +7,12 @@ import {
   TileLayer, 
   CircleMarker, 
   Popup, 
+  Tooltip as LeafletTooltip,
   LayersControl,
   useMap
 } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
-import { Navigation, Search, ZoomIn, ZoomOut, X, MapPin, Compass, Loader2 } from "lucide-react";
+import { Navigation, Search, ZoomIn, ZoomOut, X, MapPin, Compass, Loader2, ThermometerSun } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import "leaflet.heat";
 import { useRouter } from "next/navigation";
@@ -155,8 +156,9 @@ function MapOverlayControls({ map }: { map: L.Map | null }) {
   }, [map]);
 
   const handleReset = () => {
-    map?.flyTo([7.3697, 12.3547], 6, { animate: true, duration: 1.2 });
+    map?.flyTo([ cameroonCenter[0], cameroonCenter[1] ], 6, { animate: true, duration: 1.2 });
   };
+  const cameroonCenter: [number, number] = [7.3697, 12.3547];
 
   return (
     <div className="absolute bottom-28 right-6 z-[1001] flex flex-col gap-4 items-center">
@@ -269,70 +271,83 @@ export default function LeafletMap() {
             <HeatmapLayer points={points} />
           </LayersControl.Overlay>
 
-          <LayersControl.Overlay checked name="📍 Stations">
-              {points.filter(p => p.lat !== null && p.lon !== null).map((point) => (
-                <CircleMarker
-                  key={point.city}
-                  center={[point.lat!, point.lon!]}
-                  radius={6}
-                  pathOptions={{
-                    fillColor: point.irs_color || "#22c55e",
-                    color: "white",
-                    weight: 2,
-                    fillOpacity: 0.8,
-                  }}
-                  eventHandlers={{
-                    click: () => {
-                      selectVille(point.city);
-                    },
-                  }}
-                >
-                  <Popup>
-                    <div className="min-w-[160px] p-1 font-sans text-slate-800">
-                      <div className="text-lg font-bold mb-1 border-b pb-1">{point.city}</div>
-                      
-                      <div className="space-y-2 mt-2">
-                        {/* Section IRS */}
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Risque (IRS)</span>
-                          <div className="flex items-center gap-2">
-                            <span 
-                              className="px-2 py-0.5 rounded text-[11px] font-bold text-white uppercase"
-                              style={{ backgroundColor: point.irs_color || "#4CAF50" }}
-                            >
-                              {point.irs_label || "Stable"}
-                            </span>
-                            <span className="text-xs font-medium text-gray-500">
-                              {point.irs_moyen ? point.irs_moyen.toFixed(2) : "0.00"}
-                            </span>
-                          </div>
-                        </div>
+           <LayersControl.Overlay checked name="📍 Stations">
+               {points.filter(p => p.lat !== null && p.lon !== null).map((point) => {
+                 const color = point.irs_color || "#22c55e";
+                 const pm25Value = point.pm25_moyen.toFixed(1);
+                 
+                 return (
+                   <CircleMarker
+                     key={point.city}
+                     center={[point.lat!, point.lon!]}
+                     radius={8}
+                     pathOptions={{
+                       fillColor: color,
+                       color: "white",
+                       weight: 3,
+                       fillOpacity: 0.9,
+                     }}
+                     eventHandlers={{
+                       click: () => {
+                         selectVille(point.city);
+                       },
+                     }}
+                   >
+                     <LeafletTooltip 
+                        direction="top" 
+                        className="pm25-map-label"
+                        offset={[0, -10]}
+                        opacity={1}
+                     >
+                        {pm25Value} µg/m³
+                     </LeafletTooltip>
+                     <Popup>
+                        <div className="min-w-[160px] p-1 font-sans text-slate-800">
+                          <div className="text-lg font-bold mb-1 border-b pb-1">{point.city}</div>
+                          
+                          <div className="space-y-2 mt-2">
+                            {/* Section IRS */}
+                            <div className="flex flex-col gap-0.5">
+                              <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Risque (IRS)</span>
+                              <div className="flex items-center gap-2">
+                                <span 
+                                  className="px-2 py-0.5 rounded text-[11px] font-bold text-white uppercase"
+                                  style={{ backgroundColor: color }}
+                                >
+                                  {point.irs_label || "Stable"}
+                                </span>
+                                <span className="text-xs font-medium text-gray-500">
+                                  {point.irs_moyen ? point.irs_moyen.toFixed(2) : "0.00"}
+                                </span>
+                              </div>
+                            </div>
 
-                        {/* Section PM2.5 */}
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Pollution (PM2.5)</span>
-                          <div className="flex items-center gap-1.5 bg-gray-50 p-1.5 rounded-lg border border-gray-100">
-                            <div className="w-2 h-2 rounded-full bg-[#00d4b1]"></div>
-                            <span className="text-sm font-bold text-gray-800">
-                              {point.pm25_moyen} <span className="text-[10px] font-normal text-gray-500">µg/m³</span>
-                            </span>
+                            {/* Section PM2.5 */}
+                            <div className="flex flex-col gap-0.5">
+                              <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Pollution (PM2.5)</span>
+                              <div className="flex items-center gap-1.5 bg-gray-50 p-1.5 rounded-lg border border-gray-100">
+                                <div className="w-2 h-2 rounded-full bg-[#00d4b1]"></div>
+                                <span className="text-sm font-bold text-gray-800">
+                                  {point.pm25_moyen} <span className="text-[10px] font-normal text-gray-500">µg/m³</span>
+                                </span>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
 
-                      <button 
-                        onClick={() => {
-                          selectVille(point.city);
-                          router.push("/dashboard/stats");
-                        }}
-                        className="w-full mt-3 py-2 bg-[#020c18] text-white rounded-xl text-xs font-bold hover:bg-[#00d4b1] transition-colors active:scale-95"
-                      >
-                        Voir les statistiques
-                      </button>
-                    </div>
-                  </Popup>
-                </CircleMarker>
-              ))}
+                          <button 
+                            onClick={() => {
+                              selectVille(point.city);
+                              router.push("/dashboard/stats");
+                            }}
+                            className="w-full mt-3 py-2 bg-[#020c18] text-white rounded-xl text-xs font-bold hover:bg-[#00d4b1] transition-colors active:scale-95"
+                          >
+                            Voir les statistiques
+                          </button>
+                        </div>
+                     </Popup>
+                   </CircleMarker>
+                 );
+               })}
           </LayersControl.Overlay>
         </LayersControl>
       </MapContainer>
@@ -383,6 +398,24 @@ export default function LeafletMap() {
           margin-top: 90px !important;
           margin-right: 20px !important;
         }
+
+        /* Labels PM2.5 sur la carte */
+        .leaflet-tooltip-pane .pm25-map-label {
+           background: transparent !important;
+           border: none !important;
+           box-shadow: none !important;
+           color: white !important;
+           font-weight: 900 !important;
+           font-size: 8px !important;
+           text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+           pointer-events: none;
+           padding: 0 !important;
+           margin: 0 !important;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+        }
+        .pm25-map-label:before { display: none !important; }
       `}} />
     </div>
   );

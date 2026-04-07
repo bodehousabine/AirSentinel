@@ -27,38 +27,14 @@ L'arborescence des dossiers et fichiers principaux de l'application :
 
 ```text
 AirSentinel/
-├── api/                   # Backend FastAPI
-│   ├── routers/           # Endpoints (Prédictions, Alertes, Users...)
-│   ├── services/          # Logique métier (Mail, Calculs, Data...)
-│   ├── models/            # Modèles de base de données (SQLAlchemy)
-│   └── main.py            # Point d'entrée principal
-├── pwa/airsentinel        # Frontend Moderne (Next.js 15)
-│   ├── src/app/dashboard  # Pages du tableau de bord
-│   └── src/services       # Clients API (Axios)
-├── dashboard/             # Ancien Dashboard (Streamlit - Backup)
-├── data/                  # Données brutes et préparées
-├── models/                # Fichiers de modèles ML (.joblib)
-├── notebooks/             # Notebooks de Data Science
-└── README.md
-├── data/                  # Données du projet de modélisation
-│   ├── raw/               # Données brutes
-│   └── processed/         # Données nettoyées et préparées
-├── deployment/            # Configurations de déploiement
-│   └── render.yaml        # Fichier de config pour le service Render
-├── graphiques/            # Résultats visuels générés par les notebooks (SHAP, corrélations)
-├── models/                # Fichiers de modèles ML entraînés (joblib)
-├── notebooks/             # Notebooks Jupyter pour la science des données
-│   ├── 01_chargement_nettoyage.ipynb
-│   ├── 02_tests_statistiques.ipynb
-│   ├── 03_feature_engineering.ipynb
-│   ├── 04_modelisation.ipynb
-│   ├── 05_irs_episodes.ipynb
-│   └── 06_shap_interpretation.ipynb
-├── pwa/                   # Configuration Progressive Web App
-│   └── manifest.json
-├── rapport/               # Documents et rapports générés
-├── README.md              # Documentation principale (ce fichier)
-└── requirements.txt       # Dépendances Python nécessaires au projet
+├── api/                   # Backend FastAPI (Routers, Services, Models)
+├── pwa/airsentinel/       # Frontend Moderne (Next.js 15, Tailwind, PWA)
+├── data/                  # Données brutes et préparées (dataset_final.parquet)
+├── models/                # Modèles ML pré-entraînés (XGBoost, LightGBM)
+├── notebooks/             # Notebooks d'exploration Data Science & SHAP
+├── dashboard/             # Ancien tableau de bord analytique (Streamlit)
+├── deployment/            # Fichiers de CI/CD et déploiement
+└── README.md              # Documentation principale (ce fichier)
 ```
 
 ---

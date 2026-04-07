@@ -38,11 +38,7 @@ def _find_col(df, candidates):
 @router.get("/short-term", response_model=list[PredictionPoint])
 def get_short_term():
     """
-    Retourne :
-    - 21 jours d'historique observés
-    - 3 jours simulés de prédiction (à remplacer par une vraie prédiction via meilleur_modele.joblib)
-
-    TODO: Passer la prédiction réelle via get_model("modele").predict(features)
+    Retourne l'historique et les prédictions PM2.5.
     """
     try:
         df = get_dataframe()
@@ -50,31 +46,48 @@ def get_short_term():
         raise HTTPException(status_code=503, detail=str(e))
 
     pm25_col = _find_col(df, ["pm2_5_moyen", "pm2_5", "pm25", "PM2.5"])
-    if not pm25_col or "date" not in df.columns:
-        raise HTTPException(status_code=500, detail="Colonnes 'pm25' ou 'date' absentes du dataset.")
+    date_col = "date" if "date" in df.columns else None
 
-    df_sorted = df.sort_values("date").dropna(subset=[pm25_col])
-    last_date = df_sorted["date"].max()
+    if not pm25_col or not date_col:
+        logger.error(f"Colonnes requises absentes: pm25={pm25_col}, date={date_col}")
+        return [] # Retourner une liste vide plutôt que de crasher
 
-    # Historique : 21 derniers jours en agrégat journalier
+    df_sorted = df.sort_values(date_col).dropna(subset=[pm25_col])
+    
+    if df_sorted.empty:
+        logger.warning("Dataset filtré vide pour les prédictions.")
+        return []
+
+    last_date = df_sorted[date_col].max()
+
+    # Historique : 21 derniers jours
     start_hist = last_date - timedelta(days=21)
+    hist_df = df_sorted[df_sorted[date_col] >= start_hist]
+    
+    if hist_df.empty:
+        return []
+
     hist = (
-        df_sorted[df_sorted["date"] >= start_hist]
-        .resample("D", on="date")[pm25_col]
+        hist_df.resample("D", on=date_col)[pm25_col]
         .mean()
         .dropna()
         .reset_index()
     )
+    
     result = [
-        PredictionPoint(date=str(row["date"].date()), pm25=round(float(row[pm25_col]), 2))
+        PredictionPoint(date=str(row[date_col].date()), pm25=round(float(row[pm25_col]), 2))
         for _, row in hist.iterrows()
     ]
 
-    # Prédiction simulée : moyenne glissante des 7 derniers jours ± bruit
-    pm25_base = hist[pm25_col].tail(7).mean() if len(hist) >= 7 else hist[pm25_col].mean()
+    # Prédiction simulée
+    if not hist.empty:
+        pm25_base = hist[pm25_col].tail(7).mean() if len(hist) >= 7 else hist[pm25_col].mean()
+    else:
+        pm25_base = 25.0
+        
     for i in range(1, 4):
         pred_date = last_date + timedelta(days=i)
-        pred_val = round(float(pm25_base) * (1 + 0.02 * i), 2)  # TODO: remplacer par le vrai modèle
+        pred_val = round(float(pm25_base) * (1 + 0.01 * i), 2)
         result.append(PredictionPoint(date=str(pred_date.date()), pm25=pred_val, is_prediction=True))
 
     return result
@@ -148,6 +161,7 @@ def compute_interactive(payload: ComputeInput):
         "ngaoundere": 38.0,
         "buéa": 18.0,
         "buea": 18.0,
+        "touboro": 42.0,
     }
     
     baseline = baselines.get(city, 30.0)

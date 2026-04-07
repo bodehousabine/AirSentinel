@@ -59,10 +59,10 @@ def compute_irs(features: dict) -> dict:
     irs_score = float(X_pca[0, 0])
 
     # 6. Déterminer le niveau selon les seuils (percentiles)
-    #    seuils peut être : {"p50": val, "p75": val, "p90": val}
-    p50 = seuils.get("p50", np.percentile([irs_score], 50))
-    p75 = seuils.get("p75", np.percentile([irs_score], 75))
-    p90 = seuils.get("p90", np.percentile([irs_score], 90))
+    #    Valeurs par défaut si le modèle n'est pas chargé (basé sur une distribution standard)
+    p50 = seuils.get("p50", 0.0)
+    p75 = seuils.get("p75", 1.0)
+    p90 = seuils.get("p90", 2.0)
 
     if irs_score <= p50:
         level, color = "FAIBLE", "#4CAF50"
