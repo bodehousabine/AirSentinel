@@ -101,7 +101,7 @@ SEUIL_IT2 = 50.0   # Interim Target 2
 SEUIL_IT1 = 75.0   # Interim Target 1
 
 # Temps d'attente entre les villes (éviter limite API 'concurrent requests')
-TEMPS_ATTENTE = 10
+TEMPS_ATTENTE = 40
 
 # ─────────────────────────────────────────────────────────────────────────────
 # LISTE DES 40 VILLES
