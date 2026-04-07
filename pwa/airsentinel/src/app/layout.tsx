@@ -33,6 +33,8 @@ export const viewport: Viewport = {
 
 import { Toaster } from "react-hot-toast";
 
+import { LanguageProvider } from "@/context/LanguageContext";
+
 export default function RootLayout({
   children,
 }: {
@@ -42,6 +44,7 @@ export default function RootLayout({
     <html lang="fr">
       <head />
       <body className={inter.className}>
+        <LanguageProvider>
         <Toaster 
           position="top-center"
           toastOptions={{
@@ -57,6 +60,7 @@ export default function RootLayout({
           }}
         />
         {children}
+        </LanguageProvider>
       </body>
     </html>
   );

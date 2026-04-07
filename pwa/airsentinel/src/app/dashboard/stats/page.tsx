@@ -12,10 +12,12 @@ import mapService from "@/services/mapService";
 import contexteService from "@/services/contexteService";
 import { KPIResponse } from "@/types/pollution";
 import { useVille } from "@/context/VilleContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { RefreshCcw, XCircle } from "lucide-react";
 import CitySelector from "@/components/CitySelector";
 
 export default function StatsPage() {
+  const { t } = useLanguage();
   const [kpis, setKpis] = useState<KPIResponse | null>(null);
   const [analyses, setAnalyses] = useState<any>(null);
   const [contexte, setContexte] = useState<any>(null);
@@ -100,7 +102,7 @@ export default function StatsPage() {
                 <div className="flex items-center gap-3">
                   <div className="h-1 w-8 bg-[#00d4b1] rounded-full shadow-[0_0_10px_rgba(0,212,177,0.5)]" />
                   <span className="text-[10px] font-black tracking-[0.3em] text-[#00d4b1] uppercase">
-                    {ville === "CAMEROON" ? "Situation Nationale" : `Insights: ${ville}`}
+                    {ville === "CAMEROON" ? t('stats_national') : t('stats_insights').replace('{}', ville)}
                   </span>
                 </div>
                 
@@ -109,27 +111,27 @@ export default function StatsPage() {
                   className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-[10px] font-bold text-gray-300 transition-all active:scale-95 group"
                 >
                   <RefreshCcw size={14} className="text-[#00d4b1] group-hover:rotate-180 transition-transform duration-500" />
-                  CHANGER DE VILLE
+                  {t('stats_change_city')}
                 </button>
               </div>
               
               <h1 className="text-5xl font-black text-white mb-3 tracking-tighter leading-none">
-                Analyse des <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00d4b1] to-[#0ea5e9]">Données {ville === "CAMEROON" ? "Nationales" : `à ${ville}`}</span>
+                {t('stats_analyse')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00d4b1] to-[#0ea5e9]">{ville === "CAMEROON" ? t('stats_data_nat') : t('stats_data_city').replace('{}', ville)}</span>
               </h1>
               <p className="text-gray-400 text-sm font-medium max-w-md antialiased">
                 {ville === "CAMEROON" 
-                  ? `Données agrégées en temps réel depuis ${kpis?.total_observations || 0} observations à travers le pays.`
-                  : `Données spécifiques à la ville de ${ville} basées sur ${kpis?.total_observations || 0} observations.`
+                  ? t('stats_desc_nat').replace('{x}', String(kpis?.total_observations || 0))
+                  : t('stats_desc_city').replace('{y}', ville).replace('{x}', String(kpis?.total_observations || 0))
                 }
               </p>
             </header>
 
             {/* Top KPIs Grid */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-              <StatCard icon={<Activity />} label="PM2.5 Moyen" value={kpis?.pm25_moyen || 0} unit="µg/m³" color="#00d4b1" />
-              <StatCard icon={<TrendingUp />} label="Villes > OMS" value={kpis?.villes_depassant_oms || 0} unit="Villes" color="#ef4444" />
-              <StatCard icon={<Zap />} label="Polluant Majeur" value={kpis?.polluant_dominant || "PM2.5"} unit="Type" color="#f59e0b" isText />
-              <StatCard icon={<MapPin />} label="Points Actifs" value={kpis?.total_observations || 0} unit="Mesures" color="#0ea5e9" />
+              <StatCard icon={<Activity />} label={t('stats_kpi_pm25')} value={kpis?.pm25_moyen || 0} unit="µg/m³" color="#00d4b1" />
+              <StatCard icon={<TrendingUp />} label={t('stats_kpi_oms')} value={kpis?.villes_depassant_oms || 0} unit="" color="#ef4444" />
+              <StatCard icon={<Zap />} label={t('stats_kpi_pol')} value={kpis?.polluant_dominant || "PM2.5"} unit="" color="#f59e0b" isText />
+              <StatCard icon={<MapPin />} label={t('stats_kpi_pts')} value={kpis?.total_observations || 0} unit="" color="#0ea5e9" />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
@@ -137,8 +139,8 @@ export default function StatsPage() {
               <div className="lg:col-span-2 glass-card p-8 border-white/5 relative overflow-hidden group">
                  <div className="flex justify-between items-start mb-10">
                     <div>
-                       <h3 className="text-xl font-bold text-white tracking-tight">Pollution par Région</h3>
-                       <p className="text-xs text-gray-500 font-medium">Répartition géographique de la moyenne PM2.5</p>
+                       <h3 className="text-xl font-bold text-white tracking-tight">{t('stats_region_title')}</h3>
+                       <p className="text-xs text-gray-500 font-medium">{t('stats_region_sub')}</p>
                     </div>
                     <Award className="text-[#00d4b1]/20 group-hover:text-[#00d4b1]/40 transition-colors" size={32} />
                  </div>
@@ -165,7 +167,7 @@ export default function StatsPage() {
 
               {/* Top Cities Table */}
               <div className="glass-card p-8 border-white/5 border-l-4 border-l-[#ef4444]/50 flex flex-col">
-                 <h3 className="text-xl font-bold text-white mb-6 tracking-tight">Top 5 Villes Critiques</h3>
+                 <h3 className="text-xl font-bold text-white mb-6 tracking-tight">{t('stats_top5')}</h3>
                  <div className="space-y-4 flex-1 overflow-y-auto pr-2">
                     {analyses?.top_5_villes_critiques?.map((city: any, idx: number) => (
                        <div key={city.city} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 group hover:bg-white/10 transition-all duration-300">
@@ -178,15 +180,15 @@ export default function StatsPage() {
                              <span className="text-[8px] font-black text-[#ef4444] uppercase tracking-widest">µg/m³</span>
                           </div>
                        </div>
-                    )) || <p className="text-center text-gray-500 py-10 italic">Aucune donnée disponible.</p>}
+                    )) || <p className="text-center text-gray-500 py-10 italic">{t('stats_no_data')}</p>}
                  </div>
                  <div className="mt-8 p-4 bg-[#ef4444]/5 rounded-2xl border border-[#ef4444]/10">
                     <div className="flex items-center gap-3 mb-2">
                        <AlertCircle className="text-[#ef4444]" size={18} />
-                       <span className="text-xs font-black text-[#ef4444] uppercase tracking-widest">Alerte Santé</span>
+                       <span className="text-xs font-black text-[#ef4444] uppercase tracking-widest">{t('stats_alert')}</span>
                     </div>
                     <p className="text-[10px] text-gray-400 font-medium leading-relaxed">
-                       Villes avec moyennes &gt; 25 µg/m³. Vigilance recommandée.
+                       {t('stats_alert_desc')}
                     </p>
                  </div>
               </div>
@@ -198,7 +200,7 @@ export default function StatsPage() {
                <div className="glass-card p-8 border-white/5 relative group flex flex-col justify-between">
                   <div className="flex items-center gap-3 mb-6">
                      <Activity className="text-amber-400" size={20} />
-                     <h3 className="text-lg font-bold text-white">Répartition des Niveaux</h3>
+                     <h3 className="text-lg font-bold text-white">{t('stats_levels')}</h3>
                   </div>
                   
                   <div className="space-y-6">
@@ -233,7 +235,7 @@ export default function StatsPage() {
                <div className="glass-card p-8 border-white/5 relative group">
                   <div className="flex items-center gap-3 mb-6">
                      <Layers className="text-[#00d4b1]" size={20} />
-                     <h3 className="text-lg font-bold text-white">Mélange de Polluants</h3>
+                     <h3 className="text-lg font-bold text-white">{t('stats_mix')}</h3>
                   </div>
                   
                   <div className="space-y-5">
@@ -256,7 +258,7 @@ export default function StatsPage() {
                         ))
                     ) : (
                         <div className="flex items-center justify-center h-full min-h-[150px]">
-                           <p className="text-gray-500 italic text-sm">Aucune donnée multi-polluants</p>
+                           <p className="text-gray-500 italic text-sm">{t('stats_no_multi')}</p>
                         </div>
                     )}
                   </div>
@@ -271,16 +273,16 @@ export default function StatsPage() {
                      <TrendingUp size={80} />
                   </div>
                   <div>
-                     <div className="text-[10px] font-black text-[#00d4b1] uppercase tracking-widest mb-2">Tendance Annuelle</div>
+                     <div className="text-[10px] font-black text-[#00d4b1] uppercase tracking-widest mb-2">{t('stats_trend_an')}</div>
                      <h3 className="text-2xl font-black text-white mb-2">
                         {contexte?.comparaison_annuelle?.evolution_pct > 0 ? '+' : ''}{contexte?.comparaison_annuelle?.evolution_pct}%
                      </h3>
                      <p className="text-xs text-gray-500 font-medium leading-relaxed">
-                        Évolution du PM2.5 moyen entre {contexte?.comparaison_annuelle?.annee_precedente} et {contexte?.comparaison_annuelle?.annee_courante}.
+                        {t('stats_trend_desc')}
                      </p>
                   </div>
                   <div className={`mt-6 inline-flex items-center gap-2 text-[10px] font-black px-3 py-1.5 rounded-full w-fit ${contexte?.comparaison_annuelle?.evolution_pct <= 0 ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
-                     {contexte?.comparaison_annuelle?.evolution_pct <= 0 ? 'AMÉLIORATION' : 'DÉGRADATION'}
+                     {contexte?.comparaison_annuelle?.evolution_pct <= 0 ? t('stats_improve') : t('stats_degrad')}
                   </div>
                </div>
 

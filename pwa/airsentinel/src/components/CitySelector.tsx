@@ -5,6 +5,7 @@ import { Search, MapPin, Loader2, Globe } from "lucide-react";
 import mapService from "@/services/mapService";
 import { VillePoint } from "@/types/map";
 import { useVille } from "@/context/VilleContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface CitySelectorProps {
   hideNational?: boolean;
@@ -14,7 +15,8 @@ export default function CitySelector({ hideNational = false }: CitySelectorProps
   const [cities, setCities] = useState<VillePoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const { setVille } = useVille();
+  const { ville, setVille } = useVille();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -39,7 +41,7 @@ export default function CitySelector({ hideNational = false }: CitySelectorProps
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-4">
         <Loader2 className="w-10 h-10 text-[#00d4b1] animate-spin" />
-        <span className="text-[10px] font-black tracking-widest text-[#00d4b1]/50 uppercase">Chargement des zones...</span>
+        <span className="text-[10px] font-black tracking-widest text-[#00d4b1]/50 uppercase">{t('city_loading')}</span>
       </div>
     );
   }
@@ -48,15 +50,15 @@ export default function CitySelector({ hideNational = false }: CitySelectorProps
     <section className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-1">
-          <h2 className="text-3xl font-black text-white tracking-tight">Zone de Surveillance</h2>
-          <p className="text-gray-400 text-sm font-medium">Sélectionnez l&apos;une des 40 villes actives pour l&apos;analyse.</p>
+          <h2 className="text-3xl font-black text-white tracking-tight">{t('city_selector_title')}</h2>
+          <p className="text-gray-400 text-sm font-medium">{t('city_selector_desc')}</p>
         </div>
 
         <div className="relative group max-w-sm w-full">
           <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#00d4b1] transition-colors" size={18} />
           <input
             type="text"
-            placeholder="Rechercher une ville (ex: Kribi...)"
+            placeholder={t('city_search_placeholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-14 pr-6 text-white text-sm font-bold focus:border-[#00d4b1] outline-none transition-all placeholder:text-gray-600"
@@ -74,7 +76,7 @@ export default function CitySelector({ hideNational = false }: CitySelectorProps
             <div className="w-12 h-12 rounded-2xl bg-[#0ea5e9]/10 flex items-center justify-center text-[#0ea5e9] group-hover:scale-110 transition-transform shadow-[0_0_20px_rgba(14,165,233,0.1)]">
               <span className="text-[10px] font-black group-hover:scale-125 transition-transform"><Globe size={24} /></span>
             </div>
-            <span className="text-xs font-black text-white uppercase tracking-wider group-hover:text-[#0ea5e9]">National</span>
+            <span className="text-xs font-black text-white uppercase tracking-wider group-hover:text-[#0ea5e9]">{t('city_national')}</span>
           </button>
         )}
 
@@ -112,8 +114,8 @@ export default function CitySelector({ hideNational = false }: CitySelectorProps
 
       {filteredCities.length === 0 && (
         <div className="py-20 text-center space-y-4">
-          <div className="text-gray-600 font-black text-6xl opacity-10 uppercase tracking-tighter">Aucun Résultat</div>
-          <p className="text-gray-500 font-medium">La ville &quot;{search}&quot; n&apos;est pas encore sous surveillance active.</p>
+          <div className="text-gray-600 font-black text-6xl opacity-10 uppercase tracking-tighter">{t('city_empty')}</div>
+          <p className="text-gray-500 font-medium">{t('city_not_found').replace('{}', search)}</p>
         </div>
       )}
     </section>

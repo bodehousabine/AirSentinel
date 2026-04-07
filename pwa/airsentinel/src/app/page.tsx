@@ -3,12 +3,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { User, Home, Map as MapIcon, Bell, BrainCircuit, Activity, ShieldAlert, Database, Zap, Boxes, Wind, Cpu, Layers, Globe, Stethoscope, Code } from "lucide-react";
 import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
+import { useLanguage } from "@/context/LanguageContext";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const geoUrl = "/cameroon-regions.json";
 
 // ── Mini composants ──────────────────────────────────────────────────────────
 
 function Navbar() {
+  const { lang, setLang, t } = useLanguage();
   return (
     <nav
       style={{
@@ -40,10 +43,11 @@ function Navbar() {
         </span>
       </div>
       <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
+        <LanguageSwitcher />
         <a href="#pilliers" style={{ color: "rgba(224,242,254,0.7)", fontSize: "14px", textDecoration: "none" }} className="max-sm:hidden">
-          Fonctionnalités
+          {t('nav_features')}
         </a>
-        <Link href="/login" style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "50%", background: "rgba(0,212,177,0.1)", border: "1px solid rgba(0,212,177,0.25)", transition: "all 0.3s" }} onMouseEnter={(e) => e.currentTarget.style.background = "rgba(0,212,177,0.2)"} onMouseLeave={(e) => e.currentTarget.style.background = "rgba(0,212,177,0.1)"}>
+        <Link href="/login" title={t('nav_login')} style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "36px", height: "36px", borderRadius: "50%", background: "rgba(0,212,177,0.1)", border: "1px solid rgba(0,212,177,0.25)", transition: "all 0.3s" }} onMouseEnter={(e) => e.currentTarget.style.background = "rgba(0,212,177,0.2)"} onMouseLeave={(e) => e.currentTarget.style.background = "rgba(0,212,177,0.1)"}>
           <User size={18} color="#00d4b1" />
         </Link>
       </div>
@@ -98,6 +102,7 @@ function PillarCard({
 
 // Mini graphe IRS simulé
 function MiniChart() {
+  const { t } = useLanguage();
   const points = [15, 22, 18, 30, 25, 35, 28, 42, 38, 45, 40, 50];
   const max = Math.max(...points);
   const w = 300;
@@ -111,7 +116,7 @@ function MiniChart() {
       style={{ padding: "16px", marginTop: "8px" }}
     >
       <div style={{ fontSize: "12px", color: "rgba(224,242,254,0.5)", marginBottom: "8px" }}>
-        Indice IRS — Tendance nationale
+        {t('pillar_ai_title')} — {t('stats_national')}
       </div>
       <svg width="100%" viewBox={`0 0 ${w} ${h}`} style={{ overflow: "visible" }}>
         <defs>
@@ -138,6 +143,7 @@ function MiniChart() {
 
 // Carte Cameroun interactive via react-simple-maps
 function CameroonMap() {
+  const { t } = useLanguage();
   const mapData = [
     { name: "Garoua", coordinates: [13.4, 9.3], val: "0.95" },
     { name: "Douala", coordinates: [9.7, 4.05], val: "9.39" },
@@ -214,7 +220,7 @@ function CameroonMap() {
         </ComposableMap>
         <div style={{ textAlign: "center", marginTop: "12px" }}>
           <span style={{ fontSize: "11px", color: "rgba(224,242,254,0.5)", letterSpacing: "0.1em" }}>
-            CARTE RÉELLE · 10 RÉGIONS
+            {t('pillar_map_real')}
           </span>
         </div>
       </div>
@@ -235,6 +241,7 @@ function TechBadge({ name, icon }: { name: string; icon: React.ReactNode }) {
 
 // ── PWA Footer (Mobile Navigation) ───────────────────────────────────────────
 function PWAFooter() {
+  const { t } = useLanguage();
   return (
     <div
       className="sm:hidden"
@@ -256,19 +263,19 @@ function PWAFooter() {
     >
       <Link href="/" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", color: "#00d4b1", textDecoration: "none", width: "25%" }}>
         <Home size={22} />
-        <span style={{ fontSize: "10px", fontWeight: 600 }}>Accueil</span>
+        <span style={{ fontSize: "10px", fontWeight: 600 }}>{t('nav_home')}</span>
       </Link>
       <Link href="/dashboard" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", color: "rgba(224,242,254,0.5)", textDecoration: "none", width: "25%", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "#00d4b1"} onMouseLeave={(e) => e.currentTarget.style.color = "rgba(224,242,254,0.5)"}>
         <MapIcon size={22} />
-        <span style={{ fontSize: "10px", fontWeight: 500 }}>Carte</span>
+        <span style={{ fontSize: "10px", fontWeight: 500 }}>{t('footer_carte')}</span>
       </Link>
       <Link href="#pilliers" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", color: "rgba(224,242,254,0.5)", textDecoration: "none", width: "25%", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "#00d4b1"} onMouseLeave={(e) => e.currentTarget.style.color = "rgba(224,242,254,0.5)"}>
         <Bell size={22} />
-        <span style={{ fontSize: "10px", fontWeight: 500 }}>Alertes</span>
+        <span style={{ fontSize: "10px", fontWeight: 500 }}>{t('nav_features')}</span>
       </Link>
       <Link href="/login" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", color: "rgba(224,242,254,0.5)", textDecoration: "none", width: "25%", transition: "color 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.color = "#00d4b1"} onMouseLeave={(e) => e.currentTarget.style.color = "rgba(224,242,254,0.5)"}>
         <User size={22} />
-        <span style={{ fontSize: "10px", fontWeight: 500 }}>Profil</span>
+        <span style={{ fontSize: "10px", fontWeight: 500 }}>{t('nav_user_placeholder')}</span>
       </Link>
     </div>
   );
@@ -277,6 +284,7 @@ function PWAFooter() {
 // ── Page principale ──────────────────────────────────────────────────────────
 
 export default function LandingPage() {
+  const { t } = useLanguage();
   return (
     <main
       style={{
@@ -372,7 +380,7 @@ export default function LandingPage() {
             margin: "0 auto 16px",
           }}
         >
-          AirSentinel :{" "}
+          {t('hero_title_1')}
           <span
             style={{
               background: "linear-gradient(135deg, #00d4b1, #0ea5e9)",
@@ -380,10 +388,10 @@ export default function LandingPage() {
               WebkitTextFillColor: "transparent",
             }}
           >
-            L&apos;IA au Service
+            {t('hero_title_2')}
           </span>
           <br />
-          d&apos;un Air Plus Pur au Cameroun
+          {t('hero_title_3')}
         </h1>
 
         <p
@@ -395,13 +403,13 @@ export default function LandingPage() {
             lineHeight: 1.7,
           }}
         >
-          Visualisez, Analysez et Anticipez la Qualité de l&apos;Air sur Tout le Territoire
+          {t('hero_subtitle')}
         </p>
 
         {/* CTA */}
         <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap", marginTop: "10px" }}>
           <Link href="/register" className="btn-primary" style={{ padding: "14px 28px", fontSize: "16px" }}>
-            S&apos;inscrire gratuitement
+            {t('hero_cta_register')}
           </Link>
           <a
             href="#pilliers"
@@ -415,7 +423,7 @@ export default function LandingPage() {
               transition: "all 0.3s",
             }}
           >
-            En savoir plus ↓
+            {t('hero_cta_learn')}
           </a>
         </div>
 
@@ -429,10 +437,10 @@ export default function LandingPage() {
             marginTop: "52px",
           }}
         >
-          <StatBadge value="40" label="Villes" />
-          <StatBadge value="10" label="Régions" />
-          <StatBadge value="50 760" label="Observations" />
-          <StatBadge value="J+3" label="Prédictions" />
+          <StatBadge value="40" label={t('hero_stat_cities')} />
+          <StatBadge value="10" label={t('hero_stat_regions')} />
+          <StatBadge value="50 760" label={t('hero_stat_obs')} />
+          <StatBadge value="J+3" label={t('hero_stat_forecast')} />
         </div>
       </section>
 
@@ -455,7 +463,7 @@ export default function LandingPage() {
             color: "#e0f2fe",
           }}
         >
-          Nos Piliers Stratégiques
+          {t('pillars_title')}
         </h2>
 
         <div
@@ -467,8 +475,8 @@ export default function LandingPage() {
         >
           <PillarCard
             icon={<BrainCircuit size={28} />}
-            title="Anticipation IA"
-            description="Prédiction de la concentration PM2.5 à J+1 grâce à un modèle de régression entraîné sur 28 variables météo et historiques. ARIMA par zone pour les tendances à J+3."
+            title={t('pillar_ai_title')}
+            description={t('pillar_ai_desc')}
           >
             <MiniChart />
           </PillarCard>
@@ -476,13 +484,13 @@ export default function LandingPage() {
           <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
             <PillarCard
               icon={<MapIcon size={28} />}
-              title="Cartographie Interactive"
-              description="Visualisation géospatiale en temps réel de la qualité de l'air dans les 40 grandes villes camerounaises avec l'Indice de Risque Sanitaire (IRS) par zone."
+              title={t('pillar_map_title')}
+              description={t('pillar_map_desc')}
             />
             <PillarCard
               icon={<ShieldAlert size={28} />}
-              title="Indice de Risque Sanitaire"
-              description="Algorithme exclusif combinant PM2.5, CO, Dust, UV et Ozone via PCA pour calculer un score IRS : Faible · Modéré · Élevé · Critique."
+              title={t('pillar_irs_title')}
+              description={t('pillar_irs_desc')}
             />
           </div>
 
@@ -512,10 +520,10 @@ export default function LandingPage() {
             color: "#e0f2fe",
           }}
         >
-          Tech-Stack
+          {t('tech_title')}
         </h2>
         <p style={{ color: "rgba(224,242,254,0.5)", marginBottom: "36px", fontSize: "14px" }}>
-          Des technologies éprouvées pour une performance de production
+          {t('tech_subtitle')}
         </p>
 
         <div className="flex flex-wrap justify-center gap-6 mt-12">
@@ -553,9 +561,7 @@ export default function LandingPage() {
               marginBottom: "24px",
             }}
           >
-            AirSentinel représente une avancée majeure pour la santé publique au Cameroun. 
-            Grâce à l&apos;intelligence artificielle, nous pouvons désormais anticiper les 
-            épisodes de pollution et protéger les populations les plus vulnérables.
+            {t('quote_text')}
           </p>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "14px" }}>
             <div
@@ -565,10 +571,10 @@ export default function LandingPage() {
             </div>
             <div style={{ textAlign: "left" }}>
               <div style={{ fontWeight: 700, color: "#e0f2fe", fontSize: "15px" }}>
-                FOFACK ALEMDJOU HENRI JOEL
+                {t('quote_author')}
               </div>
               <div style={{ fontSize: "12px", color: "rgba(224,242,254,0.5)" }}>
-                4ième année Génie Informatique, ENSPY
+                {t('quote_role')}
               </div>
             </div>
           </div>
@@ -589,12 +595,12 @@ export default function LandingPage() {
         }}
       >
         <div style={{ marginBottom: "16px", display: "flex", justifyContent: "center", gap: "20px" }}>
-          <span style={{ color: "rgba(0,212,177,0.8)", fontWeight: 600 }}>AirSentinel © 2026</span>
-          <a href="#" style={{ color: "rgba(224,242,254,0.5)", textDecoration: "none" }}>Confidentialité</a>
-          <a href="#" style={{ color: "rgba(224,242,254,0.5)", textDecoration: "none" }}>Conditions</a>
+          <span style={{ color: "rgba(0,212,177,0.8)", fontWeight: 600 }}>{t('footer_rights')}</span>
+          <a href="#" style={{ color: "rgba(224,242,254,0.5)", textDecoration: "none" }}>{t('footer_privacy')}</a>
+          <a href="#" style={{ color: "rgba(224,242,254,0.5)", textDecoration: "none" }}>{t('footer_terms')}</a>
         </div>
-        IndabaX Cameroon 2026 · DPA Green Tech · ISSEA · ENSP Yaoundé<br/>
-        <span style={{ color: "rgba(0,212,177,0.55)", display: "block", marginTop: "8px" }}>17 mars → 7 avril 2026</span>
+        {t('footer_partners')}<br/>
+        <span style={{ color: "rgba(0,212,177,0.55)", display: "block", marginTop: "8px" }}>{t('footer_dates')}</span>
       </footer>
     </main>
   );

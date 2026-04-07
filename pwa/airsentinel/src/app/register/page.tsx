@@ -9,6 +9,8 @@ import userService from "@/services/userService";
 import SearchableSelect from "@/components/ui/SearchableSelect";
 import { Mail, Lock, Eye, EyeOff, ArrowLeft, Image as ImageIcon, User, Loader2, MapPin } from "lucide-react";
 import { notify } from "@/utils/toast";
+import { useLanguage } from "@/context/LanguageContext";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const DATASET_CITIES = [
   "Abong-Mbang", "Akonolinga", "Ambam", "Bafia", "Bafoussam", 
@@ -30,6 +32,7 @@ export default function RegisterPage() {
   const [city, setCity] = useState("Douala");
   const [avatar, setAvatar] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { t, lang } = useLanguage();
 
   const router = useRouter();
 
@@ -38,7 +41,7 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     if (password !== confirmPassword) {
-      notify.error("Les mots de passe ne correspondent pas.");
+      notify.error(t('reg_pass_mismatch'));
       setIsLoading(false);
       return;
     }
@@ -52,7 +55,7 @@ export default function RegisterPage() {
         subscribed_city: city
       });
 
-      notify.success("Compte créé avec succès ! Bienvenue.");
+      notify.success(t('reg_success'));
 
       // 2. Upload de l'avatar si présent
       if (avatar) {
@@ -60,12 +63,12 @@ export default function RegisterPage() {
         try {
           await userService.uploadAvatar(avatar);
           notify.dismiss(loadingToast);
-          notify.success("Photo de profil mise à jour.");
+          notify.success(t('reg_avatar_success'));
         } catch (avatarErr: any) {
           notify.dismiss(loadingToast);
           console.error("Erreur lors de l'upload de l'avatar:", avatarErr);
           const detail = avatarErr.response?.data?.detail || "Vérifiez vos paramètres Supabase.";
-          notify.error(`Profil prêt, mais l'image a échoué : ${detail}`);
+          notify.error(t('reg_avatar_error').replace('{}', detail));
         }
       }
 
@@ -94,6 +97,10 @@ export default function RegisterPage() {
             <ArrowLeft className="w-6 h-6" />
           </Link>
 
+          <div className="absolute top-6 right-6 z-30">
+            <LanguageSwitcher />
+          </div>
+
           {/* Logo - completely inside the card so nothing overflows */}
           <div className="relative w-[100px] h-[100px] mb-4 drop-shadow-[0_0_15px_rgba(0,212,177,0.5)] animate-float flex-shrink-0">
             <Image
@@ -111,19 +118,19 @@ export default function RegisterPage() {
               AirSentinel Cameroun
             </h1>
             <p className="text-sm text-gray-300 mt-1">
-              L'IA au Service d'un Air Plus Pur
+              {t('hero_title_2')} {t('hero_title_3')}
             </p>
           </div>
 
           <h2 className="text-[1.35rem] font-medium text-white mb-6">
-            Créer un compte
+            {t('reg_title')}
           </h2>
 
           <form className="w-full flex flex-col gap-5 sm:gap-6" onSubmit={handleRegister}>
 
             {/* Profile Image Field */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-[13px] text-gray-300 ml-1">Image de profil</label>
+              <label className="text-[13px] text-gray-300 ml-1">{t('reg_avatar')}</label>
               <div className="relative group">
                 <input
                   type="file"
@@ -139,11 +146,11 @@ export default function RegisterPage() {
 
             {/* Full Name Field */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-[13px] text-gray-300 ml-1">Nom Complet</label>
+              <label className="text-[13px] text-gray-300 ml-1">{t('reg_fullname')}</label>
               <div className="relative group">
                 <input
                   type="text"
-                  placeholder="Jean Dupont"
+                  placeholder={t('reg_fullname_placeholder')}
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   className="w-full h-[1.1cm] bg-[#1e293b]/40 border border-white/10 rounded-xl pl-4 pr-[3.5rem] text-white text-sm placeholder:text-gray-500 focus:outline-none focus:border-[var(--teal)] focus:ring-1 focus:ring-[var(--teal)]/50 transition-all"
@@ -157,7 +164,7 @@ export default function RegisterPage() {
 
             {/* Email Field */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-[13px] text-gray-300 ml-1">Email</label>
+              <label className="text-[13px] text-gray-300 ml-1">{t('login_email')}</label>
               <div className="relative group">
                 <input
                   type="email"
@@ -176,21 +183,21 @@ export default function RegisterPage() {
 
             {/* City Field (Smart Selector) */}
             <SearchableSelect
-              label="Ville de résidence"
+              label={t('reg_city')}
               options={DATASET_CITIES}
               value={city}
               onChange={(val) => setCity(val)}
-              placeholder="Rechercher votre ville..."
+              placeholder={t('reg_city_placeholder')}
             />
 
             {/* Password Field */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-[13px] text-gray-300 ml-1">Password</label>
+              <label className="text-[13px] text-gray-300 ml-1">{t('login_password')}</label>
               <div className="relative group">
                 <input
                   type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
-                  placeholder="Mot de passe"
+                  placeholder={t('login_password')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full h-[1.1cm] bg-[#1e293b]/40 border border-white/10 rounded-xl pl-4 pr-[5.5rem] text-white text-sm placeholder:text-gray-500 focus:outline-none focus:border-[var(--teal)] focus:ring-1 focus:ring-[var(--teal)]/50 transition-all mb-1"
@@ -210,12 +217,12 @@ export default function RegisterPage() {
 
             {/* Confirm Password Field */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-[13px] text-gray-300 ml-1">Confirmation du mot de passe</label>
+              <label className="text-[13px] text-gray-300 ml-1">{t('reg_confirm_pass')}</label>
               <div className="relative group">
                 <input
                   type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
-                  placeholder="Confirmez le mot de passe"
+                  placeholder={t('reg_confirm_pass_placeholder')}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="w-full h-[1.1cm] bg-[#1e293b]/40 border border-white/10 rounded-xl pl-4 pr-[5.5rem] text-white text-sm placeholder:text-gray-500 focus:outline-none focus:border-[var(--teal)] focus:ring-1 focus:ring-[var(--teal)]/50 transition-all"
@@ -240,15 +247,15 @@ export default function RegisterPage() {
               className="btn-primary w-full mt-4 !font-medium flex items-center justify-center gap-2 disabled:opacity-70"
             >
               {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
-              {isLoading ? "Création du compte..." : "Créer mon compte"}
+              {isLoading ? t('reg_processing') : t('reg_button')}
             </button>
           </form>
 
           {/* Footer Text */}
           <div className="mt-20 text-[15px] text-gray-300 text-center">
-            Déjà un compte?{" "}
+            {t('reg_have_account')}{" "}
             <Link href="/login" className="text-white hover:text-[var(--teal)] font-medium transition-colors">
-              Connectez-vous
+              {t('reg_login')}
             </Link>
           </div>
 

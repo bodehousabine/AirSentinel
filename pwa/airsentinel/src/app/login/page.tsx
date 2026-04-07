@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import authService from "@/services/authService";
 import { Mail, Lock, Eye, EyeOff, ArrowLeft, Loader2 } from "lucide-react";
 import { notify } from "@/utils/toast";
+import { useLanguage } from "@/context/LanguageContext";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -14,6 +16,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   
+  const { t } = useLanguage();
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -22,11 +25,11 @@ export default function LoginPage() {
 
     try {
       await authService.login({ email, password });
-      notify.success("Connexion réussie ! Content de vous revoir.");
+      notify.success(t('login_success'));
       router.push('/dashboard/carte');
     } catch (err: any) {
       console.error("Erreur de connexion:", err);
-      notify.error("Email ou mot de passe incorrect.");
+      notify.error(t('login_error'));
     } finally {
       setIsLoading(false);
     }
@@ -46,6 +49,10 @@ export default function LoginPage() {
             <ArrowLeft className="w-6 h-6" />
           </Link>
 
+          <div className="absolute top-6 right-6 z-30">
+            <LanguageSwitcher />
+          </div>
+
           {/* Logo - completely inside the card so nothing overflows */}
           <div className="relative w-[100px] h-[100px] mb-4 drop-shadow-[0_0_15px_rgba(0,212,177,0.5)] animate-float flex-shrink-0">
             <Image
@@ -63,19 +70,19 @@ export default function LoginPage() {
               AirSentinel Cameroun
             </h1>
             <p className="text-sm text-gray-300 mt-1">
-              L'IA au Service d'un Air Plus Pur
+              {t('hero_title_2')} {t('hero_title_3')}
             </p>
           </div>
 
           <h2 className="text-[1.35rem] font-medium text-white mb-6">
-            Se connecter
+            {t('login_title')}
           </h2>
 
           <form className="w-full flex flex-col gap-5 sm:gap-6" onSubmit={handleLogin}>
 
             {/* Email Field */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-[13px] text-gray-300 ml-1">Email</label>
+              <label className="text-[13px] text-gray-300 ml-1">{t('login_email')}</label>
               <div className="relative group">
                 <input
                   type="email"
@@ -94,12 +101,12 @@ export default function LoginPage() {
 
             {/* Password Field */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-[13px] text-gray-300 ml-1">Password</label>
+              <label className="text-[13px] text-gray-300 ml-1">{t('login_password')}</label>
               <div className="relative group">
                 <input
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
-                  placeholder="Mot de passe"
+                  placeholder={t('login_password')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full h-[1.1cm] bg-[#1e293b]/40 border border-white/10 rounded-xl pl-4 pr-[5.5rem] text-white text-sm placeholder:text-gray-500 focus:outline-none focus:border-[var(--teal)] focus:ring-1 focus:ring-[var(--teal)]/50 transition-all mb-1"
@@ -117,7 +124,7 @@ export default function LoginPage() {
               </div>
               <div className="w-full flex justify-end">
                 <Link href="#" className="text-[12px] text-gray-400 hover:text-[var(--teal)] transition-colors">
-                  Mot de passe oublié?
+                  {t('login_forgot')}
                 </Link>
               </div>
             </div>
@@ -129,15 +136,15 @@ export default function LoginPage() {
               className="btn-primary w-full mt-4 !font-medium flex items-center justify-center gap-2 disabled:opacity-70"
             >
               {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
-              {isLoading ? "Connexion..." : "Se connecter"}
+              {isLoading ? t('login_processing') : t('login_button')}
             </button>
           </form>
 
           {/* Footer Text */}
           <div className="mt-20 text-[15px] text-gray-300 text-center">
-            Pas encore de compte?{" "}
+            {t('login_no_account')}{" "}
             <Link href="/register" className="text-white hover:text-[var(--teal)] font-medium transition-colors">
-              Inscrivez-vous
+              {t('login_signup')}
             </Link>
           </div>
 

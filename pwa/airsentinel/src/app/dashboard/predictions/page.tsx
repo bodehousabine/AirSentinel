@@ -9,10 +9,12 @@ import { Brain, Sparkles, AlertCircle, Loader2, TrendingUp, TrendingDown, Minus,
 import predictionService from "@/services/predictionService";
 import { PredictionPoint } from "@/types/prediction";
 import { useVille } from "@/context/VilleContext";
+import { useLanguage } from "@/context/LanguageContext";
 import CitySelector from "@/components/CitySelector";
 
 export default function PredictionsPage() {
   const { ville, setVille } = useVille();
+  const { t } = useLanguage();
   const [data, setData] = useState<PredictionPoint[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -46,7 +48,7 @@ export default function PredictionsPage() {
         setData(res);
       } catch (err) {
         console.error("Erreur chargement prédictions:", err);
-        setError("Impossible de charger les données historiques.");
+        setError(t('error_load'));
       } finally {
         setLoading(false);
       }
@@ -91,7 +93,7 @@ export default function PredictionsPage() {
     return (
       <div className="min-h-screen bg-[#020617] flex flex-col items-center justify-center gap-4">
         <Loader2 className="w-12 h-12 text-[#00d4b1] animate-spin" />
-        <span className="text-[10px] font-black tracking-widest text-[#00d4b1]/50 uppercase">Initialisation de l&apos;IA...</span>
+        <span className="text-[10px] font-black tracking-widest text-[#00d4b1]/50 uppercase">{t('loading_ai')}</span>
       </div>
     );
   }
@@ -102,18 +104,20 @@ export default function PredictionsPage() {
         <div className="space-y-1">
            <div className="flex items-center gap-2 mb-2">
               <Brain className="text-[#00d4b1]" size={18} />
-              <span className="text-[10px] font-black tracking-[0.3em] text-[#00d4b1]/60 uppercase">Systeme Predictif v4.0</span>
+              <span className="text-[10px] font-black tracking-[0.3em] text-[#00d4b1]/60 uppercase">{t('pred_system')}</span>
            </div>
            <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
-             Laboratoire <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00d4b1] to-[#0ea5e9]">Predictif</span>
+             {t('pred_lab').split(' ')[0]} <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00d4b1] to-[#0ea5e9]">
+               {t('pred_lab').split(' ').slice(1).join(' ')}
+             </span>
            </h1>
-           <p className="text-[#e0f2fe]/40 text-sm font-medium">Analyse et simulation en temps réel des flux de particules fines.</p>
+           <p className="text-[#e0f2fe]/40 text-sm font-medium">{t('pred_desc')}</p>
         </div>
         
         {ville && ville !== "CAMEROON" && (
           <div className="flex items-center gap-4 px-6 py-3 bg-white/5 border border-white/10 rounded-2xl">
             <div className="text-right">
-                <div className="text-[9px] font-black text-gray-500 uppercase tracking-widest">Zone de Prediction</div>
+                <div className="text-[9px] font-black text-gray-500 uppercase tracking-widest">{t('pred_zone')}</div>
                 <div className="text-lg font-black text-white">{ville}</div>
             </div>
             <div className="w-px h-8 bg-white/10" />
@@ -146,13 +150,13 @@ export default function PredictionsPage() {
                  <div className="p-8">
                    <div className="flex justify-between items-start mb-10">
                       <div className="space-y-1">
-                         <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Tendance 72h (PM2.5)</div>
+                         <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{t('pred_trend')}</div>
                          <div className="text-4xl font-black text-white tabular-nums">
                            {jPlus1?.pm25.toFixed(1)} <span className="text-xl font-light opacity-30 italic">µg/m³</span>
                          </div>
                       </div>
                       <div className={`p-4 rounded-2xl border flex flex-col items-end backdrop-blur-md ${trendPct > 0 ? 'bg-orange-500/5 border-orange-500/20' : 'bg-[#00d4b1]/5 border-[#00d4b1]/20'}`}>
-                         <span className="text-[10px] font-black text-gray-500 uppercase">Fluctuation</span>
+                         <span className="text-[10px] font-black text-gray-500 uppercase">{t('pred_fluctuation')}</span>
                          <div className={`text-xl font-black flex items-center gap-2 ${trendPct > 0 ? 'text-orange-500' : 'text-[#00d4b1]'}`}>
                             {trendPct > 1 ? <TrendingUp size={20} /> : trendPct < -1 ? <TrendingDown size={20} /> : <Minus size={20} />}
                             {Math.abs(trendPct).toFixed(1)}%
@@ -218,14 +222,14 @@ export default function PredictionsPage() {
             <div className="xl:col-span-4 space-y-6">
                <div className="grid grid-cols-2 gap-4">
                   <div className="glass-card p-6 border-white/5 space-y-4">
-                     <div className="text-[9px] text-gray-500 font-black uppercase tracking-widest">Apres-Demain</div>
+                     <div className="text-[9px] text-gray-500 font-black uppercase tracking-widest">{t('pred_after_tomorrow')}</div>
                      <div className="text-3xl font-black text-white tabular-nums">{jPlus2?.pm25.toFixed(1)}</div>
                      <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
                         <div className="h-full bg-blue-500 w-[60%] opacity-50" />
                      </div>
                   </div>
                   <div className="glass-card p-6 border-white/5 space-y-4">
-                     <div className="text-[9px] text-gray-500 font-black uppercase tracking-widest">Dans 3 Jours</div>
+                     <div className="text-[9px] text-gray-500 font-black uppercase tracking-widest">{t('pred_in_3_days')}</div>
                      <div className="text-3xl font-black text-white tabular-nums">{jPlus3?.pm25.toFixed(1)}</div>
                      <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
                         <div className="h-full bg-emerald-500 w-[40%] opacity-50" />
@@ -240,9 +244,9 @@ export default function PredictionsPage() {
                   <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-6">
                      <AlertCircle size={24} />
                   </div>
-                  <h4 className="font-black text-xl text-white mb-2 leading-tight tracking-tight">Analyse de Calibrage</h4>
+                  <h4 className="font-black text-xl text-white mb-2 leading-tight tracking-tight">{t('pred_calib')}</h4>
                   <p className="text-xs text-gray-400 leading-relaxed font-medium">
-                    Notre modèle LSTM se recalibre toutes les <b>6 heures</b> en corrélant les données satellites Copernicus avec les capteurs locaux d&apos;IndabaX.
+                    {t('pred_calib_desc')}
                   </p>
                </div>
             </div>
@@ -255,21 +259,21 @@ export default function PredictionsPage() {
                      <div className="space-y-2">
                         <div className="flex items-center gap-3">
                            <Sparkles className="text-[#00d4b1] animate-pulse" size={24} />
-                           <h2 className="text-4xl font-black text-white tracking-tighter">AI <span className="text-[#00d4b1]">Lab</span> Control</h2>
+                           <h2 className="text-4xl font-black text-white tracking-tighter"><span className="text-[#00d4b1]">{t('sim_lab_control')}</span></h2>
                         </div>
-                        <p className="text-gray-400 text-sm font-medium">Simulez l&apos;impact des variables environnementales sur {ville}.</p>
+                        <p className="text-gray-400 text-sm font-medium">{t('sim_lab_desc').replace('{ville}', ville)}</p>
                      </div>
                   </header>
 
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
                      <div className="lg:col-span-7 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
                         {[
-                          { id: 'dust', label: 'Indice Poussière', min: 0, max: 300, unit: 'µg', icon: '🌪️', color: '#f59e0b' },
-                          { id: 'co', label: 'Trafic (CO)', min: 0, max: 40, unit: 'ppm', icon: '🚗', color: '#3b82f6' },
-                          { id: 'uv', label: 'Rayonnement UV', min: 0, max: 15, unit: 'idx', icon: '☀️', color: '#eab308' },
-                          { id: 'temp', label: 'Température', min: 15, max: 45, unit: '°C', icon: '🌡️', color: '#ef4444' },
-                          { id: 'humidity', label: 'Humidité', min: 0, max: 100, unit: '%', icon: '💧', color: '#0ea5e9' },
-                          { id: 'ozone', label: 'Ozone (O3)', min: 0, max: 200, unit: 'µg', icon: '☁️', color: '#8b5cf6' },
+                          { id: 'dust', label: t('sim_param_dust'), min: 0, max: 300, unit: 'µg', icon: '🌪️', color: '#f59e0b' },
+                          { id: 'co', label: t('sim_param_traffic'), min: 0, max: 40, unit: 'ppm', icon: '🚗', color: '#3b82f6' },
+                          { id: 'uv', label: t('sim_param_uv'), min: 0, max: 15, unit: 'idx', icon: '☀️', color: '#eab308' },
+                          { id: 'temp', label: t('sim_param_temp'), min: 15, max: 45, unit: '°C', icon: '🌡️', color: '#ef4444' },
+                          { id: 'humidity', label: t('sim_param_hum'), min: 0, max: 100, unit: '%', icon: '💧', color: '#0ea5e9' },
+                          { id: 'ozone', label: t('sim_param_ozone'), min: 0, max: 200, unit: 'µg', icon: '☁️', color: '#8b5cf6' },
                         ].map((f) => (
                           <div key={f.id} className="space-y-4 group/slider">
                              <div className="flex justify-between items-center">
@@ -302,12 +306,12 @@ export default function PredictionsPage() {
                            />
 
                            <div className="relative glass-card border-white/10 p-10 flex flex-col items-center text-center backdrop-blur-3xl bg-slate-900/60 shadow-2xl">
-                              <div className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] mb-8">Estimation PM2.5 Temps-Réel</div>
+                              <div className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] mb-8">{t('sim_est_realtime')}</div>
                               
                               {isComputing ? (
                                 <div className="h-[200px] flex flex-col items-center justify-center gap-4">
                                    <Loader2 className="w-16 h-16 text-[#00d4b1] animate-spin" />
-                                   <span className="text-[9px] font-black text-[#00d4b1] uppercase animate-pulse">Calcul Intelligent...</span>
+                                   <span className="text-[9px] font-black text-[#00d4b1] uppercase animate-pulse">{t('sim_calc')}</span>
                                 </div>
                               ) : simulationError ? (
                                 <div className="h-[200px] flex flex-col items-center justify-center gap-4 text-red-500">
@@ -317,7 +321,7 @@ export default function PredictionsPage() {
                                      onClick={() => setFeatures({...features})} 
                                      className="text-[9px] font-black uppercase underline tracking-widest mt-2"
                                    >
-                                     Réessayer
+                                     {t('sim_retry')}
                                    </button>
                                 </div>
                               ) : (
@@ -344,11 +348,11 @@ export default function PredictionsPage() {
 
                               <footer className="mt-12 pt-10 border-t border-white/10 w-full grid grid-cols-2 gap-4">
                                  <div className="space-y-1">
-                                    <div className="text-[9px] text-gray-500 uppercase font-black tracking-widest">Base de Données</div>
+                                    <div className="text-[9px] text-gray-500 uppercase font-black tracking-widest">{t('sim_db')}</div>
                                     <div className="text-xs font-bold text-white uppercase italic tracking-tighter">Cameroun-V12</div>
                                  </div>
                                  <div className="space-y-1">
-                                    <div className="text-[9px] text-gray-500 uppercase font-black tracking-widest">Precision IA</div>
+                                    <div className="text-[9px] text-gray-500 uppercase font-black tracking-widest">{t('sim_ai_precision')}</div>
                                     <div className="text-xs font-bold text-[#00d4b1]">± 1.4 µg</div>
                                  </div>
                               </footer>

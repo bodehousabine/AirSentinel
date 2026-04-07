@@ -2,6 +2,7 @@
 
 import { MapPin, ChevronDown, ArrowLeft, User, Baby, UserCog, Wind } from "lucide-react";
 import { useVille } from "@/context/VilleContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -11,14 +12,15 @@ interface HealthNavProps {
 
 export default function HealthNav({ currentPage }: HealthNavProps) {
   const { ville, selectVille } = useVille();
+  const { t } = useLanguage();
   const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
 
   const pages = [
-    { id: "enfants" as const, label: "Enfants", icon: Baby, href: "/dashboard/sante/enfants" },
-    { id: "adultes" as const, label: "Adultes", icon: User, href: "/dashboard/sante/adultes" },
-    { id: "personnes-agees" as const, label: "Seniors", icon: UserCog, href: "/dashboard/sante/personnes-agees" },
-    { id: "asmatiques" as const, label: "Asthmathiques", icon: Wind, href: "/dashboard/sante/asmatiques" },
+    { id: "enfants" as const, label: t('health_prof_children'), icon: Baby, href: "/dashboard/sante/enfants" },
+    { id: "adultes" as const, label: t('health_prof_adults'), icon: User, href: "/dashboard/sante/adultes" },
+    { id: "personnes-agees" as const, label: t('health_prof_seniors'), icon: UserCog, href: "/dashboard/sante/personnes-agees" },
+    { id: "asmatiques" as const, label: t('health_prof_asthma'), icon: Wind, href: "/dashboard/sante/asmatiques" },
   ];
 
   const handleSelectPage = (href: string) => {
@@ -32,7 +34,7 @@ export default function HealthNav({ currentPage }: HealthNavProps) {
         className="group flex items-center gap-3 px-5 py-2.5 bg-slate-900/60 backdrop-blur-md border border-white/20 rounded-2xl text-white hover:border-[#00d4b1]/50 hover:bg-[#00d4b1]/5 transition-all active:scale-95 shadow-lg shrink-0"
       >
         <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform text-[#00d4b1]" />
-        <span className="font-black text-[11px] uppercase tracking-widest">Tous les profils</span>
+        <span className="font-black text-[11px] uppercase tracking-widest">{t('health_all_profiles')}</span>
       </button>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -56,7 +58,7 @@ export default function HealthNav({ currentPage }: HealthNavProps) {
                 key={page.id}
                 onClick={() => handleSelectPage(page.href)}
                 className="group flex items-center gap-2 px-3 py-2 bg-slate-900/60 border border-white/10 rounded-2xl text-white/70 hover:text-white hover:border-[#00d4b1]/50 hover:bg-[#00d4b1]/10 transition-all active:scale-95 shadow-lg"
-                title={`Passer à : ${page.label}`}
+                title={`${t('health_switch_to')} ${page.label}`}
               >
                 <Icon size={18} className="group-hover:scale-110 transition-transform" />
                 <span className="font-bold text-[10px] uppercase tracking-wider hidden md:block">{page.label}</span>
@@ -72,7 +74,7 @@ export default function HealthNav({ currentPage }: HealthNavProps) {
           className="flex items-center gap-3 px-5 py-2.5 bg-[#00d4b1] border border-white/20 rounded-2xl text-white shadow-[0_4px_20px_rgba(0,212,177,0.3)] hover:bg-[#00b89c] hover:scale-105 transition-all active:scale-95 shrink-0"
         >
           <MapPin size={18} fill="white" />
-          <span className="font-black text-[11px] uppercase tracking-widest max-w-[120px] truncate">{ville || "Changer ville"}</span>
+          <span className="font-black text-[11px] uppercase tracking-widest max-w-[120px] truncate">{ville || t('health_change_city')}</span>
           <ChevronDown size={18} className={`transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
         </button>
 
@@ -82,7 +84,7 @@ export default function HealthNav({ currentPage }: HealthNavProps) {
               onClick={() => { selectVille(""); setShowDropdown(false); }}
               className="w-full text-left px-4 py-3 hover:bg-red-500/20 text-red-400 font-medium transition-colors border-b border-white/5"
             >
-              Réinitialiser
+              {t('health_reset')}
             </button>
           </div>
         )}

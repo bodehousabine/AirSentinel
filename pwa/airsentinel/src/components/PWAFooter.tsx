@@ -3,16 +3,18 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Map as MapIcon, BarChart2, Brain, HeartPulse } from "lucide-react";
-
-const TABS = [
-  { id: "carte",       label: "Carte",         icon: MapIcon,    href: "/dashboard/carte" },
-  { id: "stats",       label: "Statistiques",  icon: BarChart2,  href: "/dashboard/stats" },
-  { id: "predictions", label: "Prédictions",   icon: Brain,      href: "/dashboard/predictions" },
-  { id: "sante",       label: "Santé",         icon: HeartPulse, href: "/dashboard/sante" },
-];
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function PWAFooter() {
   const pathname = usePathname();
+  const { t } = useLanguage();
+
+  const TABS = [
+    { id: "carte",       label: t('footer_carte'),         icon: MapIcon,    href: "/dashboard/carte" },
+    { id: "stats",       label: t('footer_stats'),  icon: BarChart2,  href: "/dashboard/stats" },
+    { id: "predictions", label: t('footer_predictions'),   icon: Brain,      href: "/dashboard/predictions" },
+    { id: "sante",       label: t('footer_sante'),         icon: HeartPulse, href: "/dashboard/sante" },
+  ];
 
   return (
     <div

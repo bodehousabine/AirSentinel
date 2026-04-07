@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { HeartPulse, Baby, User, UserCog, ArrowRight, Loader2, ArrowLeft, MapPin, ChevronDown } from "lucide-react";
 import mapService from "@/services/mapService";
 import { useVille } from "@/context/VilleContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { useRouter } from "next/navigation";
 
 export default function SantePage() {
@@ -11,6 +12,7 @@ export default function SantePage() {
   const [villes, setVilles] = useState<string[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const { ville, selectVille } = useVille();
+  const { t } = useLanguage();
   const router = useRouter();
 
   useEffect(() => {
@@ -38,32 +40,32 @@ export default function SantePage() {
 
   const profiles = [
     {
-      title: "Enfants",
-      subtitle: "Préconisations pour les enfants (< 12 ans)",
+      title: t('health_prof_children'),
+      subtitle: t('health_desc_children'),
       icon: "👶",
       href: "/dashboard/sante/enfants",
       color: "bg-blue-500/20 border-blue-500/30 hover:border-blue-500/60",
       textColor: "text-blue-400"
     },
     {
-      title: "Adultes",
-      subtitle: "Préconisations pour les adultes",
+      title: t('health_prof_adults'),
+      subtitle: t('health_desc_adults'),
       icon: "🧑",
       href: "/dashboard/sante/adultes",
       color: "bg-green-500/20 border-green-500/30 hover:border-green-500/60",
       textColor: "text-green-400"
     },
     {
-      title: "Seniors",
-      subtitle: "Préconisations pour les personnes âgées",
+      title: t('health_prof_seniors'),
+      subtitle: t('health_desc_seniors'),
       icon: "👴",
       href: "/dashboard/sante/personnes-agees",
       color: "bg-purple-500/20 border-purple-500/30 hover:border-purple-500/60",
       textColor: "text-purple-400"
     },
     {
-      title: "Asthmathiques",
-      subtitle: "Préconisations pour les asthmatiques",
+      title: t('health_prof_asthma'),
+      subtitle: t('health_desc_asthma'),
       icon: "🫁",
       href: "/dashboard/sante/asmatiques",
       color: "bg-red-500/20 border-red-500/30 hover:border-red-500/60",
@@ -79,16 +81,16 @@ export default function SantePage() {
           className="group flex items-center gap-3 px-5 py-2.5 bg-slate-900/60 backdrop-blur-md border border-white/20 rounded-2xl text-white hover:border-[#ef4444]/50 hover:bg-[#ef4444]/5 transition-all active:scale-95 shadow-lg mb-8"
         >
           <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform text-[#ef4444]" />
-          <span className="font-black text-[11px] uppercase tracking-widest">Tableau de bord</span>
+          <span className="font-black text-[11px] uppercase tracking-widest">{t('health_dash_link')}</span>
         </button>
 
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <h1 className="text-4xl font-black text-[#e0f2fe] mb-2 tracking-tight flex items-center gap-3">
-              Santé & <span className="text-[#ef4444]">Protection</span> <HeartPulse className="text-[#ef4444]" size={32} />
+              {t('health_title_1')}<span className="text-[#ef4444]">{t('health_title_2')}</span> <HeartPulse className="text-[#ef4444]" size={32} />
             </h1>
             <p className="text-[#e0f2fe]/50 text-sm font-medium italic">
-              {ville ? "Choisissez un profil pour voir les recommandations." : "Sélectionnez votre ville pour commencer."}
+              {ville ? t('health_sub_city_selected') : t('health_sub_no_city')}
             </p>
           </div>
 
@@ -98,7 +100,7 @@ export default function SantePage() {
               className="px-6 py-3 bg-[#00d4b1] text-white font-black uppercase tracking-tighter text-xs rounded-2xl shadow-[0_4px_20px_rgba(0,212,177,0.4)] hover:bg-[#00b89c] hover:scale-105 transition-all active:scale-95 flex items-center gap-2 shrink-0 border border-white/20"
             >
               <MapPin size={16} fill="white" />
-              Changer de ville ({ville})
+              {t('health_change_city')} ({ville})
             </button>
           )}
         </div>
@@ -111,9 +113,9 @@ export default function SantePage() {
             <MapPin className="text-[#00d4b1] relative z-10" size={48} />
           </div>
           
-          <h2 className="text-3xl font-black text-white mb-4 text-center">Où êtes-vous ?</h2>
+          <h2 className="text-3xl font-black text-white mb-4 text-center">{t('health_where_are_you')}</h2>
           <p className="text-gray-400 text-center mb-10 max-w-md text-base leading-relaxed">
-            La qualité de l&apos;air varie selon votre position. Sélectionnez une ville pour accéder aux conseils santé adaptés.
+            {t('health_where_desc')}
           </p>
 
           <div className="relative w-full max-w-md">
@@ -125,7 +127,7 @@ export default function SantePage() {
                 <div className="w-12 h-12 rounded-2xl bg-[#00d4b1] flex items-center justify-center text-white shadow-xl scale-110">
                   <MapPin size={24} fill="white" />
                 </div>
-                <span className="font-bold text-xl">Sélectionner une ville...</span>
+                <span className="font-bold text-xl">{t('health_select_city')}</span>
               </div>
               <ChevronDown size={28} className={`text-[#00d4b1] transition-transform duration-500 ease-in-out ${showDropdown ? 'rotate-180' : ''}`} />
             </button>
@@ -160,7 +162,7 @@ export default function SantePage() {
                   <p className="text-sm text-gray-400">{profile.subtitle}</p>
                 </div>
                 <div className={`mt-2 flex items-center gap-2 ${profile.textColor}`}>
-                  <span className="text-sm font-bold">Voir les conseils</span>
+                  <span className="text-sm font-bold">{t('health_view_tips')}</span>
                   <ArrowRight size={16} />
                 </div>
               </button>
@@ -172,7 +174,7 @@ export default function SantePage() {
                 <span className="text-xl font-bold">i</span>
             </div>
             <p className="text-xs text-gray-400 leading-relaxed font-medium">
-                <b>Note IA :</b> Ces recommandations sont basées sur les normes de l&apos;OMS et adaptées à chaque profil. Si vous ressentez des difficultés respiratoires persistantes, contactez immédiatement les services de santé de votre district.
+               {t('health_ai_note')}
             </p>
           </div>
         </>

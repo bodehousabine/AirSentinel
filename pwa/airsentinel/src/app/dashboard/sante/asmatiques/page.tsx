@@ -5,6 +5,7 @@ import { HeartPulse, ShieldCheck, Loader2, Wind, Activity, MapPin, ChevronDown, 
 import healthService, { ProfilRecommandation } from "@/services/healthService";
 import mapService from "@/services/mapService";
 import { useVille } from "@/context/VilleContext";
+import { useLanguage } from "@/context/LanguageContext";
 import HealthNav from "@/components/HealthNav";
 import { useRouter } from "next/navigation";
 
@@ -14,6 +15,7 @@ export default function AsthmatiquesPage() {
   const [villes, setVilles] = useState<string[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const { ville, selectVille } = useVille();
+  const { t } = useLanguage();
   const router = useRouter();
 
   useEffect(() => {
@@ -61,18 +63,18 @@ export default function AsthmatiquesPage() {
         <HealthNav currentPage="asmatiques" />
         <header className="mb-10">
           <h1 className="text-4xl font-black text-[#e0f2fe] mb-2 tracking-tight flex items-center gap-3">
-            Santé <span className="text-[#ef4444]">Asthmathiques</span> <span className="text-3xl">🫁</span>
+            {t('health_title_1')} <span className="text-red-400">{t('health_prof_asthma')}</span> <span className="text-3xl">🫁</span>
           </h1>
-          <p className="text-[#e0f2fe]/50 text-sm font-medium italic">Préconisations personnalisées pour les personnes asthmatiques selon la qualité de l'air.</p>
+          <p className="text-[#e0f2fe]/50 text-sm font-medium italic">{t('health_desc_asthma')}</p>
         </header>
 
         <div className="glass-card p-10 flex flex-col items-center justify-center min-h-[400px]">
           <div className="w-20 h-20 rounded-full bg-[#00d4b1]/10 flex items-center justify-center mb-6">
             <MapPin className="text-[#00d4b1]" size={40} />
           </div>
-          <h2 className="text-2xl font-black text-white mb-4 text-center">Choisissez la ville</h2>
+          <h2 className="text-2xl font-black text-white mb-4 text-center">{t('health_city_choose')}</h2>
           <p className="text-gray-400 text-center mb-8 max-w-md">
-            Sélectionnez une ville pour obtenir les recommandations pour les personnes asthmatiques.
+            {t('health_req_city').replace('{}', t('health_prof_asthma').toLowerCase())}
           </p>
 
           <div className="relative w-full max-w-md">
@@ -84,7 +86,7 @@ export default function AsthmatiquesPage() {
                 <div className="w-10 h-10 rounded-xl bg-[#00d4b1] flex items-center justify-center text-white shadow-lg">
                   <MapPin size={20} fill="white" />
                 </div>
-                <span className="font-bold text-lg">Sélectionner une ville...</span>
+                <span className="font-bold text-lg">{t('health_select_city')}</span>
               </div>
               <ChevronDown size={24} className={`text-[#00d4b1] transition-transform duration-300 ${showDropdown ? 'rotate-180' : ''}`} />
             </button>
@@ -128,7 +130,7 @@ export default function AsthmatiquesPage() {
         <HealthNav currentPage="asmatiques" />
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-3xl font-black text-white mb-1">Santé Asthmatiques</h1>
+            <h1 className="text-3xl font-black text-white mb-1">{t('health_title_1')}{t('health_prof_asthma')}</h1>
             <p className="text-[#00d4b1] text-base font-bold flex items-center gap-2">
               <MapPin size={16} /> {ville}
             </p>
@@ -138,7 +140,7 @@ export default function AsthmatiquesPage() {
             className="px-6 py-3 bg-[#00d4b1] text-white font-black uppercase tracking-tighter text-xs rounded-2xl shadow-[0_4px_20px_rgba(0,212,177,0.4)] hover:bg-[#00b89c] hover:scale-105 transition-all active:scale-95 flex items-center gap-2 shrink-0 border border-white/20"
           >
             <MapPin size={16} fill="white" />
-            Changer de ville
+            {t('health_change_city')}
           </button>
         </div>
       </header>
@@ -147,18 +149,18 @@ export default function AsthmatiquesPage() {
         {isCritical && (
           <div className="bg-red-600 px-6 py-3 flex items-center gap-3">
             <AlertTriangle className="text-white" size={24} />
-            <span className="text-white font-black text-lg tracking-wide">ALERTE : POLLUTION {rec?.niveau_risque?.toUpperCase()}</span>
+            <span className="text-white font-black text-lg tracking-wide">{t('health_alert_pollution').replace('{}', rec?.niveau_risque?.toUpperCase() || "")}</span>
           </div>
         )}
         <div className="p-6 md:p-8">
           <div className="flex flex-col md:flex-row items-center gap-8">
             <div className="text-7xl">{rec?.icone || "🫁"}</div>
             <div className="flex-1 text-center md:text-left">
-              <h3 className="text-2xl font-black text-white mb-2">{rec?.profil || "Personne Asthmatique"}</h3>
+              <h3 className="text-2xl font-black text-white mb-2">{rec?.profil || t('health_prof_asthma')}</h3>
               <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full border border-white/10 bg-white/5">
                 <div className="w-3 h-3 rounded-full animate-pulse" style={{ backgroundColor: globalColor, boxShadow: `0 0 12px ${globalColor}` }} />
                 <span className="text-base font-black uppercase tracking-[0.2em]" style={{ color: globalColor }}>
-                  Niveau {rec?.niveau_risque || "MODÉRÉ"}
+                  {t('health_level').replace('{}', rec?.niveau_risque || "MODÉRÉ")}
                 </span>
               </div>
             </div>
@@ -169,30 +171,30 @@ export default function AsthmatiquesPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div className="glass-card p-5 text-center">
           <Wind className="mx-auto mb-2 text-blue-400" size={28} />
-          <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Ventilation</div>
+          <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">{t('health_ventilation')}</div>
           <div className={`text-sm font-bold ${rec?.niveau_risque === 'FAIBLE' ? 'text-green-400' : 'text-orange-400'}`}>
-            {rec?.niveau_risque === 'FAIBLE' ? '✅ Optimale' : '⚠️ Limitée'}
+            {rec?.niveau_risque === 'FAIBLE' ? `✅ ${t('health_opt_optimal')}` : `⚠️ ${t('health_opt_limited')}`}
           </div>
         </div>
         <div className="glass-card p-5 text-center">
           <Activity className="mx-auto mb-2 text-red-400" size={28} />
-          <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Sport</div>
+          <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">{t('health_sport')}</div>
           <div className={`text-sm font-bold ${rec?.niveau_risque === 'FAIBLE' ? 'text-green-400' : 'text-orange-400'}`}>
-            {rec?.niveau_risque === 'FAIBLE' ? '✅ Conseillé' : '⚠️ Éviter'}
+            {rec?.niveau_risque === 'FAIBLE' ? `✅ ${t('health_opt_advise')}` : `⚠️ ${t('health_opt_caution')}`}
           </div>
         </div>
         <div className="glass-card p-5 text-center">
           <Footprints className="mx-auto mb-2 text-purple-400" size={28} />
-          <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Sortie</div>
+          <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">{t('health_outdoors')}</div>
           <div className={`text-sm font-bold ${rec?.niveau_risque === 'FAIBLE' ? 'text-green-400' : 'text-orange-400'}`}>
-            {rec?.niveau_risque === 'FAIBLE' ? '✅ Possible' : '⚠️ Éviter'}
+            {rec?.niveau_risque === 'FAIBLE' ? `✅ ${t('health_opt_possible')}` : `⚠️ ${t('health_opt_limit')}`}
           </div>
         </div>
         <div className="glass-card p-5 text-center">
           <div className="text-amber-400 text-2xl mb-2">😷</div>
-          <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">Masque</div>
+          <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">{t('health_mask')}</div>
           <div className={`text-sm font-bold ${rec?.niveau_risque === 'FAIBLE' ? 'text-green-400' : 'text-orange-400'}`}>
-            {rec?.niveau_risque === 'FAIBLE' ? '❌ Non' : '✅ Oui'}
+            {rec?.niveau_risque === 'FAIBLE' ? `❌ ${t('health_opt_no')}` : `✅ ${t('health_opt_yes')}`}
           </div>
         </div>
       </div>
@@ -200,17 +202,17 @@ export default function AsthmatiquesPage() {
       <div className="glass-card p-6 mb-8 border-white/5">
         <h4 className="text-lg font-black text-white mb-4 flex items-center gap-2">
           <AlertTriangle className="text-amber-400" size={20} />
-          Message d'alerte
+          {t('health_alert_msg')}
         </h4>
         <p className="text-lg text-white leading-relaxed font-medium">
-          &quot;{rec?.message || "Chargement..."}&quot;
+          &quot;{rec?.message || t('health_loading')}&quot;
         </p>
       </div>
 
       <div className="glass-card p-6 border-white/5">
         <h4 className="text-lg font-black text-white mb-6 flex items-center gap-2">
           <ShieldCheck className="text-[#00d4b1]" size={20} />
-          Actions prioritaires
+          {t('health_priority_actions')}
         </h4>
         <div className="space-y-4">
           {rec?.actions.map((action, i) => (
@@ -232,9 +234,9 @@ export default function AsthmatiquesPage() {
             <AlertTriangle size={28} />
           </div>
           <div>
-            <h5 className="text-red-400 font-black mb-1">Attention particulière</h5>
+            <h5 className="text-red-400 font-black mb-1">{t('health_attention')}</h5>
             <p className="text-red-300/70 text-sm leading-relaxed">
-              Les personnes asthmatiques sont particulièrement sensibles. Ayez toujours votre inhalateur à portée de main.
+              {t('health_ai_note')}
             </p>
           </div>
         </div>
@@ -244,15 +246,15 @@ export default function AsthmatiquesPage() {
       <div className="mt-16 p-10 glass-card border-white/5 flex flex-col items-center gap-8 relative overflow-hidden group">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#00d4b1]/30 to-transparent" />
         <div className="flex flex-col items-center gap-1">
-          <h4 className="text-2xl font-black text-white">Continuer l&apos;exploration</h4>
-          <p className="text-gray-400 text-sm font-medium">Découvrez les recommandations pour les autres profils</p>
+          <h4 className="text-2xl font-black text-white">{t('health_continue_explore')}</h4>
+          <p className="text-gray-400 text-sm font-medium">{t('health_discover_other')}</p>
         </div>
 
         <div className="flex flex-wrap justify-center gap-6 w-full">
           {[
-            { title: "Enfants", icon: "👶", color: "from-blue-500/20 to-blue-600/5", border: "border-blue-500/30", text: "text-blue-400", href: "/dashboard/sante/enfants" },
-            { title: "Adultes", icon: "🧑", color: "from-green-500/20 to-green-600/5", border: "border-green-500/30", text: "text-green-400", href: "/dashboard/sante/adultes" },
-            { title: "Seniors", icon: "👴", color: "from-purple-500/20 to-purple-600/5", border: "border-purple-500/30", text: "text-purple-400", href: "/dashboard/sante/personnes-agees" }
+            { title: t('health_prof_children'), icon: "👶", color: "from-blue-500/20 to-blue-600/5", border: "border-blue-500/30", text: "text-blue-400", href: "/dashboard/sante/enfants" },
+            { title: t('health_prof_adults'), icon: "🧑", color: "from-green-500/20 to-green-600/5", border: "border-green-500/30", text: "text-green-400", href: "/dashboard/sante/adultes" },
+            { title: t('health_prof_seniors'), icon: "👴", color: "from-purple-500/20 to-purple-600/5", border: "border-purple-500/30", text: "text-purple-400", href: "/dashboard/sante/personnes-agees" }
           ].map((profile) => (
             <button
               key={profile.title}
