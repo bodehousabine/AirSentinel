@@ -197,36 +197,72 @@ from blocs.bloc6_shap        import render as bloc6
 # ── CSS premium pour les onglets et le bouton À Propos ───────────────────────
 st.markdown(f"""
 <style>
-/* ── BARRE DE FOND DES ONGLETS (Comme sur l'image) ── */
+/* ── BARRE DE FOND DES ONGLETS (Look Premium Restauration) ── */
 .stTabs [data-baseweb="tab-list"] {{
-    gap: 8px;
+    gap: 4px;
     background: {th['bg_tertiary']} !important;
     border-bottom: 1px solid {th['border_soft']};
     padding: 4px 16px 0 16px;
     border-radius: 12px 12px 0 0;
 }}
 
-/* ── STYLE GÉNÉRAL DES ONGLETS PRINCIPAUX ── */
+/* ── TRADUCTION DYNAMIQUE PAR CSS (Onglets principaux uniquement) ── */
+/* 1. On cache l'identifiant technique (0, 1, 2...) pour les onglets principaux */
+.stTabs [data-baseweb="tab"] div[data-testid="stMarkdownContainer"] {{
+    display: none !important;
+}}
+
+/* 2. On restaure l'affichage pour les sous-onglets imbriqués */
+.stTabs .stTabs [data-baseweb="tab"] div[data-testid="stMarkdownContainer"] {{
+    display: block !important;
+}}
+.stTabs .stTabs [data-baseweb="tab"]::after {{
+    display: none !important;
+}}
+
+/* 3. Style visuel des onglets principaux (Ajustés pour compacité) */
 .stTabs [data-baseweb="tab"] {{
     font-family: 'Inter', sans-serif !important;
-    font-size: 14.5px !important;
+    font-size: 13px !important;
     font-weight: 850 !important;
     text-transform: uppercase !important;
-    color: {th['text2']} !important; 
-    padding: 12px 26px !important;
+    padding: 12px 14px !important;
     border-radius: 8px 8px 0 0 !important;
     transition: all 0.25s ease !important;
     letter-spacing: 0.05em !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }}
 
+.stTabs [data-baseweb="tab"]::after {{
+    font-family: 'Inter', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 850 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}}
+
+/* Noms traduits via CSS Content */
+.stTabs [data-baseweb="tab"]:nth-child(1)::after {{ content: "{T['tab_carte']}" !important; }}
+.stTabs [data-baseweb="tab"]:nth-child(2)::after {{ content: "{T['tab_kpis']}" !important; }}
+.stTabs [data-baseweb="tab"]:nth-child(3)::after {{ content: "{T['tab_predictions']}" !important; }}
+.stTabs [data-baseweb="tab"]:nth-child(4)::after {{ content: "{T['tab_alertes']}" !important; }}
+.stTabs [data-baseweb="tab"]:nth-child(5)::after {{ content: "{T['tab_decision']}" !important; }}
+.stTabs [data-baseweb="tab"]:nth-child(6)::after {{ content: "{T['tab_contexte']}" !important; }}
+.stTabs [data-baseweb="tab"]:nth-child(7)::after {{ content: "{T['tab_about']}" !important; }}
+
 .stTabs [aria-selected="true"] {{
-    color: {th['teal'] if th['name']=='dark' else '#006b58'} !important;
     background: {th['border_soft']} !important;
-    border-bottom: 5px solid {th['teal']} !important; /* Soulignement épais image */
+    border-bottom: 5px solid {th['teal']} !important;
+}}
+
+.stTabs [aria-selected="true"]::after {{
+    color: {th['teal'] if th['name']=='dark' else '#006b58'} !important;
     font-weight: 950 !important;
 }}
 
-/* ── STYLE SPÉCIFIQUE DES SOUS-ONGLETS (Imbriqués - Conservé) ── */
+/* ── STYLE SPÉCIFIQUE DES SOUS-ONGLETS (Restauration exacte Image 1 & 2) ── */
 .stTabs .stTabs [data-baseweb="tab"] {{
     text-transform: uppercase !important;
     font-size: 13.5px !important;
@@ -251,15 +287,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ── Barre d'onglets (les rubriques de contenu + À Propos) ───────────────────
-tabs = st.tabs([
-    T['tab_carte'], 
-    T['tab_kpis'], 
-    T['tab_predictions'], 
-    T['tab_alertes'], 
-    T['tab_decision'], 
-    T['tab_contexte'], 
-    T['tab_about']
-])
+tabs = st.tabs(["0", "1", "2", "3", "4", "5", "6"])
 
 # (Ancien JS de restauration supprimé car Streamlit conserve l'état nativement)
 
