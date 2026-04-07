@@ -23,6 +23,10 @@ import os
 from datetime import datetime, timedelta, date
 from typing import Optional
 import time
+import sys
+
+# Ajouter le dossier courant au path pour qu'Uvicorn trouve "main:app"
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 LAST_DATASET_PATH = None
 LAST_DATASET_MTIME = 0
@@ -624,5 +628,5 @@ if __name__ == "__main__":
     import uvicorn
     # Récupération du port dynamique (obligatoire pour Render)
     port = int(os.environ.get("PORT", 8000))
-    # Correction du module : le fichier s'appelle main.py, donc main:app
-    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
+    # Correction : "main:app" car le fichier s'appelle main.py
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)

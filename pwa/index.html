@@ -681,9 +681,9 @@
             if(status) status.textContent = "Connexion au serveur (Réveil de l'IA)...";
             
             try {
-                // Timeout de 15 secondes pour le réveil de Render
+                // Timeout de 60 secondes pour le réveil de Render (très lent en version gratuite)
                 const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 15000);
+                const timeout = setTimeout(() => controller.abort(), 60000);
                 
                 const res = await fetch(`${API_BASE}/villes`, { signal: controller.signal });
                 clearTimeout(timeout);
