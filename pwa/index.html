@@ -438,7 +438,10 @@
     <!-- Scripts -->
 <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
     <script>
-        const API_BASE = "https://airsentinel-jpmc.onrender.com";
+        // Configuration API (Hugging Face Spaces - Plus stable que Render)
+        const API_BASE = 'https://sabine2004-airsentinel.hf.space'; 
+        const CACHE_NAME = 'airsentinel-cities-v53'; // On incrémente le cache pour forcer la MAJ
+        const FETCH_TIMEOUT = 60000; // 60s pour laisser le temps au Space de démarrer si besoin
         const SEUIL_OMS = 15.0;
 
         const TEXTS = {
