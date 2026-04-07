@@ -1,4 +1,4 @@
-const CACHE_NAME = 'airsentinel-pwa-v49';
+const CACHE_NAME = 'airsentinel-pwa-v50';
 const ASSETS = [
   './index.html',
   './manifest.json',
