@@ -9,14 +9,15 @@ import pandas as pd
 from fastapi import APIRouter, HTTPException
 from scipy import stats
 
-from api.services.data_service import get_dataframe
+from api.services.data_service import get_dataframe, apply_filters
 from api.schemas.pollution import KPIResponse
+from typing import Optional
 
 router = APIRouter(prefix="/kpis", tags=["KPIs"])
 
 
 @router.get("", response_model=KPIResponse)
-def get_kpis():
+def get_kpis(city: Optional[str] = None):
     """
     Retourne les 6 indicateurs clés nationaux :
     - PM2.5 moyen
@@ -28,6 +29,8 @@ def get_kpis():
     """
     try:
         df = get_dataframe()
+        if city:
+            df = apply_filters(df, villes=[city])
     except FileNotFoundError as e:
         raise HTTPException(status_code=503, detail=str(e))
 

@@ -11,18 +11,22 @@ import kpiService from "@/services/kpiService";
 import mapService from "@/services/mapService";
 import contexteService from "@/services/contexteService";
 import { KPIResponse } from "@/types/pollution";
+import { useVille } from "@/context/VilleContext";
+import { RefreshCcw, XCircle } from "lucide-react";
 
 export default function StatsPage() {
   const [kpis, setKpis] = useState<KPIResponse | null>(null);
   const [analyses, setAnalyses] = useState<any>(null);
   const [contexte, setContexte] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { ville, setVille } = useVille();
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const [kpiData, analysesData, contexteData] = await Promise.all([
-          kpiService.getNationalKPIs(),
+          kpiService.getNationalKPIs(ville || undefined),
           mapService.getMapAnalyses(),
           contexteService.getContexte()
         ]);
@@ -36,7 +40,7 @@ export default function StatsPage() {
       }
     };
     fetchData();
-  }, []);
+  }, [ville]);
 
   // Transformer les données pour le graphique à barres
   const barData = analyses?.pm25_par_region ? 
@@ -69,15 +73,33 @@ export default function StatsPage() {
 
       <div className="p-6 pb-64 max-w-6xl mx-auto relative z-10">
         <header className="mb-12 animate-in fade-in slide-in-from-left duration-700">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="h-1 w-8 bg-[#00d4b1] rounded-full shadow-[0_0_10px_rgba(0,212,177,0.5)]" />
-            <span className="text-[10px] font-black tracking-[0.3em] text-[#00d4b1] uppercase">AirSentinel Insights Live</span>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="h-1 w-8 bg-[#00d4b1] rounded-full shadow-[0_0_10px_rgba(0,212,177,0.5)]" />
+              <span className="text-[10px] font-black tracking-[0.3em] text-[#00d4b1] uppercase">
+                {ville ? `AirSentinel Insights: ${ville}` : "AirSentinel Insights Live"}
+              </span>
+            </div>
+            
+            {ville && (
+              <button 
+                onClick={() => setVille(null)}
+                className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-[10px] font-bold text-gray-300 transition-all active:scale-95 group"
+              >
+                <XCircle size={14} className="text-[#ef4444] group-hover:rotate-90 transition-transform" />
+                RÉINITIALISER (NATIONAL)
+              </button>
+            )}
           </div>
+          
           <h1 className="text-5xl font-black text-white mb-3 tracking-tighter leading-none">
-            Analyse des <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00d4b1] to-[#0ea5e9]">Données Nationales</span>
+            Analyse des <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00d4b1] to-[#0ea5e9]">Données {ville ? `à ${ville}` : "Nationales"}</span>
           </h1>
           <p className="text-gray-400 text-sm font-medium max-w-md antialiased">
-            Données agrégées en temps réel depuis {kpis?.total_observations || 0} observations à travers le pays.
+            {ville 
+              ? `Données spécifiques à la ville de ${ville} basées sur ${kpis?.total_observations || 0} observations.`
+              : `Données agrégées en temps réel depuis ${kpis?.total_observations || 0} observations à travers le pays.`
+            }
           </p>
         </header>
 

@@ -11,6 +11,8 @@ from pydantic import BaseModel
 from typing import Optional
 
 from api.services.data_service import get_dataframe
+from api.services.prediction_service import get_model
+from api.services.irs_service import classify_irs_score
 
 router = APIRouter(prefix="/carte", tags=["Carte"])
 
@@ -43,9 +45,14 @@ def _find_col(df, candidates):
 
 def _irs_label_color(irs_val, status_label=None):
     """
-    Détermine le label et la couleur. 
-    Priorise le label textuel s'il contient des mots clés ou emojis.
+    Détermine le label et la couleur en utilisant les seuils du modèle (ACP).
     """
+    try:
+        seuils = get_model("seuils")
+    except Exception:
+        # Fallback si les modèles ne sont pas chargés
+        seuils = {"p50": 0.2, "p75": 0.5, "p90": 0.8}
+
     if status_label:
         l = status_label.upper()
         if "FAIBLE" in l or "🟢" in l:
@@ -57,18 +64,11 @@ def _irs_label_color(irs_val, status_label=None):
         if "CRITIQUE" in l or "🔴" in l:
             return "CRITIQUE", "#B71C1C"
 
-    # Fallback sur les seuils numériques si pas de label
+    # Utilisation de la logique de classification centralisée
     if irs_val is None:
         return "N/A", "#9E9E9E"
     
-    if irs_val <= 0.2:
-        return "FAIBLE", "#4CAF50"
-    elif irs_val <= 0.5:
-        return "MODÉRÉ", "#FFC107"
-    elif irs_val <= 0.8:
-        return "ÉLEVÉ", "#FF5722"
-    else:
-        return "CRITIQUE", "#B71C1C"
+    return classify_irs_score(irs_val, seuils)
 
 
 # ─── Endpoints ─────────────────────────────────────────────────────
@@ -92,16 +92,17 @@ def get_carte():
     if not city_col:
         raise HTTPException(status_code=500, detail="Colonne ville introuvable.")
 
-    agg = {pm25_col: "mean"} if pm25_col else {}
-    if irs_col: agg[irs_col] = "mean"
-    if lat_col: agg[lat_col] = "first"
-    if lon_col: agg[lon_col] = "first"
-    if status_col: agg[status_col] = "first"
-
-    grouped = df.groupby(city_col).agg(agg).reset_index()
+    # On ne garde que la DERNIÈRE observation par ville (Real-Time feel)
+    # On s'assure que la colonne date existe
+    if "date" in df.columns:
+        # Tri par date décroissante puis suppression des doublons sur la ville
+        latest_df = df.sort_values(by="date", ascending=False).drop_duplicates(subset=[city_col])
+    else:
+        # Fallback si pas de date : on garde la première occurrence
+        latest_df = df.drop_duplicates(subset=[city_col])
 
     result = []
-    for _, row in grouped.iterrows():
+    for _, row in latest_df.iterrows():
         irs_val = float(row[irs_col]) if irs_col else None
         status_text = str(row[status_col]) if status_col else None
         

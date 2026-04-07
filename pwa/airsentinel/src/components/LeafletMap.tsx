@@ -14,6 +14,7 @@ import MarkerClusterGroup from "react-leaflet-cluster";
 import { Navigation, Search, ZoomIn, ZoomOut, X, MapPin, Compass, Loader2 } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import "leaflet.heat";
+import { useRouter } from "next/navigation";
 
 import mapService from "../services/mapService";
 import { VillePoint } from "../types/map";
@@ -196,6 +197,7 @@ export default function LeafletMap() {
   const [points, setPoints] = useState<VillePoint[]>([]);
   const [loading, setLoading] = useState(true);
   const { selectVille } = useVille();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchPoints = async () => {
@@ -279,6 +281,11 @@ export default function LeafletMap() {
                     weight: 2,
                     fillOpacity: 0.8,
                   }}
+                  eventHandlers={{
+                    click: () => {
+                      selectVille(point.city);
+                    },
+                  }}
                 >
                   <Popup>
                     <div className="min-w-[160px] p-1 font-sans text-slate-800">
@@ -313,8 +320,14 @@ export default function LeafletMap() {
                         </div>
                       </div>
 
-                      <button className="w-full mt-3 py-2 bg-[#020c18] text-white rounded-xl text-xs font-bold hover:bg-[#00d4b1] transition-colors active:scale-95">
-                        Détails & Prévisions
+                      <button 
+                        onClick={() => {
+                          selectVille(point.city);
+                          router.push("/dashboard/stats");
+                        }}
+                        className="w-full mt-3 py-2 bg-[#020c18] text-white rounded-xl text-xs font-bold hover:bg-[#00d4b1] transition-colors active:scale-95"
+                      >
+                        Voir les statistiques
                       </button>
                     </div>
                   </Popup>

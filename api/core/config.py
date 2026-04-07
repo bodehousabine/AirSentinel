@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     ]
     
     # Dataset et ML
-    DATASET_PATH: str = "data/processed/airsentinel_dataset.csv"
+    DATASET_PATH: str = "data/processed/dataset_final.parquet"
     ML_MODELS_PATH: str = "models/"
 
     # Database
