@@ -32,7 +32,7 @@ Le workflow suit une progression logique de Data Engineering et de modélisation
 | 1 | `01_chargement_nettoyage.ipynb` | Connexion aux APIs, agrégation des sources et nettoyage des valeurs aberrantes. |
 | 2 | `02_tests_statistiques.ipynb` | Analyse exploratoire (EDA), tests de stationnarité et corrélations de Pearson/Spearman. |
 | 3 | `03_feature_engineering.ipynb` | Création de variables (Lags, Moyennes mobiles, Encodage des zones climatiques). |
-| 4 | `04_modelisation.ipynb` | Entraînement du modèle hybride (Random Forest + ARIMA) et optimisation des hyperparamètres. |
+| 4 | `04_modelisation.ipynb` | Entraînement du modèle hybride (Linear Regression + ARIMA) et optimisation des hyperparamètres. |
 | 5 | `05_irs_episodes.ipynb` | Calcul de l'Indice de Risque Sanitaire (IRS) par ACP et détection d'épisodes critiques. |
 | 6 | `06_shap_interpretation.ipynb` | Analyse de l'importance des variables via SHAP (Explicabilité globale et locale). |
 | 7 | `07_analyse_residus_final.ipynb` | Diagnostic final du modèle, analyse des erreurs et validation de la précision. |
