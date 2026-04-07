@@ -166,6 +166,14 @@ VILLES_CAMEROUN = [
 
 cache_session    = requests_cache.CachedSession('.cache_daily', expire_after=3600)
 retry_session    = retry(cache_session, retries=5, backoff_factor=0.5)
+
+# Ajout d'un timeout de 30 secondes pour éviter les blocages infinis (GitHub Actions)
+old_request = retry_session.request
+def request_with_timeout(*args, **kwargs):
+    kwargs.setdefault('timeout', 30)
+    return old_request(*args, **kwargs)
+retry_session.request = request_with_timeout
+
 openmeteo_client = openmeteo_requests.Client(session=retry_session)
 
 # ─────────────────────────────────────────────────────────────────────────────
