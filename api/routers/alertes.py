@@ -125,13 +125,13 @@ async def force_notify_test(db: AsyncSession = Depends(get_db)):
     count = 0
     for user in users:
         try:
-            NotificationService.send_air_quality_alert(
-                token=user.fcm_token,
-                city=user.subscribed_city or "Bafoussam",
-                pm25=99.9,
-                level="TEST DIRECT"
+            success = await NotificationService.send_push_notification(
+                user.fcm_token,
+                "⚠️ Alerte Qualité de l'Air (Test)",
+                f"AirSentinel : La pollution a dépassé le seuil critique à {user.subscribed_city or 'votre ville'}. Protégez-vous !"
             )
-            count += 1
+            if success:
+                count += 1
         except Exception as e:
             print(f"Erreur test push pour {user.email}: {e}")
             
