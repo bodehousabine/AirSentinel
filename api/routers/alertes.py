@@ -5,10 +5,13 @@ Endpoint GET /alertes — Distribution des jours par niveau IRS par année.
 """
 
 import pandas as pd
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.services.data_service import get_dataframe
+from api.services.alert_service import AlertService
+from api.core.database import get_db
 
 router = APIRouter(prefix="/alertes", tags=["Alertes"])
 
@@ -94,3 +97,13 @@ def get_alertes():
             CRITIQUE=counts.get("CRITIQUE", 0),
         )
     return result
+
+
+@router.post("/trigger-test", tags=["Debug"])
+async def trigger_alerts_test(db: AsyncSession = Depends(get_db)):
+    """
+    Déclenche manuellement un scan d'alertes pour test.
+    Vérifiez les logs de l'API pour voir le résultat.
+    """
+    await AlertService.process_alerts(db)
+    return {"message": "Scan d'alertes lancé. Vérifiez les logs du serveur."}

@@ -61,7 +61,7 @@ class EmailService:
                         Veuillez limiter vos activités de plein air et fermer vos fenêtres si possible.
                     </p>
                     
-                    <a href="http://localhost:3000/dashboard/predictions" 
+                    <a href="{settings.FRONTEND_URL}/dashboard/predictions" 
                        style="display: inline-block; margin-top: 30px; padding: 15px 30px; background: #10b981; color: white; text-decoration: none; border-radius: 12px; font-weight: 900; text-transform: uppercase; font-size: 12px;">
                         Voir l'Analyse Complète
                     </a>

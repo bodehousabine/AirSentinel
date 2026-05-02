@@ -8,6 +8,9 @@ import logging
 from api.core.config import get_settings
 from api.routers import kpis, carte, predictions, alertes, decision, contexte, users
 from api.auth.router import router as auth_router
+import asyncio
+from api.services.alert_service import AlertService
+from api.core.database import AsyncSessionLocal
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -23,8 +26,24 @@ async def lifespan(app: FastAPI):
         logger.info("Modèles ML chargés avec succès.")
     except FileNotFoundError as e:
         logger.warning(f"Modèles ML non disponibles (mode dégradé) : {e}")
+
+    # Lancement du planificateur d'alertes en arrière-plan
+    async def alert_scheduler():
+        logger.info("Planificateur d'alertes démarré (Fréquence : 1 heure).")
+        while True:
+            try:
+                async with AsyncSessionLocal() as db:
+                    await AlertService.process_alerts(db)
+            except Exception as e:
+                logger.error(f"Erreur critique dans le scheduler d'alertes : {e}")
+            await asyncio.sleep(3600)
+
+    alert_task = asyncio.create_task(alert_scheduler())
+    
     yield
+    
     logger.info("Arrêt de l'API AirSentinel.")
+    alert_task.cancel()
 
 
 app = FastAPI(

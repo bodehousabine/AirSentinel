@@ -13,6 +13,7 @@ class Settings(BaseSettings):
         "http://localhost:8501", 
         "https://airsentinel.onrender.com",
         "https://airsentinel-cameroon.vercel.app",
+        "https://airsentinel-chi.vercel.app",
         "https://project-uo7uo-7zvnt09fu-fofack-alemdjou-henri-joels-projects.vercel.app"
     ]
     
@@ -42,6 +43,7 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: Optional[str] = None
     EMAILS_FROM_EMAIL: str = "alerts@airsentinel.cm"
     EMAILS_FROM_NAME: str = "AirSentinel Alerts"
+    FRONTEND_URL: str = "https://airsentinel-chi.vercel.app"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
