@@ -42,17 +42,12 @@ export default function Navbar() {
   const handleToggleAlerts = async () => {
     if (!currentUser) return;
     
-    // Si déjà abonné, on "désabonne" (null), sinon on propose d'activer sur sa ville connue
+    // On utilise la ville d'inscription par défaut pour les alertes
     const isSubscribed = !!currentUser.subscribed_city;
     const targetCity = currentUser.subscribed_city;
     
-    if (!isSubscribed && !targetCity) {
-      notify.error("Veuillez d'abord sélectionner une ville dans vos paramètres ou sur la carte.");
-      return;
-    }
-    
     try {
-      const loading = notify.loading(isSubscribed ? "Désactivation..." : `Activation des alertes pour ${targetCity}...`);
+      const loading = notify.loading(isSubscribed ? "Désactivation..." : `Activation des alertes...`);
       
       const newCity = isSubscribed ? "" : (targetCity || ""); 
       
@@ -62,7 +57,7 @@ export default function Navbar() {
       setCurrentUser({ ...currentUser, subscribed_city: isSubscribed ? null : targetCity });
       
       notify.dismiss(loading);
-      notify.success(isSubscribed ? "Alertes désactivées." : `Alertes activées pour ${targetCity} !`);
+      notify.success(isSubscribed ? "Alertes désactivées." : `Alertes activées !`);
     } catch (err) {
       console.error("Erreur toggle alertes:", err);
       notify.error("Impossible de modifier vos alertes.");
