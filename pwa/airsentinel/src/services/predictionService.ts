@@ -3,10 +3,11 @@ import { PredictionPoint, MonthlyPM25 } from "../types/prediction";
 
 const predictionService = {
   getShortTerm: async (city?: string | null): Promise<PredictionPoint[]> => {
-    // Si la ville n'est pas spécifiée ou est "CAMEROON", on prend Douala par défaut pour les prédictions
-    // car le modèle a besoin d'une localisation concrète.
-    const targetCity = (!city || city === "CAMEROON") ? "Douala" : city;
-    const response = await apiClient.get(`predictions/short-term?city=${encodeURIComponent(targetCity)}`);
+    // Si la ville n'est pas spécifiée, on ne peut pas prédire
+    if (!city || city === "CAMEROON") {
+       throw new Error("Veuillez sélectionner une ville pour voir les prédictions.");
+    }
+    const response = await apiClient.get(`predictions/short-term?city=${encodeURIComponent(city)}`);
     return response.data;
   },
 
@@ -17,8 +18,7 @@ const predictionService = {
 
   computeInteractive: async (city: string, features: Record<string, number>) => {
     try {
-      const targetCity = (city === "CAMEROON") ? "Douala" : city;
-      const response = await apiClient.post("predictions/compute", { city: targetCity, features });
+      const response = await apiClient.post("predictions/compute", { city: city, features });
       return response.data;
     } catch (err: any) {
       console.error("[AI Lab] Computation failed:", err);

@@ -34,6 +34,7 @@ export const viewport: Viewport = {
 import { Toaster } from "react-hot-toast";
 
 import { LanguageProvider } from "@/context/LanguageContext";
+import NotificationManager from "@/components/NotificationManager";
 
 export default function RootLayout({
   children,
@@ -59,6 +60,7 @@ export default function RootLayout({
             },
           }}
         />
+        <NotificationManager />
         {children}
         </LanguageProvider>
       </body>

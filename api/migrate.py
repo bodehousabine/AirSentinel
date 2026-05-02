@@ -13,30 +13,31 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 async def migrate():
     if not DATABASE_URL:
-        print("❌ Erreur : DATABASE_URL non trouvée dans .env")
+        print("ERROR : DATABASE_URL non trouvee dans .env")
         return
 
-    print(f"🔄 Connexion à la base de données...")
+    print("Connexion a la base de donnees...")
     engine = create_async_engine(DATABASE_URL)
 
     async with engine.begin() as conn:
-        print("🔨 Ajout des colonnes manquantes à la table 'users'...")
+        print("--- Ajout des colonnes manquantes a la table 'users' ---")
         
         # SQL pour ajouter les colonnes si elles n'existent pas
         sql_commands = [
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS subscribed_city VARCHAR(100);",
-            "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_alert_sent TIMESTAMP WITH TIME ZONE;"
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_alert_sent TIMESTAMP WITH TIME ZONE;",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS fcm_token VARCHAR(255);"
         ]
         
         for sql in sql_commands:
             try:
                 await conn.execute(text(sql))
-                print(f"✅ Executé : {sql}")
+                print(f"OK : {sql}")
             except Exception as e:
-                print(f"⚠️ Erreur lors de l'exécution de '{sql}': {e}")
+                print(f"ERROR : {sql}: {e}")
 
     await engine.dispose()
-    print("🚀 Migration terminée avec succès !")
+    print("DONE : Migration terminee !")
 
 if __name__ == "__main__":
     asyncio.run(migrate())

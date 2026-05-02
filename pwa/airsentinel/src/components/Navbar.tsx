@@ -44,12 +44,17 @@ export default function Navbar() {
     
     // Si déjà abonné, on "désabonne" (null), sinon on propose d'activer sur sa ville connue
     const isSubscribed = !!currentUser.subscribed_city;
-    const targetCity = currentUser.subscribed_city || "Douala"; // Fallback au cas où
+    const targetCity = currentUser.subscribed_city;
+    
+    if (!isSubscribed && !targetCity) {
+      notify.error("Veuillez d'abord sélectionner une ville dans vos paramètres ou sur la carte.");
+      return;
+    }
     
     try {
-      const loading = notify.loading(isSubscribed ? "Désactivation..." : "Activation des alertes...");
+      const loading = notify.loading(isSubscribed ? "Désactivation..." : `Activation des alertes pour ${targetCity}...`);
       
-      const newCity = isSubscribed ? "" : targetCity; // L'API s'attend à une string (vide pour désactiver)
+      const newCity = isSubscribed ? "" : (targetCity || ""); 
       
       await predictionService.subscribeToCityAlerts(newCity);
       
@@ -92,7 +97,7 @@ export default function Navbar() {
                 ? "bg-[var(--teal)]/10 border-[var(--teal)]/40 text-[var(--teal)] shadow-[0_0_15px_rgba(0,212,177,0.2)]" 
                 : "bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:border-white/20"}
             `}
-            title={currentUser.subscribed_city ? `${t('nav_alerts_active')} (${currentUser.subscribed_city})` : t('nav_activate_alerts')}
+            title={currentUser.subscribed_city ? `${t('nav_alerts_active')} (${currentUser.subscribed_city})` : "Activer les alertes"}
           >
             {currentUser.subscribed_city ? (
               <>
