@@ -1,6 +1,6 @@
 # api/services/alert_service.py
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 import logging
@@ -32,7 +32,7 @@ class AlertService:
         for user in users:
             try:
                 # 2. Vérifier si on a déjà envoyé une alerte récemment (Cool down de 6 heures)
-                if user.last_alert_sent and (datetime.now() - user.last_alert_sent) < timedelta(hours=6):
+                if user.last_alert_sent and (datetime.now(timezone.utc) - user.last_alert_sent) < timedelta(hours=6):
                     continue
 
                 # 3. Calculer la qualité de l'air actuelle pour la ville (Simulation basée sur des features moyennes)
@@ -69,7 +69,7 @@ class AlertService:
                         )
                     
                     # Mise à jour du timestamp pour éviter le spam
-                    user.last_alert_sent = datetime.now()
+                    user.last_alert_sent = datetime.now(timezone.utc)
                     await db.commit()
             except Exception as e:
                 logger.error(f"[AlertService] Erreur lors du traitement pour {user.email} : {str(e)}")
