@@ -44,6 +44,13 @@ export default function ProfilPage() {
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("[Profil] Tentative de mise à jour avec:", { fullName, email, city });
+    
+    if (!fullName || !email) {
+      notify.error("Le nom et l'email sont obligatoires.");
+      return;
+    }
+
     setIsSaving(true);
     try {
       const updatedUser = await authService.updateProfile({
@@ -51,6 +58,7 @@ export default function ProfilPage() {
         email: email,
         subscribed_city: city
       });
+      console.log("[Profil] Mise à jour réussie:", updatedUser);
       setUser(updatedUser);
       // Synchroniser le contexte global de la ville
       if (city) selectVille(city);
@@ -58,6 +66,7 @@ export default function ProfilPage() {
       window.dispatchEvent(new Event('userUpdate'));
       notify.success("Profil mis à jour avec succès !");
     } catch (err: any) {
+      console.error("[Profil] Erreur lors de la mise à jour:", err);
       notify.error(err.response?.data?.detail || "Erreur lors de la mise à jour.");
     } finally {
       setIsSaving(false);

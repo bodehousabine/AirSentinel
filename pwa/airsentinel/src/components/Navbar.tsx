@@ -19,6 +19,8 @@ export default function Navbar() {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   useEffect(() => {
     const fetchUser = async () => {
       if (authService.isAuthenticated()) {
@@ -132,7 +134,10 @@ export default function Navbar() {
             </div>
             
             <div className="relative group">
-              <div className="w-9 h-9 rounded-full border-2 border-[var(--teal)]/30 overflow-hidden bg-slate-800 flex items-center justify-center cursor-pointer group-hover:border-[var(--teal)] transition-all">
+              <div 
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="w-9 h-9 rounded-full border-2 border-[var(--teal)]/30 overflow-hidden bg-slate-800 flex items-center justify-center cursor-pointer group-hover:border-[var(--teal)] transition-all"
+              >
                 {currentUser.avatar_url ? (
                   <Image 
                     src={currentUser.avatar_url} 
@@ -146,12 +151,16 @@ export default function Navbar() {
               </div>
               
               {/* Profile Dropdown */}
-              <div className="absolute top-12 right-0 bg-[#0f172a]/95 border border-white/10 p-2 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 whitespace-nowrap min-w-[190px] backdrop-blur-2xl translate-y-2 group-hover:translate-y-0">
+              <div className={`
+                absolute top-12 right-0 bg-[#0f172a]/95 border border-white/10 p-2 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] whitespace-nowrap min-w-[190px] backdrop-blur-2xl transition-all duration-300
+                ${isMenuOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-2 lg:group-hover:opacity-100 lg:group-hover:visible lg:group-hover:translate-y-0'}
+              `}>
                 <div className="px-3 py-2 border-b border-white/5 mb-2">
                   <p className="text-[10px] uppercase tracking-widest text-gray-500 font-bold">Compte</p>
                 </div>
                 <Link 
                   href="/dashboard/profil"
+                  onClick={() => setIsMenuOpen(false)}
                   className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-gray-200 hover:bg-[var(--teal)]/10 hover:text-[var(--teal)] transition-all mb-1 group/item"
                 >
                   <div className="w-8 h-8 rounded-lg bg-[var(--teal)]/10 flex items-center justify-center group-hover/item:bg-[var(--teal)]/20 transition-colors">
