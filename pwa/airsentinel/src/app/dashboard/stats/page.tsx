@@ -5,7 +5,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, 
   ResponsiveContainer, Cell, PieChart, Pie 
 } from "recharts";
-import { TrendingUp, Activity, MapPin, Loader2, Award, Zap, PieChart as PieIcon, Layers, AlertCircle } from "lucide-react";
+import { TrendingUp, Activity, MapPin, Loader2, Award, Zap, Layers, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import kpiService from "@/services/kpiService";
 import mapService from "@/services/mapService";
@@ -45,15 +45,8 @@ export default function StatsPage() {
     fetchData();
   }, [ville]);
 
-  // Transformer les données pour le graphique à barres
-  // En mode national : PM2.5 par région
-  // En mode ville : PM2.5 par région (filtré sur la région de la ville)
+  // isNational reste utile pour le header
   const isNational = !ville || ville === "CAMEROON";
-  const barData = analyses?.pm25_par_region ?
-    Object.entries(analyses.pm25_par_region).map(([name, value]) => ({
-      name,
-      value: value as number
-    })).sort((a, b) => b.value - a.value) : [];
 
   if (loading) {
     return (
@@ -135,38 +128,8 @@ export default function StatsPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-              {/* Main Bar Chart */}
-              <div className="lg:col-span-2 glass-card p-8 border-white/5 relative overflow-hidden group">
-                 <div className="flex justify-between items-start mb-10">
-                    <div>
-                       <h3 className="text-xl font-bold text-white tracking-tight">{t('stats_region_title')}</h3>
-                       <p className="text-xs text-gray-500 font-medium">{t('stats_region_sub')}</p>
-                    </div>
-                    <Award className="text-[#00d4b1]/20 group-hover:text-[#00d4b1]/40 transition-colors" size={32} />
-                 </div>
-
-                 <div className="h-[350px] min-h-[350px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                       <BarChart data={barData} margin={{ top: 20, right: 10, left: -20, bottom: 40 }}>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                          <XAxis dataKey="name" stroke="rgba(255,255,255,0.3)" fontSize={10} angle={-45} textAnchor="end" />
-                          <YAxis stroke="rgba(255,255,255,0.3)" fontSize={10} tickLine={false} axisLine={false} />
-                          <Tooltip 
-                             cursor={{ fill: 'rgba(0,212,177,0.05)' }}
-                             contentStyle={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px' }}
-                          />
-                          <Bar dataKey="value" radius={[4, 4, 0, 0]} animationDuration={1500}>
-                             {barData.map((entry, index) => (
-                               <Cell key={`cell-${index}`} fill={index < 3 ? '#00d4b1' : '#1e293b'} fillOpacity={0.8} />
-                             ))}
-                          </Bar>
-                       </BarChart>
-                    </ResponsiveContainer>
-                 </div>
-              </div>
-
-              {/* Top Cities Table */}
-              <div className="glass-card p-8 border-white/5 border-l-4 border-l-[#ef4444]/50 flex flex-col">
+              {/* Top Cities Table — col pleine largeur */}
+              <div className="lg:col-span-2 glass-card p-8 border-white/5 border-l-4 border-l-[#ef4444]/50 flex flex-col">
                  <h3 className="text-xl font-bold text-white mb-6 tracking-tight">{t('stats_top5')}</h3>
                  <div className="space-y-4 flex-1 overflow-y-auto pr-2">
                     {analyses?.top_5_villes_critiques?.map((city: any, idx: number) => (
@@ -192,142 +155,47 @@ export default function StatsPage() {
                     </p>
                  </div>
               </div>
+
+              {/* Polluants Mix */}
+              <div className="glass-card p-8 border-white/5 relative group">
+                 <div className="flex items-center gap-3 mb-6">
+                    <Layers className="text-[#00d4b1]" size={20} />
+                    <h3 className="text-lg font-bold text-white">{t('stats_mix')}</h3>
+                 </div>
+                 
+                 <div className="space-y-5">
+                   {contexte?.donut_polluants?.length > 0 ? (
+                       contexte.donut_polluants.map((entry: any, index: number) => (
+                          <div key={index} className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs font-bold text-gray-300">{entry.label}</span>
+                              <span className="text-xs font-black text-white">{entry.valeur}%</span>
+                            </div>
+                            <div className="w-full h-2 rounded-full overflow-hidden bg-white/5 border border-white/5">
+                               <div 
+                                 className="h-full rounded-full transition-all duration-1000 relative"
+                                 style={{ width: `${entry.valeur}%`, backgroundColor: entry.couleur }}
+                               >
+                                 <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/30" />
+                               </div>
+                            </div>
+                          </div>
+                       ))
+                   ) : (
+                       <div className="flex items-center justify-center h-full min-h-[150px]">
+                          <p className="text-gray-500 italic text-sm">{t('stats_no_multi')}</p>
+                       </div>
+                   )}
+                 </div>
+              </div>
             </div>
-
-            {/* Second Row: Advanced Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-               {/* Metric 1: Niveaux IRS (Stacked Progress) */}
-               <div className="glass-card p-8 border-white/5 relative group flex flex-col justify-between">
-                  <div className="flex items-center gap-3 mb-6">
-                     <Activity className="text-amber-400" size={20} />
-                     <h3 className="text-lg font-bold text-white">{t('stats_levels')}</h3>
-                  </div>
-                  
-                  <div className="space-y-6">
-                    {/* Stacked Progress Bar */}
-                    <div className="w-full h-4 rounded-full overflow-hidden flex bg-white/5 border border-white/10 shadow-inner">
-                      {contexte?.donut_niveaux?.map((entry: any, index: number) => (
-                         <div 
-                           key={index} 
-                           style={{ width: `${entry.valeur}%`, backgroundColor: entry.couleur }}
-                           className="h-full transition-all duration-1000 hover:brightness-125 hover:scale-y-110 origin-center"
-                           title={`${entry.label}: ${entry.valeur}%`}
-                         />
-                      ))}
-                    </div>
-
-                    {/* Labels grid */}
-                    <div className="grid grid-cols-2 gap-4">
-                      {contexte?.donut_niveaux?.map((entry: any, index: number) => (
-                         <div key={index} className="flex justify-between items-center bg-white/5 hover:bg-white/10 transition-colors p-3 rounded-xl border border-white/10">
-                           <div className="flex items-center gap-2">
-                             <div className="w-2.5 h-2.5 rounded-full shadow-[0_0_8px_rgba(255,255,255,0.3)]" style={{ backgroundColor: entry.couleur, boxShadow: `0 0 8px ${entry.couleur}` }} />
-                             <span className="text-xs font-bold text-gray-300">{entry.label}</span>
-                           </div>
-                           <span className="text-sm font-black text-white">{entry.valeur}%</span>
-                         </div>
-                      ))}
-                    </div>
-                  </div>
-               </div>
-
-               {/* Metric 2: Polluants Mix (Horizontal Bars) */}
-               <div className="glass-card p-8 border-white/5 relative group">
-                  <div className="flex items-center gap-3 mb-6">
-                     <Layers className="text-[#00d4b1]" size={20} />
-                     <h3 className="text-lg font-bold text-white">{t('stats_mix')}</h3>
-                  </div>
-                  
-                  <div className="space-y-5">
-                    {contexte?.donut_polluants?.length > 0 ? (
-                        contexte.donut_polluants.map((entry: any, index: number) => (
-                           <div key={index} className="space-y-2">
-                             <div className="flex justify-between items-center">
-                               <span className="text-xs font-bold text-gray-300">{entry.label}</span>
-                               <span className="text-xs font-black text-white">{entry.valeur}%</span>
-                             </div>
-                             <div className="w-full h-2 rounded-full overflow-hidden bg-white/5 border border-white/5">
-                                <div 
-                                  className="h-full rounded-full transition-all duration-1000 relative"
-                                  style={{ width: `${entry.valeur}%`, backgroundColor: entry.couleur }}
-                                >
-                                  <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/30" />
-                                </div>
-                             </div>
-                           </div>
-                        ))
-                    ) : (
-                        <div className="flex items-center justify-center h-full min-h-[150px]">
-                           <p className="text-gray-500 italic text-sm">{t('stats_no_multi')}</p>
-                        </div>
-                    )}
-                  </div>
-               </div>
-            </div>
-
-            {/* Third Row: Comparison & Enviro */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-               {/* Evolution Card */}
-               <div className="glass-card p-8 border-white/5 flex flex-col justify-between overflow-hidden relative">
-                  <div className="absolute top-0 right-0 p-4 opacity-10">
-                     <TrendingUp size={80} />
-                  </div>
-                  <div>
-                     <div className="text-[10px] font-black text-[#00d4b1] uppercase tracking-widest mb-2">{t('stats_trend_an')}</div>
-                     <h3 className="text-2xl font-black text-white mb-2">
-                        {contexte?.comparaison_annuelle?.evolution_pct > 0 ? '+' : ''}{contexte?.comparaison_annuelle?.evolution_pct}%
-                     </h3>
-                     <p className="text-xs text-gray-500 font-medium leading-relaxed">
-                        {t('stats_trend_desc')}
-                     </p>
-                  </div>
-                  <div className={`mt-6 inline-flex items-center gap-2 text-[10px] font-black px-3 py-1.5 rounded-full w-fit ${contexte?.comparaison_annuelle?.evolution_pct <= 0 ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
-                     {contexte?.comparaison_annuelle?.evolution_pct <= 0 ? t('stats_improve') : t('stats_degrad')}
-                  </div>
-               </div>
-
-               {/* UV Index Card */}
-               <div className="glass-card p-8 border-white/5 relative group bg-gradient-to-br from-amber-500/5 to-transparent">
-                  <div className="flex items-center justify-between mb-6">
-                     <div className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Index UV maximal</div>
-                     <Zap className="text-amber-500" size={18} />
-                  </div>
-                  <div className="flex items-baseline gap-2 mb-2">
-                     <span className="text-4xl font-black text-white">{contexte?.uv_ozone?.uv_index}</span>
-                     <span className="text-xs font-bold text-amber-500/50 uppercase">Elevé</span>
-                  </div>
-                  <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
-                     <div 
-                        className="h-full bg-gradient-to-r from-amber-500 to-orange-600 transition-all duration-1000" 
-                        style={{ width: `${(contexte?.uv_ozone?.uv_index / 12) * 100}%` }}
-                     />
-                  </div>
-                  <p className="text-[10px] text-gray-500 mt-4 italic">Source: {contexte?.uv_ozone?.source}</p>
-               </div>
-
-               {/* Ozone Card */}
-               <div className="glass-card p-8 border-white/5 relative group bg-gradient-to-br from-blue-500/5 to-transparent">
-                  <div className="flex items-center justify-between mb-6">
-                     <div className="text-[10px] font-black text-blue-400 uppercase tracking-widest">Ozone (O3)</div>
-                     <Activity className="text-blue-400" size={18} />
-                  </div>
-                  <div className="flex items-baseline gap-2 mb-2">
-                     <span className="text-4xl font-black text-white">{contexte?.uv_ozone?.ozone_ppb}</span>
-                     <span className="text-xs font-bold text-blue-400/50 uppercase">PPB</span>
-                  </div>
-                  <p className="text-xs text-gray-400 font-medium leading-relaxed mt-4">
-                     Concentration moyenne en surface. Niveau habituel pour la zone équatoriale.
-                  </p>
-               </div>
-            </div>
-
-            <div className="h-[120px] sm:hidden" />
-          </>
-        )}
-      </div>
-    </main>
-  );
-}
+             <div className="h-[120px] sm:hidden" />
+           </>
+         )}
+       </div>
+     </main>
+   );
+ }
 
 function StatCard({ icon, label, value, unit, color, isText }: any) {
   return (

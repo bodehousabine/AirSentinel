@@ -39,11 +39,15 @@ async def lifespan(app: FastAPI):
             await asyncio.sleep(3600)
 
     alert_task = asyncio.create_task(alert_scheduler())
-    
+
     yield
-    
+
     logger.info("Arrêt de l'API AirSentinel.")
     alert_task.cancel()
+    try:
+        await alert_task  # FIX: attendre la fin propre pour éviter les warnings asyncio
+    except asyncio.CancelledError:
+        pass
 
 
 app = FastAPI(
@@ -57,14 +61,15 @@ app = FastAPI(
 
 # ─── CORS ─────────────────────────────────────────────────────────
 origins = settings.ALLOWED_ORIGINS
-# En mode DEBUG, on peut être plus permissif pour faciliter le développement local
+# FIX: avec allow_origins=["*"], allow_credentials=True est invalide (erreur navigateur).
+# En DEBUG on autorise tout mais on désactive les credentials
 if settings.DEBUG:
     origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=True if "*" not in origins else False,
+    allow_credentials=False if "*" in origins else True,
     allow_methods=["*"],
     allow_headers=["*"],
 )

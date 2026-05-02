@@ -27,8 +27,12 @@ def get_dataframe() -> pd.DataFrame:
         raise FileNotFoundError(f"Le fichier de données '{dataset_path}' n'existe pas.")
         
     try:
-        _df = pd.read_parquet(dataset_path, engine='fastparquet')
-        
+        try:
+            _df = pd.read_parquet(dataset_path, engine='fastparquet')
+        except Exception:
+            # Fallback: certains envs n'ont pas fastparquet, on essaie pyarrow
+            _df = pd.read_parquet(dataset_path, engine='pyarrow')
+
         # ─── VIRTUAL TIME SHIFT (Live Demo Mode) ───
         # Pour que l'app paraisse "Live", on décale les dates pour que le dataset finisse AUJOURD'HUI.
         if 'date' in _df.columns:
@@ -38,7 +42,7 @@ def get_dataframe() -> pd.DataFrame:
                 delta = today - max_date
                 _df['date'] = _df['date'] + delta
                 logger.info(f"Dataset décalé de {delta.days} jours pour correspondre à la date actuelle ({today.date()})")
-        
+
         logger.info(f"Dataset chargé avec succès depuis {dataset_path}")
     except Exception as e:
         logger.error(f"Erreur lors du chargement du Parquet : {e}")

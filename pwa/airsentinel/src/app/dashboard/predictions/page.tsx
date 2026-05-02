@@ -83,10 +83,10 @@ export default function PredictionsPage() {
 
   const predictions = data.filter(p => p.is_prediction);
   const history = data.filter(p => !p.is_prediction);
-  const jPlus1 = predictions[0];
-  const jPlus2 = predictions[1];
-  const jPlus3 = predictions[2];
-  const lastReal = history[history.length - 1]?.pm25 || 0;
+  const today = history[history.length - 1];   // Aujourd'hui = dernière valeur réelle
+  const jPlus1 = predictions[0];               // Demain
+  const jPlus2 = predictions[1];               // Après-demain
+  const lastReal = today?.pm25 || 0;
   const trendPct = jPlus1 ? ((jPlus1.pm25 - lastReal) / lastReal) * 100 : 0;
 
   if (loading) {
@@ -220,34 +220,49 @@ export default function PredictionsPage() {
             </div>
 
             <div className="xl:col-span-4 space-y-6">
-               <div className="grid grid-cols-2 gap-4">
-                  <div className="glass-card p-6 border-white/5 space-y-4">
-                     <div className="text-[9px] text-gray-500 font-black uppercase tracking-widest">{t('pred_after_tomorrow')}</div>
-                     <div className="text-3xl font-black text-white tabular-nums">{jPlus2?.pm25.toFixed(1)}</div>
-                     <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                        <div className="h-full bg-blue-500 w-[60%] opacity-50" />
-                     </div>
+               {/* Cartes Aujourd'hui / Demain / Après-demain */}
+               <div className="grid grid-cols-1 gap-4">
+                  {/* Aujourd'hui */}
+                  <div className="glass-card p-6 border-white/5 flex items-center justify-between">
+                    <div className="space-y-1">
+                      <div className="text-[9px] text-gray-500 font-black uppercase tracking-widest">Aujourd’hui</div>
+                      <div className="text-3xl font-black text-white tabular-nums">
+                        {today?.pm25.toFixed(1) ?? "—"}
+                        <span className="text-xs font-normal text-gray-500 ml-1">µg/m³</span>
+                      </div>
+                    </div>
+                    <div className="w-12 h-12 rounded-2xl bg-[#00d4b1]/10 flex items-center justify-center text-2xl">
+                      📊
+                    </div>
                   </div>
-                  <div className="glass-card p-6 border-white/5 space-y-4">
-                     <div className="text-[9px] text-gray-500 font-black uppercase tracking-widest">{t('pred_in_3_days')}</div>
-                     <div className="text-3xl font-black text-white tabular-nums">{jPlus3?.pm25.toFixed(1)}</div>
-                     <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                        <div className="h-full bg-emerald-500 w-[40%] opacity-50" />
-                     </div>
-                  </div>
-               </div>
 
-               <div className="glass-card p-8 border-white/5 bg-gradient-to-br from-blue-500/5 to-transparent relative group">
-                  <div className="absolute top-4 right-4 text-blue-400 group-hover:scale-110 transition-transform">
-                     <Sparkles size={20} />
+                  {/* Demain */}
+                  <div className="glass-card p-6 border-white/5 flex items-center justify-between">
+                    <div className="space-y-1">
+                      <div className="text-[9px] text-gray-500 font-black uppercase tracking-widest">Demain (J+1)</div>
+                      <div className="text-3xl font-black text-white tabular-nums">
+                        {jPlus1?.pm25.toFixed(1) ?? "—"}
+                        <span className="text-xs font-normal text-gray-500 ml-1">µg/m³</span>
+                      </div>
+                    </div>
+                    <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-2xl">
+                      📆
+                    </div>
                   </div>
-                  <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-6">
-                     <AlertCircle size={24} />
+
+                  {/* Après-demain */}
+                  <div className="glass-card p-6 border-white/5 flex items-center justify-between">
+                    <div className="space-y-1">
+                      <div className="text-[9px] text-gray-500 font-black uppercase tracking-widest">Après-demain (J+2)</div>
+                      <div className="text-3xl font-black text-white tabular-nums">
+                        {jPlus2?.pm25.toFixed(1) ?? "—"}
+                        <span className="text-xs font-normal text-gray-500 ml-1">µg/m³</span>
+                      </div>
+                    </div>
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-2xl">
+                      🌤️
+                    </div>
                   </div>
-                  <h4 className="font-black text-xl text-white mb-2 leading-tight tracking-tight">{t('pred_calib')}</h4>
-                  <p className="text-xs text-gray-400 leading-relaxed font-medium">
-                    {t('pred_calib_desc')}
-                  </p>
                </div>
             </div>
           </div>

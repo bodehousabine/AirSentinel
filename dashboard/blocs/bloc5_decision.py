@@ -38,7 +38,7 @@ VULN_FR = {
         "enfants":    "🔴 DANGER — Ne pas sortir. Fermer fenêtres. Appeler le médecin si symptômes.",
         "enceintes":  "🔴 DANGER — Confinement strict. Consultation médicale urgente recommandée.",
         "ages":       "🔴 DANGER — Rester confiné. Activer le suivi médical d'urgence.",
-        "asthma":     "🔴 DANGER CRITIQUE — Traitement d'urgence. Appeler le 15 si crise.",
+        "asthma":     "🔴 DANGER CRITIQUE — Traitement d'urgence. Appeler le 115 si crise.",
         "agricult":   "🔴 DANGER — Cesser tout travail extérieur. Ne sortir qu'en cas d'absolue nécessité.",
     },
 }

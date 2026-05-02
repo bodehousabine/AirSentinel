@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { HeartPulse, ShieldCheck, Loader2, Wind, Activity, MapPin, ChevronDown, AlertTriangle, Footprints } from "lucide-react";
+import { HeartPulse, ShieldCheck, Loader2, MapPin, ChevronDown, AlertTriangle } from "lucide-react";
 import healthService, { ProfilRecommandation } from "@/services/healthService";
 import mapService from "@/services/mapService";
 import { useVille } from "@/context/VilleContext";
@@ -168,36 +168,6 @@ export default function AdultesPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="glass-card p-5 text-center">
-          <Wind className="mx-auto mb-2 text-blue-400" size={28} />
-          <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">{t('health_ventilation')}</div>
-          <div className={`text-sm font-bold ${rec?.niveau_risque === 'FAIBLE' ? 'text-green-400' : 'text-orange-400'}`}>
-            {rec?.niveau_risque === 'FAIBLE' ? `✅ ${t('health_opt_optimal')}` : `⚠️ ${t('health_opt_limited')}`}
-          </div>
-        </div>
-        <div className="glass-card p-5 text-center">
-          <Activity className="mx-auto mb-2 text-red-400" size={28} />
-          <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">{t('health_sport')}</div>
-          <div className={`text-sm font-bold ${rec?.niveau_risque === 'FAIBLE' ? 'text-green-400' : 'text-orange-400'}`}>
-            {rec?.niveau_risque === 'FAIBLE' ? `✅ ${t('health_opt_advise')}` : `⚠️ ${t('health_opt_caution')}`}
-          </div>
-        </div>
-        <div className="glass-card p-5 text-center">
-          <Footprints className="mx-auto mb-2 text-purple-400" size={28} />
-          <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">{t('health_outdoors')}</div>
-          <div className={`text-sm font-bold ${rec?.niveau_risque === 'FAIBLE' ? 'text-green-400' : 'text-orange-400'}`}>
-            {rec?.niveau_risque === 'FAIBLE' ? `✅ ${t('health_opt_possible')}` : `⚠️ ${t('health_opt_limit')}`}
-          </div>
-        </div>
-        <div className="glass-card p-5 text-center">
-          <div className="text-amber-400 text-2xl mb-2">😷</div>
-          <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-1">{t('health_mask')}</div>
-          <div className={`text-sm font-bold ${rec?.niveau_risque === 'FAIBLE' ? 'text-green-400' : 'text-orange-400'}`}>
-            {rec?.niveau_risque === 'FAIBLE' ? `❌ ${t('health_opt_no')}` : `✅ ${t('health_opt_yes')}`}
-          </div>
-        </div>
-      </div>
 
       <div className="glass-card p-6 mb-8 border-white/5">
         <h4 className="text-lg font-black text-white mb-4 flex items-center gap-2">

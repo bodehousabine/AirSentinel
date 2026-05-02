@@ -82,7 +82,7 @@ RECOMMANDATIONS = {
     "CRITIQUE": {
         "enfant": {
             "message": "🚨 Urgence sanitaire. Ne pas exposer les enfants à l'extérieur.",
-            "actions": ["Évacuation des zones les plus exposées si possible", "Fermer hermétiquement", "Appeler le 15 si détresse"]
+            "actions": ["Évacuation des zones les plus exposées si possible", "Fermer hermétiquement", "Appeler le 115 si détresse"]
         },
         "adulte": {
             "message": "🚨 Pollution critique. Confinement recommandé.",
@@ -94,7 +94,7 @@ RECOMMANDATIONS = {
         },
         "asthmatique": {
             "message": "🚨 Situation critique. Protocole d'urgence asthme à activer.",
-            "actions": ["Appeler le 15", "Utilisation immédiate des bronchodilatateurs", "Ne pas sortir sous aucun prétexte"]
+            "actions": ["Appeler le 115", "Utilisation immédiate des bronchodilatateurs", "Ne pas sortir sous aucun prétexte"]
         },
     },
 }

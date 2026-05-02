@@ -7,13 +7,23 @@ Endpoint GET /kpis — Retourne les 6 KPIs nationaux AirSentinel.
 import numpy as np
 import pandas as pd
 from fastapi import APIRouter, HTTPException
-from scipy import stats
+from typing import Optional
+import logging
 
 from api.services.data_service import get_dataframe, apply_filters
 from api.schemas.pollution import KPIResponse
-from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/kpis", tags=["KPIs"])
+
+
+def _find_col(df: pd.DataFrame, candidates: list[str]):
+    """Cherche la première colonne disponible dans le DataFrame parmi une liste de candidats."""
+    for col in candidates:
+        if col in df.columns:
+            return col
+    return None
 
 
 @router.get("", response_model=KPIResponse)
@@ -33,6 +43,9 @@ def get_kpis(city: Optional[str] = None):
             df = apply_filters(df, villes=[city])
     except FileNotFoundError as e:
         raise HTTPException(status_code=503, detail=str(e))
+
+    if df.empty:
+        raise HTTPException(status_code=404, detail=f"Aucune donnée pour la ville '{city}'.")
 
     # --- PM2.5 moyen ---
     pm25_col = _find_col(df, ["pm2_5_moyen", "pm2_5", "pm25", "PM2.5", "PM25"])
@@ -58,22 +71,26 @@ def get_kpis(city: Optional[str] = None):
         "O3": _find_col(df, ["o3", "O3"]),
         "SO2": _find_col(df, ["so2", "SO2"]),
     }
-    polluant_dominant = max(
-        {k: df[v].mean() for k, v in polluant_cols.items() if v},
-        key=lambda k: {k: df[polluant_cols[k]].mean() for k, v in polluant_cols.items() if v}.get(k, 0),
-        default="PM2.5"
-    )
+    # FIX: Logique de polluant dominant correcte (ancienne version était redondante et cassée)
+    available_polluants = {k: float(df[v].mean()) for k, v in polluant_cols.items() if v}
+    polluant_dominant = max(available_polluants, key=available_polluants.get) if available_polluants else "PM2.5"
 
     # --- Tendance nationale sur les 12 derniers mois ---
     tendance = "stable"
     if pm25_col and "date" in df.columns:
-        df_sorted = df.sort_values("date")
-        last_12 = df_sorted[df_sorted["date"] >= df_sorted["date"].max() - pd.DateOffset(months=12)]
-        if len(last_12) > 2:
-            x = np.arange(len(last_12))
-            slope, _, _, p_value, _ = stats.linregress(x, last_12[pm25_col].fillna(method="ffill"))
-            if p_value < 0.05:
-                tendance = "croissant" if slope > 0 else "décroissant"
+        try:
+            from scipy import stats
+            df_sorted = df.sort_values("date")
+            last_12 = df_sorted[df_sorted["date"] >= df_sorted["date"].max() - pd.DateOffset(months=12)]
+            if len(last_12) > 2:
+                x = np.arange(len(last_12))
+                # FIX: méthode 'ffill' dépréciée depuis pandas 2.x, remplacée par ffill()
+                y_values = last_12[pm25_col].ffill().values
+                slope, _, _, p_value, _ = stats.linregress(x, y_values)
+                if p_value < 0.05:
+                    tendance = "croissant" if slope > 0 else "décroissant"
+        except Exception as e:
+            logger.warning(f"[KPIs] Impossible de calculer la tendance : {e}")
 
     return KPIResponse(
         pm25_moyen=round(pm25_moyen, 2),
@@ -83,11 +100,3 @@ def get_kpis(city: Optional[str] = None):
         tendance=tendance,
         total_observations=len(df),
     )
-
-
-def _find_col(df: pd.DataFrame, candidates: list[str]):
-    """Cherche la première colonne disponible dans le DataFrame parmi une liste de candidats."""
-    for col in candidates:
-        if col in df.columns:
-            return col
-    return None

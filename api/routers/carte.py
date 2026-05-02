@@ -157,8 +157,9 @@ def get_analyses(city: Optional[str] = None):
     if "date" in df.columns and pm25_col:
         df_s = df.sort_values("date")
         last12 = df_s[df_s["date"] >= df_s["date"].max() - pd.DateOffset(months=12)]
-        monthly = last12.resample("ME", on="date")[pm25_col].mean().round(2)
-        tendance_12_mois = {str(k.date()): v for k, v in monthly.items()}
+        monthly = last12.resample("ME", on="date")[pm25_col].mean().round(2).dropna()
+        # FIX: les valeurs NaN brisent la sérialisation JSON — on les exclut via dropna()
+        tendance_12_mois = {str(k.date()): float(v) for k, v in monthly.items()}
 
     # 3. Top 3 polluants
     polluant_cols = {
@@ -168,7 +169,11 @@ def get_analyses(city: Optional[str] = None):
         "O3":    _find_col(df, ["o3"]),
         "SO2":   _find_col(df, ["so2"]),
     }
-    available = {k: round(float(df[v].mean()), 2) for k, v in polluant_cols.items() if v}
+    available = {
+        k: round(float(df[v].mean()), 2)
+        for k, v in polluant_cols.items()
+        if v and not df[v].isna().all()  # FIX: skip columns that are all-NaN
+    }
     top_3 = sorted(available.items(), key=lambda x: x[1], reverse=True)[:3]
     top_3_polluants = [{"polluant": k, "moyenne": v} for k, v in top_3]
 

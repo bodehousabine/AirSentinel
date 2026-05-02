@@ -273,8 +273,11 @@ export default function LeafletMap() {
 
            <LayersControl.Overlay checked name="📍 Stations">
                {points.filter(p => p.lat !== null && p.lon !== null).map((point) => {
-                 const color = point.irs_color || "#22c55e";
-                 const pm25Value = point.pm25_moyen.toFixed(1);
+                 // Couleur basée sur PM2.5 (seuils OMS)
+                 const pm25 = point.pm25_moyen;
+                 const color = pm25 <= 10 ? "#4CAF50" : pm25 <= 25 ? "#FFC107" : pm25 <= 50 ? "#FF5722" : "#B71C1C";
+                 const pm25Label = pm25 <= 10 ? "Bon" : pm25 <= 25 ? "Modéré" : pm25 <= 50 ? "Élevé" : "Critique";
+                 const pm25Value = pm25.toFixed(1);
                  
                  return (
                    <CircleMarker
@@ -306,29 +309,26 @@ export default function LeafletMap() {
                           <div className="text-lg font-bold mb-1 border-b pb-1">{point.city}</div>
                           
                           <div className="space-y-2 mt-2">
-                            {/* Section IRS */}
+                            {/* Section PM2.5 principale */}
                             <div className="flex flex-col gap-0.5">
-                              <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Risque (IRS)</span>
+                              <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Pollution PM2.5</span>
+                              <div className="flex items-center gap-1.5 bg-gray-50 p-1.5 rounded-lg border border-gray-100">
+                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }}></div>
+                                <span className="text-sm font-bold text-gray-800">
+                                  {point.pm25_moyen} <span className="text-[10px] font-normal text-gray-500">µg/m³</span>
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Niveau de qualité */}
+                            <div className="flex flex-col gap-0.5">
+                              <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Qualité de l&apos;air</span>
                               <div className="flex items-center gap-2">
                                 <span 
                                   className="px-2 py-0.5 rounded text-[11px] font-bold text-white uppercase"
                                   style={{ backgroundColor: color }}
                                 >
-                                  {point.irs_label || "Stable"}
-                                </span>
-                                <span className="text-xs font-medium text-gray-500">
-                                  {point.irs_moyen ? point.irs_moyen.toFixed(2) : "0.00"}
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Section PM2.5 */}
-                            <div className="flex flex-col gap-0.5">
-                              <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Pollution (PM2.5)</span>
-                              <div className="flex items-center gap-1.5 bg-gray-50 p-1.5 rounded-lg border border-gray-100">
-                                <div className="w-2 h-2 rounded-full bg-[#00d4b1]"></div>
-                                <span className="text-sm font-bold text-gray-800">
-                                  {point.pm25_moyen} <span className="text-[10px] font-normal text-gray-500">µg/m³</span>
+                                  {pm25Label}
                                 </span>
                               </div>
                             </div>
@@ -352,26 +352,26 @@ export default function LeafletMap() {
         </LayersControl>
       </MapContainer>
 
-      {/* ── Légende PWA Premium ── */}
+      {/* ── Légende PM2.5 ── */}
       <div className="absolute bottom-24 left-6 z-[1000] bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-3xl p-5 shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div className="flex flex-col gap-4">
           <div className="space-y-1">
             <h4 className="text-[10px] font-black text-[var(--teal)] uppercase tracking-[0.15em] leading-none">
-              Indice IRS
+              Pollution PM2.5
             </h4>
-            <p className="text-[9px] text-gray-400 font-medium">Niveau de risque santé</p>
+            <p className="text-[9px] text-gray-400 font-medium">Concentration µg/m³ (seuils OMS)</p>
           </div>
           
           <div className="grid grid-cols-1 gap-3">
             {[
-              { label: "Faible", color: "#4CAF50", desc: "Air pur & sain" },
-              { label: "Modéré", color: "#FFC107", desc: "Sensibilité légère" },
-              { label: "Élevé", color: "#FF5722", desc: "Pollution active" },
-              { label: "Critique", color: "#B71C1C", desc: "Danger sanitaire" },
+              { label: "Bon",      color: "#4CAF50", desc: "≤ 10 µg/m³" },
+              { label: "Modéré",  color: "#FFC107", desc: "11 – 25 µg/m³" },
+              { label: "Élevé",   color: "#FF5722", desc: "26 – 50 µg/m³" },
+              { label: "Critique", color: "#B71C1C", desc: "> 50 µg/m³" },
             ].map((item) => (
               <div key={item.label} className="flex items-center gap-3">
                 <div 
-                  className="w-3 h-3 rounded-full border-2 border-white/20 shadow-[0_0_8px_rgba(0,0,0,0.2)]" 
+                  className="w-3 h-3 rounded-full border-2 border-white/20" 
                   style={{ backgroundColor: item.color, boxShadow: `0 0 12px ${item.color}44` }} 
                 />
                 <div className="flex flex-col">
