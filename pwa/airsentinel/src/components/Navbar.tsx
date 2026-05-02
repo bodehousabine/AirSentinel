@@ -32,6 +32,10 @@ export default function Navbar() {
       setIsLoading(false);
     };
     fetchUser();
+
+    // Écouter les mises à jour de profil pour synchroniser la Navbar
+    window.addEventListener('userUpdate', fetchUser);
+    return () => window.removeEventListener('userUpdate', fetchUser);
   }, []);
 
   const handleLogout = () => {

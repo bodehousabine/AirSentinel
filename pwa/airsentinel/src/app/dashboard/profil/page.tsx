@@ -3,10 +3,12 @@
 import React, { useState, useEffect } from "react";
 import { User, Mail, MapPin, Save, Shield, Bell, BellOff, Loader2, Camera } from "lucide-react";
 import authService from "@/services/authService";
+import userService from "@/services/userService";
 import predictionService from "@/services/predictionService";
 import { User as UserType } from "@/types/auth";
 import { notify } from "@/utils/toast";
 import { useLanguage } from "@/context/LanguageContext";
+import { useVille } from "@/context/VilleContext";
 import SearchableSelect from "@/components/ui/SearchableSelect";
 import { DATASET_CITIES } from "../../../services/dataService";
 
@@ -38,6 +40,8 @@ export default function ProfilPage() {
     fetchUser();
   }, []);
 
+  const { selectVille } = useVille();
+
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
@@ -48,11 +52,38 @@ export default function ProfilPage() {
         subscribed_city: city
       });
       setUser(updatedUser);
+      // Synchroniser le contexte global de la ville
+      if (city) selectVille(city);
+      // Notifier la Navbar de mettre à jour les infos utilisateur
+      window.dispatchEvent(new Event('userUpdate'));
       notify.success("Profil mis à jour avec succès !");
     } catch (err: any) {
       notify.error(err.response?.data?.detail || "Erreur lors de la mise à jour.");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handlePasswordChange = () => {
+    notify.info("Le changement de mot de passe sera disponible dans la prochaine version !");
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const loading = notify.loading("Téléchargement de l'avatar...");
+    try {
+      const { avatar_url } = await userService.uploadAvatar(file);
+      if (user) {
+        setUser({ ...user, avatar_url });
+      }
+      window.dispatchEvent(new Event('userUpdate'));
+      notify.dismiss(loading);
+      notify.success("Photo de profil mise à jour !");
+    } catch (err) {
+      notify.dismiss(loading);
+      notify.error("Erreur lors de l'envoi de l'image.");
     }
   };
 
@@ -62,6 +93,7 @@ export default function ProfilPage() {
     try {
       await predictionService.subscribeToCityAlerts(user.subscribed_city || city, newState);
       setUser({ ...user, is_alerts_enabled: newState });
+      window.dispatchEvent(new Event('userUpdate'));
       notify.success(newState ? "Alertes activées !" : "Alertes désactivées.");
     } catch (err) {
       notify.error("Erreur lors de la modification des alertes.");
@@ -100,9 +132,19 @@ export default function ProfilPage() {
                   <User size={48} className="text-[var(--teal)]" />
                 )}
               </div>
-              <button className="absolute bottom-0 right-0 p-2.5 bg-[var(--teal)] rounded-xl text-white shadow-xl hover:scale-110 transition-all">
+              <button 
+                onClick={() => document.getElementById('avatarInput')?.click()}
+                className="absolute bottom-0 right-0 p-2.5 bg-[var(--teal)] rounded-xl text-white shadow-xl hover:scale-110 transition-all"
+              >
                 <Camera size={18} />
               </button>
+              <input 
+                id="avatarInput"
+                type="file" 
+                className="hidden" 
+                accept="image/*"
+                onChange={handleAvatarUpload}
+              />
             </div>
             
             <h2 className="text-xl font-bold text-white mb-1 text-center">{user?.full_name}</h2>
@@ -136,7 +178,12 @@ export default function ProfilPage() {
             <p className="text-xs text-gray-400 mb-4 leading-relaxed">
               Vos données sont protégées par un chiffrement de bout en bout conforme aux normes IndabaX.
             </p>
-            <button className="text-xs font-bold text-[var(--teal)] hover:underline">Changer mon mot de passe</button>
+            <button 
+              onClick={handlePasswordChange}
+              className="text-xs font-bold text-[var(--teal)] hover:underline"
+            >
+              Changer mon mot de passe
+            </button>
           </div>
         </div>
 
