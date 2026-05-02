@@ -21,3 +21,24 @@ test.md
 
 # Firebase Security
 api/firebase-service-account.json
+# Android & Bubblewrap Build Files
+.gradle/
+build/
+app/build/
+*.apk
+*.aab
+*.keystore
+*.jks
+local.properties
+android/
+
+# Bubblewrap / Android wrapper files
+/pwa/airsentinel/app/
+/pwa/airsentinel/gradle/
+/pwa/airsentinel/build.gradle
+/pwa/airsentinel/gradle.properties
+/pwa/airsentinel/gradlew*
+/pwa/airsentinel/settings.gradle
+/pwa/airsentinel/twa-manifest.json
+/pwa/airsentinel/manifest-checksum.txt
+/pwa/airsentinel/store_icon.png

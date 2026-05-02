@@ -5,7 +5,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, 
   ResponsiveContainer, AreaChart, Area, ReferenceLine 
 } from "recharts";
-import { Brain, Sparkles, AlertCircle, Loader2, TrendingUp, TrendingDown, Minus, RefreshCcw } from "lucide-react";
+import { Brain, Sparkles, AlertCircle, Loader2, TrendingUp, TrendingDown, Minus, RefreshCcw, Activity, CalendarDays, CalendarPlus } from "lucide-react";
 import predictionService from "@/services/predictionService";
 import { PredictionPoint } from "@/types/prediction";
 import { useVille } from "@/context/VilleContext";
@@ -231,8 +231,8 @@ export default function PredictionsPage() {
                         <span className="text-xs font-normal text-gray-500 ml-1">µg/m³</span>
                       </div>
                     </div>
-                    <div className="w-12 h-12 rounded-2xl bg-[#00d4b1]/10 flex items-center justify-center text-2xl">
-                      📊
+                    <div className="w-12 h-12 rounded-2xl bg-[#00d4b1]/10 flex items-center justify-center text-[#00d4b1]">
+                      <Activity size={24} />
                     </div>
                   </div>
 
@@ -245,8 +245,8 @@ export default function PredictionsPage() {
                         <span className="text-xs font-normal text-gray-500 ml-1">µg/m³</span>
                       </div>
                     </div>
-                    <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-2xl">
-                      📆
+                    <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+                      <CalendarDays size={24} />
                     </div>
                   </div>
 
@@ -259,8 +259,8 @@ export default function PredictionsPage() {
                         <span className="text-xs font-normal text-gray-500 ml-1">µg/m³</span>
                       </div>
                     </div>
-                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-2xl">
-                      🌤️
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                      <CalendarPlus size={24} />
                     </div>
                   </div>
                </div>
