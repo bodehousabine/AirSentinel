@@ -120,6 +120,7 @@ class UserUpdate(BaseModel):
     full_name: Optional[str] = None
     email: Optional[str] = None
     subscribed_city: Optional[str] = None
+    is_alerts_enabled: Optional[bool] = None
 
 @router.patch("/me")
 async def update_profile(
@@ -143,6 +144,12 @@ async def update_profile(
         
     if payload.subscribed_city is not None:
         current_user.subscribed_city = payload.subscribed_city
+        # Si on définit une ville, on active généralement les alertes par défaut
+        if payload.is_alerts_enabled is None:
+             current_user.is_alerts_enabled = True
+             
+    if payload.is_alerts_enabled is not None:
+        current_user.is_alerts_enabled = payload.is_alerts_enabled
         
     await db.commit()
     await db.refresh(current_user)
