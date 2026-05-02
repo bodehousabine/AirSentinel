@@ -24,6 +24,7 @@ const DATASET_CITIES = [
 ].sort();
 
 export default function RegisterPage() {
+  const [step, setStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -35,6 +36,15 @@ export default function RegisterPage() {
   const { t, lang } = useLanguage();
 
   const router = useRouter();
+
+  const handleNextStep = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fullName || !email || !city) {
+      notify.error("Veuillez remplir tous les champs obligatoires.");
+      return;
+    }
+    setStep(2);
+  };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,133 +132,163 @@ export default function RegisterPage() {
             </p>
           </div>
 
+          {/* Progress Indicator */}
+          <div className="flex items-center gap-2 mb-6 w-full max-w-[120px]">
+            <div className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${step >= 1 ? 'bg-[var(--teal)]' : 'bg-white/10'}`}></div>
+            <div className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${step >= 2 ? 'bg-[var(--teal)]' : 'bg-white/10'}`}></div>
+          </div>
+
           <h2 className="text-[1.35rem] font-medium text-white mb-6">
-            {t('reg_title')}
+            {step === 1 ? "Informations Personnelles" : "Sécurité & Profil"}
           </h2>
 
-          <form className="w-full flex flex-col gap-5 sm:gap-6" onSubmit={handleRegister}>
-
-            {/* Profile Image Field */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[13px] text-gray-300 ml-1">{t('reg_avatar')}</label>
-              <div className="relative group">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setAvatar(e.target.files?.[0] || null)}
-                  className="w-full h-[1.1cm] bg-[#1e293b]/40 border border-white/10 rounded-xl pl-4 pr-[3.5rem] file:mr-4 file:h-full file:px-3 file:border-0 file:text-[11px] file:font-semibold file:bg-[var(--teal)] file:text-[#020c18] hover:file:bg-[#00b396] text-white text-sm focus:outline-none focus:border-[var(--teal)] focus:ring-1 focus:ring-[var(--teal)]/50 transition-all cursor-pointer overflow-hidden flex items-center"
-                />
-                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-[var(--teal)]">
-                  <ImageIcon className="w-5 h-5 opacity-90 group-focus-within:opacity-100 transition-opacity" />
-                </div>
-              </div>
-            </div>
-
-            {/* Full Name Field */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[13px] text-gray-300 ml-1">{t('reg_fullname')}</label>
-              <div className="relative group">
-                <input
-                  type="text"
-                  placeholder={t('reg_fullname_placeholder')}
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="w-full h-[1.1cm] bg-[#1e293b]/40 border border-white/10 rounded-xl pl-4 pr-[3.5rem] text-white text-sm placeholder:text-gray-500 focus:outline-none focus:border-[var(--teal)] focus:ring-1 focus:ring-[var(--teal)]/50 transition-all"
-                  required
-                />
-                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-[var(--teal)]">
-                  <User className="w-5 h-5 opacity-90 group-focus-within:opacity-100 transition-opacity" />
-                </div>
-              </div>
-            </div>
-
-            {/* Email Field */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[13px] text-gray-300 ml-1">{t('login_email')}</label>
-              <div className="relative group">
-                <input
-                  type="email"
-                  autoComplete="email"
-                  placeholder="votre@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full h-[1.1cm] bg-[#1e293b]/40 border border-white/10 rounded-xl pl-4 pr-[3.5rem] text-white text-sm placeholder:text-gray-500 focus:outline-none focus:border-[var(--teal)] focus:ring-1 focus:ring-[var(--teal)]/50 transition-all"
-                  required
-                />
-                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-[var(--teal)]">
-                  <Mail className="w-5 h-5 opacity-90 group-focus-within:opacity-100 transition-opacity" />
-                </div>
-              </div>
-            </div>
-
-            {/* City Field (Smart Selector) */}
-            <SearchableSelect
-              label={t('reg_city')}
-              options={DATASET_CITIES}
-              value={city}
-              onChange={(val) => setCity(val)}
-              placeholder={t('reg_city_placeholder')}
-            />
-
-            {/* Password Field */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[13px] text-gray-300 ml-1">{t('login_password')}</label>
-              <div className="relative group">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="new-password"
-                  placeholder={t('login_password')}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full h-[1.1cm] bg-[#1e293b]/40 border border-white/10 rounded-xl pl-4 pr-[5.5rem] text-white text-sm placeholder:text-gray-500 focus:outline-none focus:border-[var(--teal)] focus:ring-1 focus:ring-[var(--teal)]/50 transition-all mb-1"
-                  required
-                />
-                <div className="absolute inset-y-0 right-0 pr-4 flex items-center gap-2">
-                  <Lock className="w-5 h-5 text-[var(--teal)] opacity-90 group-focus-within:opacity-100 transition-opacity pointer-events-none" />
-                  <div
-                    className="flex items-center text-gray-400 hover:text-white cursor-pointer transition-colors"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+          <form className="w-full flex flex-col gap-5 sm:gap-6" onSubmit={step === 1 ? handleNextStep : handleRegister}>
+            
+            {step === 1 && (
+              <div className="flex flex-col gap-5 sm:gap-6 animate-fade-in">
+                {/* Full Name Field */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[13px] text-gray-300 ml-1">{t('reg_fullname')}</label>
+                  <div className="relative group">
+                    <input
+                      type="text"
+                      placeholder={t('reg_fullname_placeholder')}
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="w-full h-[1.1cm] bg-[#1e293b]/40 border border-white/10 rounded-xl pl-4 pr-[3.5rem] text-white text-sm placeholder:text-gray-500 focus:outline-none focus:border-[var(--teal)] focus:ring-1 focus:ring-[var(--teal)]/50 transition-all"
+                      required
+                    />
+                    <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-[var(--teal)]">
+                      <User className="w-5 h-5 opacity-90 group-focus-within:opacity-100 transition-opacity" />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Confirm Password Field */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[13px] text-gray-300 ml-1">{t('reg_confirm_pass')}</label>
-              <div className="relative group">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="new-password"
-                  placeholder={t('reg_confirm_pass_placeholder')}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full h-[1.1cm] bg-[#1e293b]/40 border border-white/10 rounded-xl pl-4 pr-[5.5rem] text-white text-sm placeholder:text-gray-500 focus:outline-none focus:border-[var(--teal)] focus:ring-1 focus:ring-[var(--teal)]/50 transition-all"
-                  required
-                />
-                <div className="absolute inset-y-0 right-0 pr-4 flex items-center gap-2">
-                  <Lock className="w-5 h-5 text-[var(--teal)] opacity-90 group-focus-within:opacity-100 transition-opacity pointer-events-none" />
-                  <div
-                    className="flex items-center text-gray-400 hover:text-white cursor-pointer transition-colors"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                {/* Email Field */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[13px] text-gray-300 ml-1">{t('login_email')}</label>
+                  <div className="relative group">
+                    <input
+                      type="email"
+                      autoComplete="email"
+                      placeholder="votre@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full h-[1.1cm] bg-[#1e293b]/40 border border-white/10 rounded-xl pl-4 pr-[3.5rem] text-white text-sm placeholder:text-gray-500 focus:outline-none focus:border-[var(--teal)] focus:ring-1 focus:ring-[var(--teal)]/50 transition-all"
+                      required
+                    />
+                    <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-[var(--teal)]">
+                      <Mail className="w-5 h-5 opacity-90 group-focus-within:opacity-100 transition-opacity" />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="btn-primary w-full mt-4 !font-medium flex items-center justify-center gap-2 disabled:opacity-70"
-            >
-              {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
-              {isLoading ? t('reg_processing') : t('reg_button')}
-            </button>
+                {/* City Field (Smart Selector) */}
+                <SearchableSelect
+                  label={t('reg_city')}
+                  options={DATASET_CITIES}
+                  value={city}
+                  onChange={(val) => setCity(val)}
+                  placeholder={t('reg_city_placeholder')}
+                />
+
+                {/* Next Step Button */}
+                <button
+                  type="submit"
+                  className="btn-primary w-full mt-4 !font-medium flex items-center justify-center gap-2"
+                >
+                  Suivant
+                </button>
+              </div>
+            )}
+
+            {step === 2 && (
+              <div className="flex flex-col gap-5 sm:gap-6 animate-fade-in">
+                {/* Profile Image Field */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[13px] text-gray-300 ml-1">{t('reg_avatar')}</label>
+                  <div className="relative group">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setAvatar(e.target.files?.[0] || null)}
+                      className="w-full h-[1.1cm] bg-[#1e293b]/40 border border-white/10 rounded-xl pl-4 pr-[3.5rem] file:mr-4 file:h-full file:px-3 file:border-0 file:text-[11px] file:font-semibold file:bg-[var(--teal)] file:text-[#020c18] hover:file:bg-[#00b396] text-white text-sm focus:outline-none focus:border-[var(--teal)] focus:ring-1 focus:ring-[var(--teal)]/50 transition-all cursor-pointer overflow-hidden flex items-center"
+                    />
+                    <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-[var(--teal)]">
+                      <ImageIcon className="w-5 h-5 opacity-90 group-focus-within:opacity-100 transition-opacity" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Password Field */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[13px] text-gray-300 ml-1">{t('login_password')}</label>
+                  <div className="relative group">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="new-password"
+                      placeholder={t('login_password')}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full h-[1.1cm] bg-[#1e293b]/40 border border-white/10 rounded-xl pl-4 pr-[5.5rem] text-white text-sm placeholder:text-gray-500 focus:outline-none focus:border-[var(--teal)] focus:ring-1 focus:ring-[var(--teal)]/50 transition-all mb-1"
+                      required
+                    />
+                    <div className="absolute inset-y-0 right-0 pr-4 flex items-center gap-2">
+                      <Lock className="w-5 h-5 text-[var(--teal)] opacity-90 group-focus-within:opacity-100 transition-opacity pointer-events-none" />
+                      <div
+                        className="flex items-center text-gray-400 hover:text-white cursor-pointer transition-colors"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Confirm Password Field */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[13px] text-gray-300 ml-1">{t('reg_confirm_pass')}</label>
+                  <div className="relative group">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="new-password"
+                      placeholder={t('reg_confirm_pass_placeholder')}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full h-[1.1cm] bg-[#1e293b]/40 border border-white/10 rounded-xl pl-4 pr-[5.5rem] text-white text-sm placeholder:text-gray-500 focus:outline-none focus:border-[var(--teal)] focus:ring-1 focus:ring-[var(--teal)]/50 transition-all"
+                      required
+                    />
+                    <div className="absolute inset-y-0 right-0 pr-4 flex items-center gap-2">
+                      <Lock className="w-5 h-5 text-[var(--teal)] opacity-90 group-focus-within:opacity-100 transition-opacity pointer-events-none" />
+                      <div
+                        className="flex items-center text-gray-400 hover:text-white cursor-pointer transition-colors"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 mt-4">
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="flex-1 h-[1.1cm] bg-white/5 border border-white/10 rounded-xl text-white font-medium hover:bg-white/10 transition-all"
+                  >
+                    Retour
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="flex-[2] btn-primary !mt-0 !font-medium flex items-center justify-center gap-2 disabled:opacity-70"
+                  >
+                    {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
+                    {isLoading ? t('reg_processing') : t('reg_button')}
+                  </button>
+                </div>
+              </div>
+            )}
           </form>
 
           {/* Footer Text */}
