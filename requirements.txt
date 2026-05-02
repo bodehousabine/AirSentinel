@@ -26,3 +26,5 @@ python-dotenv==1.0.1
 openpyxl==3.1.5
 fastparquet==2024.5.0
 pypdf==6.9.2
+firebase-admin==6.5.0
+pytz==2024.1
