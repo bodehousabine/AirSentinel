@@ -9,42 +9,53 @@ import toast from "react-hot-toast";
 
 export default function NotificationManager() {
   useEffect(() => {
+    let retryCount = 0;
+    const maxRetries = 3;
+
     const setupNotifications = async () => {
-      // 1. Vérifier si l'utilisateur est connecté
-      if (!authService.isAuthenticated()) return;
+      // Si pas encore connecté, on attend un peu (le temps que le state auth se stabilise)
+      if (!authService.isAuthenticated()) {
+        if (retryCount < maxRetries) {
+          retryCount++;
+          setTimeout(setupNotifications, 2000);
+        }
+        return;
+      }
 
       try {
+        console.log("[FCM] Tentative de configuration...");
         // 2. Demander la permission
         const permission = await Notification.requestPermission();
         if (permission !== "granted") {
-          console.log("Permission de notification refusée.");
+          console.log("[FCM] Permission refusée.");
           return;
         }
 
-        // 3. Récupérer le token FCM
         const messaging = getMessaging(app);
-        
-        // Note: Remplacez par votre vraie clé VAPID si possible
         const token = await getToken(messaging, {
           vapidKey: "BCOhvQLvI5jxno6kfSATjGtotNS-ratoHpGgG0O7lTfmHP_utjn1a2CbgGjOEmmN6o6ZgwfhU0wRtceWfbQ95Lg"
         });
 
         if (token) {
-          console.log("Token FCM récupéré:", token);
-          // 4. Envoyer au backend
+          console.log("[FCM] Token récupéré:", token);
           await apiClient.post("/notifications/update-token", { fcm_token: token });
+          console.log("[FCM] Token synchronisé avec le serveur.");
         }
 
-        // 5. Écouter les messages quand l'app est au premier plan
         onMessage(messaging, (payload) => {
-          console.log("Message reçu au premier plan:", payload);
+          console.log("[FCM] Message reçu:", payload);
           toast.success(`${payload.notification?.title}: ${payload.notification?.body}`, {
-            duration: 5000,
+            duration: 8000,
             icon: "🚨",
+            style: {
+              background: '#1e293b',
+              color: '#fff',
+              border: '1px solid rgba(0,212,177,0.3)'
+            }
           });
         });
       } catch (error) {
-        console.error("Erreur lors de la configuration des notifications:", error);
+        console.error("[FCM] Erreur:", error);
       }
     };
 

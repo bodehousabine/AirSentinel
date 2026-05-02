@@ -107,3 +107,32 @@ async def trigger_alerts_test(db: AsyncSession = Depends(get_db)):
     """
     await AlertService.process_alerts(db)
     return {"message": "Scan d'alertes lancé. Vérifiez les logs du serveur."}
+
+@router.post("/force-notify-test", tags=["Debug"])
+async def force_notify_test(db: AsyncSession = Depends(get_db)):
+    """
+    Envoie une notification PUSH de test à TOUS les utilisateurs ayant un token,
+    SANS vérifier la qualité de l'air.
+    """
+    from sqlalchemy import select
+    from api.models.user import User
+    from api.services.notification_service import NotificationService
+    
+    stmt = select(User).where(User.fcm_token.isnot(None))
+    result = await db.execute(stmt)
+    users = result.scalars().all()
+    
+    count = 0
+    for user in users:
+        try:
+            NotificationService.send_air_quality_alert(
+                token=user.fcm_token,
+                city=user.subscribed_city or "Bafoussam",
+                pm25=99.9,
+                level="TEST DIRECT"
+            )
+            count += 1
+        except Exception as e:
+            print(f"Erreur test push pour {user.email}: {e}")
+            
+    return {"message": f"Test envoyé à {count} utilisateur(s)."}
