@@ -21,12 +21,12 @@ except Exception as e:
 
 class NotificationService:
     @staticmethod
-    def send_push_notification(token: str, title: str, body: str, data: dict = None):
+    async def send_push_notification(token: str, title: str, body: str, data: dict = None):
         """
         Envoie une notification push via Firebase Cloud Messaging.
         """
         if not token:
-            return
+            return None
 
         message = messaging.Message(
             notification=messaging.Notification(
@@ -38,7 +38,10 @@ class NotificationService:
         )
 
         try:
-            response = messaging.send(message)
+            # messaging.send est bloquant, on l'exécute dans un thread séparé
+            import asyncio
+            loop = asyncio.get_event_loop()
+            response = await loop.run_in_executor(None, lambda: messaging.send(message))
             logger.info(f"[Firebase] Notification envoyée avec succès : {response}")
             return response
         except Exception as e:
@@ -46,14 +49,14 @@ class NotificationService:
             return None
 
     @classmethod
-    def send_air_quality_alert(cls, token: str, city: str, pm25: float, level: str):
+    async def send_air_quality_alert(cls, token: str, city: str, pm25: float, level: str):
         """
         Envoie une alerte spécifique à la qualité de l'air.
         """
         title = f"🚨 Alerte Qualité de l'Air : {level}"
         body = f"La concentration de PM2.5 à {city} est de {pm25} µg/m³. Prenez vos précautions."
         
-        return cls.send_push_notification(
+        return await cls.send_push_notification(
             token=token,
             title=title,
             body=body,

@@ -65,7 +65,7 @@ class AlertService:
                     # Envoi Push Notification (FCM)
                     if user.fcm_token:
                         from api.services.notification_service import NotificationService
-                        NotificationService.send_air_quality_alert(
+                        await NotificationService.send_air_quality_alert(
                             token=user.fcm_token,
                             city=user.subscribed_city,
                             pm25=prediction.predicted_pm25,
