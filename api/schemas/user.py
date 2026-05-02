@@ -20,6 +20,7 @@ class UserResponse(UserBase):
     id: UUID
     avatar_url: Optional[str] = None
     subscribed_city: Optional[str] = None
+    is_alerts_enabled: bool = True
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

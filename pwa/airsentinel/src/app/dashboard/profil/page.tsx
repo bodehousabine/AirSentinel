@@ -8,7 +8,7 @@ import { User as UserType } from "@/types/auth";
 import { notify } from "@/utils/toast";
 import { useLanguage } from "@/context/LanguageContext";
 import SearchableSelect from "@/components/ui/SearchableSelect";
-import { DATASET_CITIES } from "@/services/dataService";
+import { DATASET_CITIES } from "../../../services/dataService";
 
 export default function ProfilPage() {
   const { t } = useLanguage();
