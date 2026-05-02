@@ -15,6 +15,7 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 export default function Navbar() {
   const { t, lang, setLang } = useLanguage();
   const [currentUser, setCurrentUser] = useState<UserType | null>(null);
+  const [originalCity, setOriginalCity] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
@@ -40,26 +41,33 @@ export default function Navbar() {
   };
 
   const handleToggleAlerts = async () => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      console.log("[Navbar] Pas d'utilisateur connecté.");
+      return;
+    }
     
-    // On utilise la ville d'inscription par défaut pour les alertes
-    const isSubscribed = !!currentUser.subscribed_city;
     const targetCity = currentUser.subscribed_city;
+    const currentEnabled = currentUser.is_alerts_enabled;
     
+    if (!targetCity) {
+      notify.error("Veuillez d'abord choisir une ville dans votre profil.");
+      router.push("/dashboard/profil");
+      return;
+    }
+
     try {
-      const loading = notify.loading(isSubscribed ? "Désactivation..." : `Activation des alertes...`);
+      const loading = notify.loading(currentEnabled ? "Désactivation..." : `Activation des alertes...`);
       
-      const newCity = isSubscribed ? "" : (targetCity || ""); 
+      await predictionService.subscribeToCityAlerts(targetCity, !currentEnabled);
       
-      await predictionService.subscribeToCityAlerts(newCity);
-      
-      // Mettre à jour l'état local immédiatement
-      setCurrentUser({ ...currentUser, subscribed_city: isSubscribed ? null : targetCity });
+      // Mettre à jour l'état local
+      const updatedUser = { ...currentUser, is_alerts_enabled: !currentEnabled };
+      setCurrentUser(updatedUser);
       
       notify.dismiss(loading);
-      notify.success(isSubscribed ? "Alertes désactivées." : `Alertes activées !`);
+      notify.success(!currentEnabled ? `Alertes activées sur ${targetCity} !` : "Alertes désactivées.");
     } catch (err) {
-      console.error("Erreur toggle alertes:", err);
+      console.error("[Navbar] Erreur toggle alertes:", err);
       notify.error("Impossible de modifier vos alertes.");
     }
   };
@@ -88,13 +96,13 @@ export default function Navbar() {
             onClick={handleToggleAlerts}
             className={`
               relative flex items-center gap-2 px-3 h-9 rounded-full border transition-all duration-300 group
-              ${currentUser.subscribed_city 
+              ${currentUser.is_alerts_enabled 
                 ? "bg-[var(--teal)]/10 border-[var(--teal)]/40 text-[var(--teal)] shadow-[0_0_15px_rgba(0,212,177,0.2)]" 
                 : "bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:border-white/20"}
             `}
-            title={currentUser.subscribed_city ? `${t('nav_alerts_active')} (${currentUser.subscribed_city})` : "Activer les alertes"}
+            title={currentUser.is_alerts_enabled ? `${t('nav_alerts_active')} (${currentUser.subscribed_city})` : "Activer les alertes"}
           >
-            {currentUser.subscribed_city ? (
+            {currentUser.is_alerts_enabled ? (
               <>
                 <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[var(--teal)] rounded-full animate-pulse shadow-[0_0_8px_rgba(0,212,177,0.8)]" />
                 <Bell size={16} className="animate-wiggle" />
@@ -133,14 +141,23 @@ export default function Navbar() {
                 )}
               </div>
               
-              {/* Simple logout tooltip/button on hover or click */}
-              <button 
-                onClick={handleLogout}
-                className="absolute top-12 right-0 bg-slate-900 border border-white/10 px-3 py-2 rounded-lg text-xs text-rose-400 flex items-center gap-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap hover:bg-rose-500/10"
-              >
-                <LogOut size={14} />
-                {t('nav_logout')}
-              </button>
+              {/* Profile Dropdown */}
+              <div className="absolute top-12 right-0 bg-slate-900 border border-white/10 p-1.5 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap min-w-[160px] backdrop-blur-2xl">
+                <Link 
+                  href="/dashboard/profil"
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-gray-300 hover:bg-white/5 hover:text-white transition-all mb-1"
+                >
+                  <User size={14} className="text-[var(--teal)]" />
+                  Mon Profil
+                </Link>
+                <button 
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-rose-400 hover:bg-rose-500/10 transition-all"
+                >
+                  <LogOut size={14} />
+                  {t('nav_logout')}
+                </button>
+              </div>
             </div>
           </div>
         ) : (

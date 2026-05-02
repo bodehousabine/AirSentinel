@@ -26,7 +26,8 @@ async def migrate():
         sql_commands = [
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS subscribed_city VARCHAR(100);",
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS last_alert_sent TIMESTAMP WITH TIME ZONE;",
-            "ALTER TABLE users ADD COLUMN IF NOT EXISTS fcm_token VARCHAR(255);"
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS fcm_token VARCHAR(255);",
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_alerts_enabled BOOLEAN DEFAULT TRUE;"
         ]
         
         for sql in sql_commands:

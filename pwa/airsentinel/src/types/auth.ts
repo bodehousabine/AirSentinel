@@ -5,6 +5,7 @@ export interface User {
   is_active: boolean;
   avatar_url: string | null;
   subscribed_city: string | null;
+  is_alerts_enabled: boolean;
   created_at: string; // ISO datetime string
 }
 

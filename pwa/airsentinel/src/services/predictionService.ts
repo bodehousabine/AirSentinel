@@ -26,9 +26,12 @@ const predictionService = {
     }
   },
 
-  subscribeToCityAlerts: async (city: string) => {
+  subscribeToCityAlerts: async (city: string, isEnabled: boolean = true) => {
     try {
-      const response = await apiClient.put("users/me/subscription", { subscribed_city: city });
+      const response = await apiClient.put("users/me/subscription", { 
+        subscribed_city: city,
+        is_alerts_enabled: isEnabled
+      });
       return response.data;
     } catch (err: any) {
       console.error("[Alerts] Subscription failed:", err.message);

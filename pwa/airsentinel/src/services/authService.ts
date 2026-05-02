@@ -37,7 +37,12 @@ const authService = {
   /**
    * Logs out the user by removing the token.
    */
-  logout(): void {
+  updateProfile: async (data: { full_name?: string; email?: string; subscribed_city?: string }) => {
+    const response = await apiClient.patch("users/me", data);
+    return response.data;
+  },
+
+  logout: () => {
     if (typeof window !== "undefined") {
       localStorage.removeItem(AUTH_TOKEN_KEY);
     }

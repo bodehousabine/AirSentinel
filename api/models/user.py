@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import String, Boolean, Text, DateTime, func
+from sqlalchemy import String, Boolean, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID
 from typing import Optional
@@ -16,12 +16,12 @@ class User(Base):
         default=uuid.uuid4
     )
     email: Mapped[str] = mapped_column(
-        String(255), 
+        String(100), 
         unique=True, 
         index=True, 
         nullable=False
     )
-    full_name: Mapped[str] = mapped_column(
+    full_name: Mapped[Optional[str]] = mapped_column(
         String(100), 
         nullable=True
     )
@@ -29,8 +29,8 @@ class User(Base):
         String(255), 
         nullable=False
     )
-    avatar_url: Mapped[str] = mapped_column(
-        Text, 
+    avatar_url: Mapped[Optional[str]] = mapped_column(
+        String(255), 
         nullable=True
     )
     is_active: Mapped[bool] = mapped_column(
@@ -46,14 +46,17 @@ class User(Base):
         server_default=func.now(), 
         onupdate=func.now()
     )
-    
-    # Subscriptions pour les Alertes AirSentinel
     subscribed_city: Mapped[Optional[str]] = mapped_column(
         String(100), 
         nullable=True
     )
+    is_alerts_enabled: Mapped[bool] = mapped_column(
+        Boolean,
+        default=True,
+        server_default="true"
+    )
     last_alert_sent: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), 
+        DateTime(timezone=True),
         nullable=True
     )
     fcm_token: Mapped[Optional[str]] = mapped_column(

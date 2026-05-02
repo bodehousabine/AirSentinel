@@ -20,8 +20,12 @@ class AlertService:
         Logic simple : On utilise le même moteur de calcul que le simulateur interactif pour avoir le niveau actuel.
         En production, cela serait couplé à un flux de capteurs réels.
         """
-        # 1. Récupérer tous les utilisateurs ayant une ville d'abonnement
-        stmt = select(User).where(User.subscribed_city.isnot(None))
+        # 1. Récupérer les utilisateurs ayant souscrit à une ville et ayant les alertes actives
+        stmt = select(User).where(
+            User.subscribed_city.isnot(None),
+            User.subscribed_city != "",
+            User.is_alerts_enabled == True
+        )
         result = await db.execute(stmt)
         users = result.scalars().all()
 

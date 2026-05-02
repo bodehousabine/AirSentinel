@@ -114,6 +114,39 @@ async def upload_avatar(
         )
 class SubscriptionUpdate(BaseModel):
     subscribed_city: Optional[str] = None
+    is_alerts_enabled: Optional[bool] = None
+
+class UserUpdate(BaseModel):
+    full_name: Optional[str] = None
+    email: Optional[str] = None
+    subscribed_city: Optional[str] = None
+
+@router.patch("/me")
+async def update_profile(
+    payload: UserUpdate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Met à jour les informations de profil de l'utilisateur.
+    """
+    if payload.full_name is not None:
+        current_user.full_name = payload.full_name
+    
+    if payload.email is not None:
+        # Vérifier si l'email est déjà pris
+        from sqlalchemy import select
+        result = await db.execute(select(User).where(User.email == payload.email, User.id != current_user.id))
+        if result.scalars().first():
+            raise HTTPException(status_code=400, detail="Cet email est déjà utilisé.")
+        current_user.email = payload.email
+        
+    if payload.subscribed_city is not None:
+        current_user.subscribed_city = payload.subscribed_city
+        
+    await db.commit()
+    await db.refresh(current_user)
+    return current_user
 
 @router.put("/me/subscription")
 async def update_subscription(
@@ -122,17 +155,32 @@ async def update_subscription(
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Met à jour la ville d'abonnement pour les alertes mail en temps réel.
+    Met à jour les préférences d'alertes (activation/désactivation et ville).
     """
-    current_user.subscribed_city = payload.subscribed_city
-    # Réinitialiser le cool-down si on change de ville pour être averti immédiatement
-    current_user.last_alert_sent = None
+    if payload.subscribed_city is not None:
+        current_user.subscribed_city = payload.subscribed_city
+        
+    if payload.is_alerts_enabled is not None:
+        current_user.is_alerts_enabled = payload.is_alerts_enabled
+    else:
+        # Si is_alerts_enabled n'est pas fourni, on suppose qu'on veut basculer
+        # ou garder l'état actuel selon si subscribed_city est vide ou pas
+        # (compatibilité avec l'ancien comportement)
+        if payload.subscribed_city == "":
+            current_user.is_alerts_enabled = False
+        elif payload.subscribed_city:
+            current_user.is_alerts_enabled = True
+
+    # Réinitialiser le cool-down si on réactive les alertes
+    if current_user.is_alerts_enabled:
+        current_user.last_alert_sent = None
     
     await db.commit()
     await db.refresh(current_user)
     
     return {
         "status": "success",
+        "is_alerts_enabled": current_user.is_alerts_enabled,
         "subscribed_city": current_user.subscribed_city,
-        "message": f"Vous êtes maintenant abonné aux alertes pour {payload.subscribed_city or 'aucune ville'}"
+        "message": "Préférences d'alertes mises à jour."
     }
