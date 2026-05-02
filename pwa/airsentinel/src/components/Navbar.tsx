@@ -142,20 +142,27 @@ export default function Navbar() {
               </div>
               
               {/* Profile Dropdown */}
-              <div className="absolute top-12 right-0 bg-slate-900 border border-white/10 p-1.5 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap min-w-[160px] backdrop-blur-2xl">
+              <div className="absolute top-12 right-0 bg-[#0f172a]/95 border border-white/10 p-2 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 whitespace-nowrap min-w-[190px] backdrop-blur-2xl translate-y-2 group-hover:translate-y-0">
+                <div className="px-3 py-2 border-b border-white/5 mb-2">
+                  <p className="text-[10px] uppercase tracking-widest text-gray-500 font-bold">Compte</p>
+                </div>
                 <Link 
                   href="/dashboard/profil"
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-gray-300 hover:bg-white/5 hover:text-white transition-all mb-1"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-gray-200 hover:bg-[var(--teal)]/10 hover:text-[var(--teal)] transition-all mb-1 group/item"
                 >
-                  <User size={14} className="text-[var(--teal)]" />
-                  Mon Profil
+                  <div className="w-8 h-8 rounded-lg bg-[var(--teal)]/10 flex items-center justify-center group-hover/item:bg-[var(--teal)]/20 transition-colors">
+                    <User size={16} className="text-[var(--teal)]" />
+                  </div>
+                  <span className="font-bold">Mon Profil</span>
                 </Link>
                 <button 
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-rose-400 hover:bg-rose-500/10 transition-all"
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-rose-400 hover:bg-rose-500/10 transition-all group/logout"
                 >
-                  <LogOut size={14} />
-                  {t('nav_logout')}
+                  <div className="w-8 h-8 rounded-lg bg-rose-500/5 flex items-center justify-center group-hover/logout:bg-rose-500/10 transition-colors">
+                    <LogOut size={16} />
+                  </div>
+                  <span className="font-bold">{t('nav_logout')}</span>
                 </button>
               </div>
             </div>
