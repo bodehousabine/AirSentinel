@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import logging
 
 from api.core.config import get_settings
-from api.routers import kpis, carte, predictions, alertes, decision, contexte, users, notifications
+from api.routers import kpis, carte, predictions, alertes, decision, contexte, users, notifications, chat
 from api.auth.router import router as auth_router
 import asyncio
 from api.services.alert_service import AlertService
@@ -84,6 +84,7 @@ app.include_router(alertes.router,     prefix=settings.API_PREFIX)
 app.include_router(decision.router,    prefix=settings.API_PREFIX)
 app.include_router(contexte.router,    prefix=settings.API_PREFIX)
 app.include_router(notifications.router, prefix=settings.API_PREFIX)
+app.include_router(chat.router,          prefix=settings.API_PREFIX)
 
 
 # ─── Endpoints de base ────────────────────────────────────────────

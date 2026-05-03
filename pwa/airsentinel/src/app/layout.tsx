@@ -35,6 +35,7 @@ import { Toaster } from "react-hot-toast";
 
 import { LanguageProvider } from "@/context/LanguageContext";
 import NotificationManager from "@/components/NotificationManager";
+import ChatBot from "@/components/ChatBot";
 
 export default function RootLayout({
   children,
@@ -61,6 +62,7 @@ export default function RootLayout({
           }}
         />
         <NotificationManager />
+        <ChatBot />
         {children}
         </LanguageProvider>
       </body>
