@@ -71,7 +71,7 @@ def fetch_data(villes_info, start_date, end_date):
     for city in villes_info:
         try:
             # Weather
-            w_res = openmeteo.weather_api("https://archive-api.open-meteo.com/v1/archive", params={
+            w_res = openmeteo.weather_api("https://api.open-meteo.com/v1/forecast", params={
                 "latitude": city['lat'], "longitude": city['lon'], "start_date": start_date, "end_date": end_date,
                 "daily": ["weather_code", "temperature_2m_max", "temperature_2m_min", "temperature_2m_mean", 
                           "apparent_temperature_max", "apparent_temperature_min", "apparent_temperature_mean",
