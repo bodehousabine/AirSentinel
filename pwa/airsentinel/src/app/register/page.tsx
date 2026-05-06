@@ -85,7 +85,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center p-4 sm:p-6 bg-[url(/joel1.jpg)] bg-cover bg-center bg-no-repeat overflow-hidden">
+    <div className="min-h-screen relative flex items-center justify-center p-4 sm:p-6 bg-hero-joel overflow-hidden">
       {/* Dark gradient overlay to ensure text readability */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#020c18]/80 via-[#020c18]/60 to-[#020c18]/90 backdrop-blur-[2px]"></div>
 
