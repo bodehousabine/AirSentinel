@@ -85,3 +85,36 @@ class EmailService:
         </html>
         """
         await cls._send_email_brevo(email, subject, html_template)
+
+    @classmethod
+    async def send_broadcast_message(cls, email: str, name: str, subject: str, message: str):
+        """Envoie un message de broadcast stylisé."""
+        html_template = f"""
+        <html>
+        <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: #f8fafc; padding: 20px;">
+            <div style="max-width: 600px; margin: 0 auto; background: #1e293b; border-radius: 15px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="background: #10b981; padding: 30px; text-align: center;">
+                    <h1 style="color: white; margin: 0; font-size: 28px;">AirSentinel News</h1>
+                </div>
+                <div style="padding: 40px;">
+                    <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">Bonjour {name or 'Sentinel'},</p>
+                    
+                    <p style="color: #f8fafc; line-height: 1.6; font-size: 16px;">
+                        {message}
+                    </p>
+                    
+                    <div style="text-align: center; margin-top: 40px;">
+                        <a href="{settings.FRONTEND_URL}" 
+                           style="display: inline-block; padding: 15px 30px; background: #3b82f6; color: white; text-decoration: none; border-radius: 12px; font-weight: 900; text-transform: uppercase; font-size: 12px;">
+                            Accéder à AirSentinel
+                        </a>
+                    </div>
+                </div>
+                <div style="padding: 20px; background: #0f172a; text-align: center; font-size: 11px; color: #475569;">
+                    &copy; 2026 AirSentinel Cameroon — Surveillance Intelligente. Tous droits réservés.
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        await cls._send_email_brevo(email, subject, html_template)

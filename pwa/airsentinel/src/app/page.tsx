@@ -289,7 +289,7 @@ export default function LandingPage() {
     <main
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(160deg, rgba(2, 12, 24, 0.45) 0%, rgba(3, 18, 35, 0.4) 100%), url('/joel1.jpg')",
+        background: "linear-gradient(160deg, rgba(2, 12, 24, 0.45) 0%, rgba(3, 18, 35, 0.4) 100%), url(/joel1.jpg)",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundAttachment: "fixed",
