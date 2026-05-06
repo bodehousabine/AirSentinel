@@ -84,7 +84,7 @@ class AlertService:
 
                     # Envoi Email
                     try:
-                        EmailService.send_air_quality_alert(
+                        await EmailService.send_air_quality_alert(
                             email=user.email,
                             city=user.subscribed_city,
                             pm25=prediction.predicted_pm25,

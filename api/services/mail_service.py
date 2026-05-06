@@ -1,10 +1,8 @@
 # api/services/mail_service.py
 
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from typing import Optional
+import httpx
 import logging
+from typing import Optional
 
 from api.core.config import settings
 
@@ -12,32 +10,45 @@ logger = logging.getLogger(__name__)
 
 class EmailService:
     @staticmethod
-    def _send_email(to_email: str, subject: str, html_content: str):
-        """Logic d'envoi basique via smtplib."""
-        if not settings.SMTP_HOST or not settings.SMTP_USER or not settings.SMTP_PASSWORD:
-            logger.warning("[Mail] SMTP non configuré. L'email est affiché dans les logs au lieu d'être envoyé.")
-            logger.info(f"[SIMULATED MAIL] To: {to_email} | Subject: {subject}\nContent: {html_content[:200]}...")
+    async def _send_email_brevo(to_email: str, subject: str, html_content: str):
+        """Envoi d'email via l'API Brevo v3."""
+        if not settings.BREVO_API_KEY:
+            logger.warning("[Mail] BREVO_API_KEY non configuré. L'email est affiché dans les logs au lieu d'être envoyé.")
+            logger.info(f"[SIMULATED BREVO MAIL] To: {to_email} | Subject: {subject}\nContent: {html_content[:200]}...")
             return
 
-        msg = MIMEMultipart()
-        msg["From"] = f"{settings.EMAILS_FROM_NAME} <{settings.EMAILS_FROM_EMAIL}>"
-        msg["To"] = to_email
-        msg["Subject"] = subject
-
-        msg.attach(MIMEText(html_content, "html"))
+        url = "https://api.brevo.com/v3/smtp/email"
+        headers = {
+            "accept": "application/json",
+            "api-key": settings.BREVO_API_KEY,
+            "content-type": "application/json"
+        }
+        
+        payload = {
+            "sender": {
+                "name": settings.EMAILS_FROM_NAME,
+                "email": settings.EMAILS_FROM_EMAIL
+            },
+            "to": [{"email": to_email}],
+            "subject": subject,
+            "htmlContent": html_content
+        }
 
         try:
-            with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
-                server.starttls() # Utilisation de TLS
-                server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
-                server.send_message(msg)
-            logger.info(f"[Mail] Email envoyé avec succès à {to_email}")
+            async with httpx.AsyncClient() as client:
+                response = await client.post(url, headers=headers, json=payload)
+                
+                if response.status_code in [201, 200, 202]:
+                    logger.info(f"[Mail] Email Brevo envoyé avec succès à {to_email}")
+                else:
+                    logger.error(f"[Mail] Erreur Brevo ({response.status_code}): {response.text}")
+                    
         except Exception as e:
-            logger.error(f"[Mail] Échec de l'envoi de l'email : {str(e)}")
+            logger.error(f"[Mail] Échec de l'envoi via Brevo : {str(e)}")
 
     @classmethod
-    def send_air_quality_alert(cls, email: str, city: str, pm25: float, level: str, color: str):
-        """Envoie un mail d'alerte PM2.5 stylisé."""
+    async def send_air_quality_alert(cls, email: str, city: str, pm25: float, level: str, color: str):
+        """Envoie un mail d'alerte PM2.5 stylisé via Brevo."""
         subject = f"🚨 Alerte AirSentinel : Qualité de l'air {level} à {city}"
         
         html_template = f"""
@@ -73,4 +84,4 @@ class EmailService:
         </body>
         </html>
         """
-        cls._send_email(email, subject, html_template)
+        await cls._send_email_brevo(email, subject, html_template)

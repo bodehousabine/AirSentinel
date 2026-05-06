@@ -43,6 +43,7 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: Optional[str] = None
     EMAILS_FROM_EMAIL: str = "alerts@airsentinel.cm"
     EMAILS_FROM_NAME: str = "AirSentinel Alerts"
+    BREVO_API_KEY: Optional[str] = None
     FRONTEND_URL: str = "https://airsentinel-chi.vercel.app"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
