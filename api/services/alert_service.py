@@ -59,8 +59,8 @@ class AlertService:
 
         for user in users:
             try:
-                # 2. Cool-down de 6 heures pour éviter le spam
-                if user.last_alert_sent and (datetime.now(timezone.utc) - user.last_alert_sent) < timedelta(hours=6):
+                # 2. Cool-down de 3 heures pour éviter le spam
+                if user.last_alert_sent and (datetime.now(timezone.utc) - user.last_alert_sent) < timedelta(hours=3):
                     logger.debug(f"[AlertService] Cool-down actif pour {user.email}, skip.")
                     continue
 
@@ -75,8 +75,8 @@ class AlertService:
                     f"({prediction.predicted_pm25} µg/m³) pour {user.subscribed_city}"
                 )
 
-                # 4. Alerte si niveau DÉGRADÉ, MAUVAIS ou TRÈS MAUVAIS
-                if prediction.level in ["DÉGRADÉ", "MAUVAIS", "TRÈS MAUVAIS"]:
+                # 4. Alerte si PM2.5 > 15 µg/m³ (aligné sur les recommandations de l'OMS 2021)
+                if prediction.predicted_pm25 > 15:
                     logger.info(
                         f"[AlertService] Seuil franchi pour {user.email} "
                         f"à {user.subscribed_city} ({prediction.predicted_pm25} µg/m³)"
