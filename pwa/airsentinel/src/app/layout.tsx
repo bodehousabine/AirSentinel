@@ -36,6 +36,7 @@ import { Toaster } from "react-hot-toast";
 import { LanguageProvider } from "@/context/LanguageContext";
 import NotificationManager from "@/components/NotificationManager";
 import ChatBot from "@/components/ChatBot";
+import KeepAlive from "@/components/KeepAlive";
 
 export default function RootLayout({
   children,
@@ -61,6 +62,7 @@ export default function RootLayout({
             },
           }}
         />
+        <KeepAlive />
         <NotificationManager />
         <ChatBot />
         {children}
