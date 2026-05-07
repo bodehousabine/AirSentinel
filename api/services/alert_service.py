@@ -37,8 +37,7 @@ class AlertService:
     @staticmethod
     async def process_alerts(db: AsyncSession):
         """
-        Vérifie les PM2.5 pour chaque utilisateur abonné et envoie des notifications si nécessaire.
-        Utilise des features réalistes par ville pour produire des prédictions pertinentes.
+        Vérifie les PM2.5 pour chaque utilisateur abonné en utilisant les données RÉELLES du dataset.
         """
         # 1. Récupérer les utilisateurs abonnés avec alertes actives
         stmt = select(User).where(
@@ -53,48 +52,63 @@ class AlertService:
             logger.info("[AlertService] Aucun utilisateur abonné pour le moment.")
             return
 
-        # Import ici pour éviter un import circulaire au niveau du module
+        # 2. Charger les dernières données réelles du dataset
+        from api.services.data_service import get_dataframe
+        try:
+            df = get_dataframe()
+            # On s'assure d'avoir les données les plus récentes par ville
+            df_latest = df.sort_values("date").groupby("ville").last().reset_index()
+            # On met les noms de villes en minuscules pour faciliter la recherche
+            df_latest["ville_key"] = df_latest["ville"].str.lower().str.strip()
+            data_map = df_latest.set_index("ville_key").to_dict(orient="index")
+        except Exception as e:
+            logger.error(f"[AlertService] Impossible de charger le dataset réel : {e}. Fallback sur les moyennes.")
+            data_map = {}
+
+        # Import ici pour éviter un import circulaire
         from api.routers.predictions import compute_interactive
         from api.schemas.prediction import ComputeInput
 
         for user in users:
             try:
-                # 2. Cool-down de 3 heures pour éviter le spam
+                # 3. Cool-down de 3 heures
                 if user.last_alert_sent and (datetime.now(timezone.utc) - user.last_alert_sent) < timedelta(hours=3):
-                    logger.debug(f"[AlertService] Cool-down actif pour {user.email}, skip.")
                     continue
 
-                # 3. Features réalistes selon la ville de l'utilisateur
                 city_key = user.subscribed_city.lower().strip()
-                features = CITY_FEATURES.get(city_key, DEFAULT_FEATURES)
-                logger.info(f"[AlertService] Calcul pour {user.email} @ {user.subscribed_city} (features city-specific)")
+                
+                # 4. Priorité aux données réelles du jour, sinon fallback sur les CITY_FEATURES
+                if city_key in data_map:
+                    real_data = data_map[city_key]
+                    features = {
+                        "dust": float(real_data.get("dust_moyen", 50.0)),
+                        "co": float(real_data.get("co_moyen", 15.0)),
+                        "uv": float(real_data.get("uv_moyen", 6.0)),
+                        "temp": float(real_data.get("temperature_2m_mean", 25.0)),
+                        "humidity": float(real_data.get("humidity_moyen", 60.0)), # Note: check column name in update_daily
+                        "ozone": float(real_data.get("ozone_moyen", 40.0))
+                    }
+                    logger.info(f"[AlertService] Utilisation des données RÉELLES pour {user.email} @ {user.subscribed_city}")
+                else:
+                    features = CITY_FEATURES.get(city_key, DEFAULT_FEATURES)
+                    logger.info(f"[AlertService] Fallback sur moyennes pour {user.email} @ {user.subscribed_city}")
 
                 prediction = compute_interactive(ComputeInput(city=user.subscribed_city, features=features))
-                logger.info(
-                    f"[AlertService] Niveau prédit : {prediction.level} "
-                    f"({prediction.predicted_pm25} µg/m³) pour {user.subscribed_city}"
-                )
-
-                # 4. Alerte si PM2.5 > 15 µg/m³ (aligné sur les recommandations de l'OMS 2021)
+                
+                # 5. Alerte si PM2.5 > 15 µg/m³
                 if prediction.predicted_pm25 > 15:
-                    logger.info(
-                        f"[AlertService] Seuil franchi pour {user.email} "
-                        f"à {user.subscribed_city} ({prediction.predicted_pm25} µg/m³)"
-                    )
+                    logger.info(f"[AlertService] SEUIL FRANCHI ({prediction.predicted_pm25} µg/m³) pour {user.email}")
 
                     # Envoi Email
-                    try:
-                        await EmailService.send_air_quality_alert(
-                            email=user.email,
-                            city=user.subscribed_city,
-                            pm25=prediction.predicted_pm25,
-                            level=prediction.level,
-                            color=prediction.color,
-                        )
-                    except Exception as mail_err:
-                        logger.error(f"[AlertService] Erreur mail pour {user.email}: {mail_err}")
+                    await EmailService.send_air_quality_alert(
+                        email=user.email,
+                        city=user.subscribed_city,
+                        pm25=prediction.predicted_pm25,
+                        level=prediction.level,
+                        color=prediction.color,
+                    )
 
-                    # Envoi Push Notification (FCM)
+                    # Envoi Push
                     if user.fcm_token:
                         try:
                             from api.services.notification_service import NotificationService
@@ -105,17 +119,10 @@ class AlertService:
                                 level=prediction.level,
                             )
                         except Exception as push_err:
-                            logger.error(f"[AlertService] Erreur push pour {user.email}: {push_err}")
+                            logger.error(f"[AlertService] Erreur push : {push_err}")
 
-                    # Mise à jour du timestamp pour éviter le spam
                     user.last_alert_sent = datetime.now(timezone.utc)
                     await db.commit()
 
-                else:
-                    logger.info(
-                        f"[AlertService] Niveau {prediction.level} pour {user.subscribed_city} — "
-                        f"pas d'alerte nécessaire."
-                    )
-
             except Exception as e:
-                logger.error(f"[AlertService] Erreur lors du traitement pour {user.email} : {str(e)}")
+                logger.error(f"[AlertService] Erreur pour {user.email} : {str(e)}")
