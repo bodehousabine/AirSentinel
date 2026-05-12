@@ -367,21 +367,29 @@ def build_css(th: dict, img_url: str) -> str:
         background-color: {'rgba(0,212,177,0.10)' if th['name']=='dark' else 'rgba(10,60,120,0.07)'} !important;
     }}
 
-    /* ── Widgets ── */
-    .stSelectbox [data-baseweb="select"] > div {{
-        background: {'rgba(7,30,53,0.95)' if th['name']=='dark' else 'rgba(255,255,255,0.97)'} !important;
-        border-color: {th['border_soft']} !important;
+    /* ── Widgets (Selectbox, Multiselect) ── */
+    .stSelectbox [data-baseweb="select"] > div,
+    .stMultiSelect [data-baseweb="select"] > div {{
+        background-color: {'#0b2540' if th['name']=='dark' else '#ffffff'} !important;
+        border: 1.5px solid {th['border_med']} !important;
         border-radius: 8px !important;
         color: {th['text']} !important;
     }}
-    .stSelectbox [data-baseweb="select"] span {{
+    /* Forcer la couleur du chevron (accent circonflexe bas) */
+    .stSelectbox svg {{
+        fill: {th['text']} !important;
+        color: {th['text']} !important;
+    }}
+    .stSelectbox [data-baseweb="select"] span,
+    .stMultiSelect [data-baseweb="select"] span,
+    .stMultiSelect [data-baseweb="select"] div {{
         color: {th['text']} !important;
     }}
     /* Slider track */
     [data-testid="stSlider"] [data-baseweb="slider"] {{
         color: {th['text']} !important;
     }}
-    .stSlider label, .stSelectbox label, .stCheckbox label {{
+    .stSlider label, .stSelectbox label, .stMultiSelect label, .stCheckbox label {{
         color: {th['text2']} !important;
     }}
     .stCheckbox label span {{ font-size: 13px; color: {th['text2']}; }}

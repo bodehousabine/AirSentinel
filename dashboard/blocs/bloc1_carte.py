@@ -118,21 +118,22 @@ def render(profil):
         all_reg_label = "Toutes les régions" if lang == "fr" else "All regions"
 
         # Réduire le padding Streamlit pour coller à 120px
-        st.markdown("""
+        # Rendre les labels du radio plus visibles avec injection sécurisée
+        radio_style = f"""
         <style>
-        div[data-testid="stVerticalBlock"] > div:has(> div[data-testid="stRadio"]) {
+        div[data-testid="stVerticalBlock"] > div:has(> div[data-testid="stRadio"]) {{
             padding-top: 0 !important;
             margin-top: 0 !important;
-        }
-        /* Rendre les labels du radio plus visibles */
-        div[data-testid="stRadio"] label {
+        }}
+        div[data-testid="stRadio"] label {{
             font-weight: 800 !important;
             font-size: 14px !important;
             letter-spacing: 0.05em !important;
             color: {th['text']} !important;
-        }
+        }}
         </style>
-        """, unsafe_allow_html=True)
+        """
+        st.markdown(radio_style, unsafe_allow_html=True)
 
         # Mode radio vertical (aujourd'hui en haut, historique en bas)
         mode = st.radio(
@@ -142,15 +143,17 @@ def render(profil):
             key="carte_mode",
             label_visibility="collapsed"
         )
-        # Région juste en dessous, compact
-        region_sel = st.multiselect(
+        # Remplacement par selectbox pour avoir le chevron (accent circonflexe bas) comme dans la sidebar
+        all_reg_label = "Toutes les régions" if lang == "fr" else "All regions"
+        region_sel_val = st.selectbox(
             "🗺️ Région" if lang == "fr" else "🗺️ Region",
-            regions_dispo,
-            default=[],
+            [all_reg_label] + regions_dispo,
+            index=0,
             key="carte_region_sel",
-            label_visibility="collapsed",
-            placeholder="Toutes les régions" if lang == "fr" else "All regions"
+            label_visibility="collapsed"
         )
+        # Conversion en liste pour garder la compatibilité avec la suite du code
+        region_sel = [region_sel_val] if region_sel_val != all_reg_label else []
 
     mode_today = "AUJOURD'HUI" in mode or "TODAY" in mode
 
@@ -294,6 +297,7 @@ def render(profil):
         n_dep = int((agg["pm2_5_moyen"] > 15).sum())
         pct   = f"{n_dep/max(len(agg),1)*100:.0f}%"
 
+        # 1. Légende Qualité de l'Air
         lbl_legend = "Légende · Qualité de l'Air" if lang == "fr" else "Legend · Air Quality"
         st.markdown(f"""
         <div style="background:{th['bg_tertiary']};border:1px solid {th['border_soft']};
@@ -318,20 +322,74 @@ def render(profil):
                 ]
             ])}
         </div>
+        """, unsafe_allow_html=True)
 
-        <div style="background:{f'linear-gradient(135deg, {th["red"]} 0%, #7f1d1d 100%)' if n_dep > 0 else th['bg_tertiary']};
-                    border:1px solid rgba(239,68,68,0.4);border-radius:12px;padding:18px 12px;
-                    margin-top:12px;text-align:center;">
-            <div style="font-size:42px;font-weight:800;
-                        color:{'#ffffff' if n_dep > 0 else th['text']};line-height:1;">{n_dep}</div>
-            <div style="font-size:12px;font-weight:700;
-                        color:{'#ffffff' if n_dep > 0 else th['text']};
-                        margin-top:5px;text-transform:uppercase;">{T['bloc1_cities_above']}</div>
-            <div style="font-size:10px;color:{'#ffffff' if n_dep > 0 else th['text']};opacity:0.85;
-                        margin-top:4px;font-family:'DM Mono',monospace;">
-                {pct} · {periode_label}
+        # 2. Bloc KPI OMS (Méthode robuste par iframe - comme au Bloc 2)
+        from streamlit.components.v1 import html as st_html
+        
+        oms_bg = f"linear-gradient(135deg, {th['red']} 0%, #7f1d1d 100%)" if n_dep > 0 else th['bg_tertiary']
+        oms_val_color = '#ffffff' if n_dep > 0 else th['text']
+        
+        # Préparation des labels (sans émoji calendrier)
+        reg_txt = region_sel_val if region_sel_val != all_reg_label else ("National" if lang == "fr" else "National")
+        mode_txt = ("Prédictions" if lang == "fr" else "Predictions") if mode_today else ("Historique" if lang == "fr" else "Historical")
+        date_txt = date.today().strftime('%d %b %Y')
+        detail_txt = f"{pct} · {date_txt} · {mode_txt} · {reg_txt}"
+
+        html_kpi = f"""
+        <div id="kpi-container" style="font-family: 'Inter', sans-serif; text-align: center; padding: 0; margin: 0;">
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@800&family=DM+Mono&display=swap');
+                .box {{
+                    background: {oms_bg};
+                    border: 1px solid rgba(239,68,68,0.4);
+                    border-radius: 24px;
+                    padding: 20px 10px;
+                    text-align: center;
+                    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+                    height: 140px;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    color: {oms_val_color};
+                }}
+                .value {{ font-size: 48px; font-weight: 800; line-height: 1; margin-bottom: 5px; }}
+                .label {{ font-size: 13px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }}
+                .details {{ font-size: 10px; opacity: 0.9; font-family: 'DM Mono', monospace; white-space: nowrap; }}
+            </style>
+            <div class="box">
+                <div class="value" id="count-up">0</div>
+                <div class="label">{T['bloc1_cities_above']}</div>
+                <div class="details">{detail_txt}</div>
             </div>
-        </div>""", unsafe_allow_html=True)
+            <script>
+                (function() {{
+                    const el = document.getElementById('count-up');
+                    let curr = 0;
+                    const target = {n_dep};
+                    const duration = 1500;
+                    const stepTime = 20;
+                    const steps = duration / stepTime;
+                    const increment = target / steps;
+                    
+                    if (target === 0) {{ el.innerText = "0"; return; }}
+                    
+                    const timer = setInterval(() => {{
+                        curr += increment;
+                        if (curr >= target) {{
+                            el.innerText = target;
+                            clearInterval(timer);
+                        }} else {{
+                            el.innerText = Math.floor(curr);
+                        }}
+                    }}, stepTime);
+                }})();
+            </script>
+        </div>
+        """
+        # On utilise une hauteur fixe pour éviter le scroll, et un fond transparent
+        st_html(html_kpi, height=170)
 
         # PM2.5 par région — basé sur prédictions si mode aujourd'hui
         lbl = "PM2.5 prédit par région" if (mode_today and lang == "fr") else \
@@ -356,25 +414,39 @@ def render(profil):
     st.markdown("<hr style='border-color:rgba(99,160,255,0.06);margin:8px 0 2px;'>", unsafe_allow_html=True)
 
     # ══ ANALYSES ENRICHIES — toujours basées sur données historiques réelles ══
+    # Déterminer le label de période
+    if mode == auj_lbl:
+        p_label = "Aujourd'hui" if lang == "fr" else "Today"
+    else:
+        p_label = ctx.get("scope_annees", "")
+
     # Titre des analyses avec icônes SVG
     icon_bar = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.85; margin-right:4px; vertical-align:text-bottom;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>'
     icon_cal = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.8; margin:0 4px; vertical-align:text-bottom;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'
     
-    clean_periode = periode_label.replace("📅 ", "")
     titre_text = ("Analyses détaillées" if lang == "fr" else "Detailed analyses")
-    
-    st.markdown(f"""
-    <div style="font-size:16px;font-weight:600;color:{th['text']};margin-top:-10px;margin-bottom:16px;display:flex;align-items:center;">
-        {icon_bar} {titre_text} · {icon_cal if "📅" in periode_label else ""} {clean_periode}
-    </div>""", unsafe_allow_html=True)
+    # Utilisation de format pour éviter les conflits d'accolades dans les f-strings avec SVG
+    html_titre = """
+    <div style="font-size:16px;font-weight:600;color:{color};margin-top:-10px;margin-bottom:16px;display:flex;align-items:center;">
+        {icon1} {text} · {icon2} {label}
+    </div>""".format(color=th['text'], icon1=icon_bar, text=titre_text, icon2=icon_cal, label=p_label)
+    st.markdown(html_titre, unsafe_allow_html=True)
 
-    # Pour les analyses enrichies, utiliser les données historiques réelles
-    df_analyse = df_carte if not mode_today else df[df["date"] == df["date"].max()].copy()
+    # Pour les analyses enrichies, utiliser les données historiques réelles (filtrées par région si besoin)
+    if mode_today:
+        df_analyse = df[df["date"] == df["date"].max()].copy()
+        if region_sel:
+            df_analyse = df_analyse[df_analyse["region"].isin(region_sel)]
+    else:
+        df_analyse = df_carte.copy()
 
     c1, c2 = st.columns(2)
 
     with c1:
-        lbl3 = "Top polluants · National" if lang == "fr" else "Top pollutants · National"
+        if region_sel:
+            lbl3 = "Top polluants · Régional" if lang == "fr" else "Top pollutants · Regional"
+        else:
+            lbl3 = "Top polluants · National" if lang == "fr" else "Top pollutants · National"
         if "polluant_dominant" in df_analyse.columns:
             top3  = df_analyse["polluant_dominant"].value_counts().head(3)
             total = top3.sum()
@@ -460,4 +532,8 @@ def render(profil):
         )
         st.markdown(html_top5, unsafe_allow_html=True)
 
-    sources_bar(f"{T['sources_who']} · {T['sources_cecc']} · {T['sources_bauer']}", th)
+    # Fin des colonnes d'analyse
+
+    # Sources en bas de bloc
+    txt_sources = f"{T.get('sources_who', '')} · {T.get('sources_cecc', '')} · {T.get('sources_bauer', '')}"
+    sources_bar(txt_sources, th)

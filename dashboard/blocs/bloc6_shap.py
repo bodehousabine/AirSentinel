@@ -5,7 +5,8 @@ import streamlit as st
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
-from utils import get_context, banner, sources_bar, empty_state
+from utils import get_context, banner, sources_bar, empty_state, kpi_box
+import streamlit.components.v1 as components
 from assets import IMAGES
 
 # ── Icônes SVG inline (pas de JS requis) ─────────────────────────────────────
@@ -342,8 +343,8 @@ def render(profil):
         return
 
     GRID = dict(gridcolor=th['grid_color'], linecolor=th['line_color'], zeroline=False)
-    PL   = dict(paper_bgcolor='rgba(15,23,42,0.97)', plot_bgcolor='rgba(20,30,50,0.95)',
-                font=dict(color=th['text2'], size=11))
+    PL   = dict(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(color=th['text'], size=11))
 
     annees  = f"{df['date'].dt.year.min()}–{df['date'].dt.year.max()}"
     is_dark = th.get('name', 'dark') == 'dark'
@@ -399,36 +400,46 @@ def render(profil):
     # ══════════════════════════════════════════════════════════════════════════
     # KPIs
     # ══════════════════════════════════════════════════════════════════════════
-    k1, k2, k3, k4, k5, k6 = st.columns(6)
-    kpis = [
-        (k1, 'wind',        f"{meta_sel['pm25']:.1f}",     'Avg PM2.5' if lang=='en' else 'PM2.5 moy.',  'µg/m³',
-         th['red'] if meta_sel['pm25'] > 25 else th['amber'] if meta_sel['pm25'] > 15 else th['green']),
-        (k2, 'cloud',       f"{meta_sel['dust']:.0f}",     'Avg Dust' if lang=='en' else 'Dust moy.',   'µg/m³',
-         th['red'] if meta_sel['dust'] > 50 else th['amber'] if meta_sel['dust'] > 20 else th['green']),
-        (k3, 'thermometer', f"{meta_sel['temp']:.1f}°",    'Max Temp' if lang=='en' else 'Temp. max',   'avg' if lang=='en' else 'moy.',
-         th['coral'] if meta_sel['temp'] > 32 else th['amber']),
-        (k4, 'droplets',    f"{meta_sel['precip']:.1f}",   'Precip.' if lang=='en' else 'Précip.',     'mm/day' if lang=='en' else 'mm/jour',
-         th['blue'] if meta_sel['precip'] > 4 else th['amber']),
-        (k5, 'wind',        f"{meta_sel['harmattan']:.1f}%",'Harmattan',  'freq.' if lang=='en' else 'fréq.',
-         th['red'] if meta_sel['harmattan'] > 5 else th['green']),
-        (k6, 'flame',       f"{meta_sel['feux']:.1f}%",    'Fires' if lang=='en' else 'Feux',        'freq.' if lang=='en' else 'fréq.',
-         th['red'] if meta_sel['feux'] > 2 else th['green']),
-    ]
-    for col_ui, ico, val, label, unit, color in kpis:
-        with col_ui:
-            st.markdown(
-                f'<div style="background:{bg_card};border:1px solid {color}66;'
-                f'border-top:4px solid {color};border-radius:12px;padding:16px 8px;'
-                f'text-align:center;box-shadow:0 4px 20px {color}22;">'
-                f'<div style="display:flex;justify-content:center;margin-bottom:6px;">'
-                f'{_icon(ico, 20, color)}</div>'
-                f'<div style="font-size:28px;font-weight:800;color:{color};line-height:1;">{val}</div>'
-                f'<div style="font-size:11px;color:{txt_main};margin-top:8px;font-weight:600;'
-                f'text-transform:uppercase;letter-spacing:.06em;">{label}</div>'
-                f'<div style="font-size:10px;color:{txt_dim};margin-top:3px;">{unit}</div>'
-                f'</div>',
-                unsafe_allow_html=True
-            )
+    if lang == "fr":
+        info_pm25 = "Concentration moyenne de particules fines (PM2.5) dans cette zone climatique. Indicateur clé de santé."
+        info_dust = "Niveau moyen de poussières désertiques en suspension. Particulièrement élevé lors de l'Harmattan."
+        info_temp = "Moyenne des températures maximales journalières. La chaleur aggrave l'impact de la pollution."
+        info_precip = "Moyenne journalière des précipitations. La pluie aide à dissiper les polluants."
+        info_harmattan = "Fréquence des vents secs et poussiéreux provenant du Sahara, affectant la qualité de l'air."
+        info_feux = "Fréquence des épisodes de feux de brousse ou agricoles, générateurs massifs de PM2.5."
+    else:
+        info_pm25 = "Average concentration of fine particles (PM2.5) in this climatic zone. Key health indicator."
+        info_dust = "Average level of suspended desert dust. Particularly high during the Harmattan season."
+        info_temp = "Average of maximum daily temperatures. Heat exacerbates the impact of pollution."
+        info_precip = "Average daily precipitation. Rain helps clean the atmosphere of suspended particles."
+        info_harmattan = "Frequency of dry, dusty winds from the Sahara, severely affecting air quality."
+        info_feux = "Frequency of bushfire or agricultural fire episodes, massive generators of PM2.5."
+
+    cols = st.columns(6)
+    with cols[0]:
+        kpi_box(f"{meta_sel['pm25']:.1f} µg/m³", 'PM2.5 MOY.' if lang=='fr' else 'AVG PM2.5',
+            "Moyenne · " + annees if lang == "fr" else "Average · " + annees,
+            th['red'] if meta_sel['pm25'] > 25 else th['amber'] if meta_sel['pm25'] > 15 else th['green'], th, icon='pm25', info_text=info_pm25)
+    with cols[1]:
+        kpi_box(f"{meta_sel['dust']:.0f} µg/m³", 'DUST MOY.' if lang=='fr' else 'AVG DUST',
+            "Poussières · " + annees if lang == "fr" else "Desert dust · " + annees,
+            th['red'] if meta_sel['dust'] > 50 else th['amber'] if meta_sel['dust'] > 20 else th['green'], th, icon='dust', info_text=info_dust)
+    with cols[2]:
+        kpi_box(f"{meta_sel['temp']:.1f}°C", 'TEMP. MAX',
+            "Max journalier" if lang == "fr" else "Daily max",
+            th['coral'] if meta_sel['temp'] > 32 else th['amber'], th, icon='temp', info_text=info_temp)
+    with cols[3]:
+        kpi_box(f"{meta_sel['precip']:.1f}", 'PRÉCIP.' if lang=='fr' else 'PRECIP.',
+            "mm/jour" if lang == "fr" else "mm/day",
+            th['blue'] if meta_sel['precip'] > 4 else th['amber'], th, icon='rain', info_text=info_precip)
+    with cols[4]:
+        kpi_box(f"{meta_sel['harmattan']:.1f}%", 'HARMATTAN',
+            "Fréquence" if lang == "fr" else "Frequency",
+            th['red'] if meta_sel['harmattan'] > 5 else th['green'], th, icon='wind', info_text=info_harmattan)
+    with cols[5]:
+        kpi_box(f"{meta_sel['feux']:.1f}%", 'FEUX' if lang=='fr' else 'FIRES',
+            "Fréquence" if lang == "fr" else "Frequency",
+            th['red'] if meta_sel['feux'] > 2 else th['green'], th, icon='fire', info_text=info_feux)
 
     st.markdown("<div style='margin:20px 0 8px;'></div>", unsafe_allow_html=True)
 
@@ -587,16 +598,19 @@ def render(profil):
         font=dict(color=th['red'], size=11), yshift=10
     )
     fig_bars.update_layout(
-        **PL, height=300, barmode='group',
-        margin=dict(l=20, r=20, t=50, b=20),
-        uniformtext_minsize=9, uniformtext_mode='hide',
-        legend=dict(font=dict(color=txt_sub, size=13),
-                    bgcolor='rgba(15,23,42,0.95)',
-                    orientation='h', yanchor='top', y=1.18, xanchor='left', x=0),
-        xaxis=dict(**GRID, tickfont=dict(size=13, color=txt_main)),
-        yaxis=dict(**GRID, tickfont=dict(size=12, color=txt_main)),
+        template='plotly_dark' if th['name'] == 'dark' else 'plotly_white',
+        margin=dict(l=10, r=10, t=25, b=25),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color=th['text'], size=10),
+        barmode='group',
+        legend=dict(font=dict(color=th['text'], size=11),
+                    bgcolor='rgba(0,0,0,0)',
+                    orientation='h', yanchor='top', y=1.2, xanchor='left', x=0),
+        xaxis=dict(**GRID, tickfont=dict(size=11, color=th['text'])),
+        yaxis=dict(**GRID, tickfont=dict(size=11, color=th['text'])),
     )
-    st.plotly_chart(fig_bars, width="stretch")
+    st.plotly_chart(fig_bars, width='stretch')
 
     # ── Sources ───────────────────────────────────────────────────────────────
     st.markdown("<div style='margin-top:16px;'></div>", unsafe_allow_html=True)

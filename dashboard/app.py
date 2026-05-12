@@ -80,30 +80,44 @@ _an_min  = int(_df_data["date"].dt.year.min())
 
 with st.sidebar:
     # ── Logo ──────────────────────────────────────────────────────────────────
-    st.markdown(f"""
-    <div style="position:relative;border-radius:14px;overflow:hidden;
-                height:195px;margin-bottom:14px;
-                border:1px solid rgba(0,212,177,0.28);
-                box-shadow:0 4px 28px rgba(0,212,177,0.14);">
-        <img src="{IMAGES['sidebar_top']}"
-             style="width:100%;height:100%;object-fit:cover;object-position:center 40%;
-                    filter:saturate(0.90) brightness(0.65);"
-             onerror="this.style.opacity='0'"/>
-        <div style="position:absolute;inset:0;
-                    background:{'linear-gradient(135deg,rgba(0,212,177,0.42) 0%,rgba(2,12,24,0.78) 100%)' if th['name']=='dark' else 'linear-gradient(135deg,rgba(0,212,177,0.2) 0%,rgba(212,235,248,0.8) 100%)'};"></div>
-        <div style="position:absolute;inset:0;display:flex;flex-direction:column;
-                    align-items:center;justify-content:flex-start;text-align:center;padding:15px 10px;">
+    # ── Styles pour l'animation du logo ───────────────────────────────────────
+    st.markdown("""
+        <style>
+        @keyframes logo-shine {
+            0% { left: -150%; }
+            30% { left: 150%; }
+            100% { left: 150%; }
+        }
+        @keyframes logo-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        @keyframes logo-glow {
+            0%, 100% { filter: drop-shadow(0 0 10px rgba(0,212,177,0.3)); }
+            50% { filter: drop-shadow(0 0 25px rgba(0,212,177,0.7)); }
+        }
+        .custom-logo-container { position: relative; border-radius: 16px; overflow: hidden; height: 195px; margin-bottom: 15px; border: 1px solid rgba(0,212,177,0.2); box-shadow: 0 4px 30px rgba(0,0,0,0.4); }
+        .custom-logo-shine { position: absolute; top: 0; left: -150%; width: 60%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent); transform: skewX(-20deg); z-index: 1; animation: logo-shine 6s infinite; }
+        .custom-logo-content { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2; padding: 15px; }
+        .custom-logo-img { width: 68px; height: auto; border-radius: 12px; animation: logo-float 4s ease-in-out infinite, logo-glow 3s ease-in-out infinite; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+        </style>
+    """, unsafe_allow_html=True)
+
+    # ── Affichage du Logo ─────────────────────────────────────────────────────
+    st.markdown(f'''
+    <div class="custom-logo-container">
+        <img src="{IMAGES['sidebar_top']}" style="width:100%; height:100%; object-fit:cover; filter: brightness(0.55) saturate(0.8);" onerror="this.style.opacity='0'"/>
+        <div class="custom-logo-shine"></div>
+        <div style="position:absolute; inset:0; background:{'linear-gradient(135deg,rgba(0,212,177,0.35) 0%,rgba(2,12,24,0.75) 100%)' if th['name']=='dark' else 'linear-gradient(135deg,rgba(0,212,177,0.1) 0%,rgba(212,235,248,0.75) 100%)'};"></div>
+        <div class="custom-logo-content">
             <div style="margin-bottom:10px;">
-                <img src="data:image/jpeg;base64,{_logo_b64}" style="width:62px;height:auto;border-radius:10px;">
+                <img src="data:image/jpeg;base64,{_logo_b64}" class="custom-logo-img">
             </div>
-            <div style="font-size:28px;font-weight:900;color:{th['text']};letter-spacing:-0.03em;text-shadow: 0px 3px 6px rgba(0,0,0,0.5);">AirSentinel</div>
-            <div style="font-size:12px;font-weight:800;color:{ th['teal'] if th['name']=='dark' else '#006b58' };letter-spacing:.16em;
-                        margin-top:3px;font-family:'DM Mono',monospace;">
-                {T['sidebar_app_subtitle']}
-            </div>
+            <div style="font-size:28px; font-weight:900; color:{th['text']}; text-shadow: 0 3px 10px rgba(0,0,0,0.6); letter-spacing:-0.02em;">AirSentinel</div>
+            <div style="font-size:12px; font-weight:800; color:{th['teal'] if th['name']=='dark' else '#006b58'}; letter-spacing:0.18em; margin-top:2px; font-family:'DM Mono',monospace;">{T['sidebar_app_subtitle']}</div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
 
     if st.button("← " + ("Accueil" if st.session_state["lang"] == "fr" else "Home"),
                  key="btn_home", width='stretch'):
@@ -141,21 +155,35 @@ with st.sidebar:
 
     st.markdown(f"<hr style='border-color:{th['border_soft']};margin:12px 0;'>", unsafe_allow_html=True)
 
-    # ── Profil ────────────────────────────────────────────────────────────────
-    st.markdown(
-        f"<div style='font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;"
-        f"color:{th['text3']};margin-bottom:8px;'>{T['sidebar_profile_title']}</div>",
-        unsafe_allow_html=True
-    )
+    # ── Profil (Géré globalement, UI déplacée dans les onglets) ───────────────
     profil_options = [
         T["sidebar_profile_citizen"],
         T["sidebar_profile_health"],
         T["sidebar_profile_mayor"],
         T["sidebar_profile_researcher"],
     ]
-    profil = st.selectbox("profil", profil_options, label_visibility="collapsed", key="profil_sel")
+    if "global_profil" not in st.session_state:
+        st.session_state["global_profil"] = profil_options[0]
+        
+    profil = st.session_state["global_profil"]
+    
+    # ── Pour assurer que la traduction se met à jour, on vérifie si la valeur actuelle est toujours valide
+    if profil not in profil_options:
+        profil = profil_options[0]
+        st.session_state["global_profil"] = profil
 
-    st.markdown(f"<hr style='border-color:{th['border_soft']};margin:12px 0;'>", unsafe_allow_html=True)
+    # CSS pour le style du sélecteur de profil
+    st.markdown(f"""
+    <style>
+    }}
+
+    @keyframes profile-box-glow {{
+        0% {{ filter: drop-shadow(0 0 0 rgba(0, 212, 177, 0)); transform: scale(1); border-color: inherit; }}
+        50% {{ filter: drop-shadow(0 0 18px rgba(0, 212, 177, 0.9)); transform: scale(1.05); border-color: #00d4b1; }}
+        100% {{ filter: drop-shadow(0 0 0 rgba(0, 212, 177, 0)); transform: scale(1); border-color: inherit; }}
+    }}
+    </style>
+    """, unsafe_allow_html=True)
 
     # ── Filtre années ─────────────────────────────────────────────────────────
     st.markdown(

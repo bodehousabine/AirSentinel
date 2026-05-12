@@ -2,53 +2,135 @@
 import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
+import streamlit.components.v1 as components
 from utils import get_context, banner, sources_bar, empty_state, irs_level
 from assets import IMAGES
+def _render_irs_gauge_animated(irs, ctx, th, T):
+    """Affiche une jauge propre, mathématiquement exacte, sans image de fond."""
+    # Seuils réels
+    s1, s2, s3 = 0.08, 0.13, 0.18
+    
+    # Couleurs exactes
+    c_green = "#10b981"
+    c_amber = "#f59e0b"
+    c_coral = "#f97316"
+    c_red   = "#ef4444"
+    
+    html_code = f"""
+    <div id="gauge-container" style="width: 100%; display: flex; justify-content: center; align-items: center; background: transparent;">
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@900&display=swap');
+            body {{ margin: 0; padding: 0; background: transparent; overflow: hidden; }}
+            #main-box {{ 
+                position: relative; 
+                width: 550px; height: 320px; 
+                background: transparent;
+                display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            }}
+            .gauge-svg {{ width: 500px; height: 260px; margin-top: 10px; }}
+            .irs-value {{ font-size: 52px; font-family: 'DM Serif Display', serif; fill: {th['text']}; text-anchor: middle; }}
+            .tick-text {{ font-size: 15px; font-weight: 900; fill: {th['text']}; font-family: 'Inter', sans-serif; }}
+            .needle {{ transition: transform 1.5s cubic-bezier(0.19, 1, 0.22, 1); transform-origin: 250px 210px; }}
+            .tick-line {{ stroke: {th['text']}; stroke-width: 1.5; opacity: 0.6; }}
+        </style>
+        
+        <div id="main-box">
+            <div style="font-family:'Inter',sans-serif; color:{th['text']}; font-size:24px; font-weight:900; letter-spacing:0.15em; margin-top:25px; text-transform:uppercase;">NIVEAU D'IRS</div>
+            <svg class="gauge-svg" viewBox="0 0 500 260">
+                <!-- Segments Arcs (Mathématiquement proportionnels) -->
+                <path id="arc-green"  fill="none" stroke="{c_green}" stroke-width="50" />
+                <path id="arc-amber"  fill="none" stroke="{c_amber}" stroke-width="50" />
+                <path id="arc-coral"  fill="none" stroke="{c_coral}" stroke-width="50" />
+                <path id="arc-red"    fill="none" stroke="{c_red}"   stroke-width="50" />
 
-def _render_irs_gauge(irs, ctx, th, T):
-    """Affiche un indicateur en jauge (conteur de voiture) pour l'IRS."""
-    p50, p75, p90 = ctx["p50"], ctx["p75"], ctx["p90"]
-    
-    fig = go.Figure(go.Indicator(
-        mode = "gauge+number",
-        value = irs,
-        domain = {'x': [0, 1], 'y': [0, 1]},
-        number = {'font': {'size': 42, 'color': th['text'], 'weight': 'bold'}, 'valueformat': ".3f"},
-        gauge = {
-            'axis': {
-                'range': [0, 1], 
-                'tickwidth': 3, 
-                'tickcolor': th['text'],
-                'tickvals': [0, p50, p75, p90, 1],
-                'ticktext': ["0", f"<b>{p50:.2f}</b>", f"<b>{p75:.2f}</b>", f"<b>{p90:.2f}</b>", "1"],
-                'tickmode': 'array',
-                'tickfont': {'size': 13, 'color': th['text'], 'family': 'Arial Black, sans-serif'}
-            },
-            'bar': {'color': th['text'], 'thickness': 0.15},
-            'bgcolor': "rgba(0,0,0,0.05)",
-            'borderwidth': 0,
-            'steps': [
-                {'range': [0, p50],   'color': th["green"]},
-                {'range': [p50, p75], 'color': th["amber"]},
-                {'range': [p75, p90], 'color': th["coral"]},
-                {'range': [p90, 1],   'color': th["red"]},
-            ],
-            'threshold': {
-                'line': {'color': "#fff", 'width': 4},
-                'thickness': 0.8,
-                'value': irs
-            }
-        }
-    ))
-    
-    fig.update_layout(
-        paper_bgcolor = "rgba(0,0,0,0)",
-        plot_bgcolor = "rgba(0,0,0,0)",
-        font = {'color': th['text2'], 'family': "Inter"},
-        height = 240,
-        margin = dict(l=65, r=65, t=50, b=20)
-    )
-    return fig
+                <!-- Valeur centrale -->
+                <text x="250" y="195" class="irs-value" id="irs-text">0.000</text>
+
+                <!-- Ticks Group (Étiquettes + Tirets) -->
+                <g id="ticks-group"></g>
+
+                <!-- Aiguille (Barre blanche style "T-Cut") - Positionnée dans l'arc (Rayon ~150) -->
+                <g id="needle-group" class="needle" style="transform: rotate(-90deg);">
+                    <rect x="247" y="35" width="6" height="50" fill="{th['text']}" filter="drop-shadow(0 0 5px {th['text']}55)" />
+                </g>
+            </svg>
+        </div>
+
+        <script>
+            (function() {{
+                const R = 150; // Rayon de l'arc
+                const CX = 250; const CY = 210;
+                
+                function getPoint(angle, radius) {{
+                    const rad = angle * Math.PI / 180;
+                    return (CX + radius * Math.cos(Math.PI - rad)) + " " + (CY - radius * Math.sin(Math.PI - rad));
+                }}
+                
+                function setArc(id, startAngle, endAngle) {{
+                    const d = "M " + getPoint(startAngle, R) + " A " + R + " " + R + " 0 0 1 " + getPoint(endAngle, R);
+                    document.getElementById(id).setAttribute("d", d);
+                }}
+
+                const s1 = {s1}; const s2 = {s2}; const s3 = {s3};
+                
+                // Mappage réel sur 180 degrés
+                setArc("arc-green", 0, s1 * 180);
+                setArc("arc-amber", s1 * 180, s2 * 180);
+                setArc("arc-coral", s2 * 180, s3 * 180);
+                setArc("arc-red", s3 * 180, 180);
+
+                // Ticks
+                const ticks = [
+                    {{val: 0, angle: 0}},
+                    {{val: s1, angle: s1 * 180}},
+                    {{val: s2, angle: s2 * 180}},
+                    {{val: s3, angle: s3 * 180}},
+                    {{val: 1, angle: 180}}
+                ];
+                
+                const tg = document.getElementById("ticks-group");
+                ticks.forEach(t => {{
+                    // Ligne de liaison (le petit tiret)
+                    const pStart = getPoint(t.angle, R + 25);
+                    const pEnd = getPoint(t.angle, R + 35);
+                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                    line.setAttribute("x1", pStart.split(" ")[0]); line.setAttribute("y1", pStart.split(" ")[1]);
+                    line.setAttribute("x2", pEnd.split(" ")[0]); line.setAttribute("y2", pEnd.split(" ")[1]);
+                    line.setAttribute("class", "tick-line");
+                    tg.appendChild(line);
+
+                    // Texte
+                    const pTxt = getPoint(t.angle, R + 55);
+                    const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                    txt.setAttribute("x", pTxt.split(" ")[0]);
+                    txt.setAttribute("y", pTxt.split(" ")[1]);
+                    txt.setAttribute("class", "tick-text");
+                    txt.setAttribute("text-anchor", t.angle > 110 ? "start" : t.angle < 70 ? "end" : "middle");
+                    txt.setAttribute("dominant-baseline", "middle");
+                    txt.textContent = t.val === 0 ? "0" : (t.val === 1 ? "1" : t.val.toFixed(2));
+                    tg.appendChild(txt);
+                }});
+
+                const targetIrs = {irs};
+                const irsText = document.getElementById("irs-text");
+                const needle = document.getElementById("needle-group");
+                
+                let start = null;
+                function step(ts) {{
+                    if (!start) start = ts;
+                    const p = Math.min((ts - start) / 1800, 1);
+                    const ease = 1 - Math.pow(1 - p, 4);
+                    irsText.textContent = (ease * targetIrs).toFixed(3);
+                    needle.style.transform = "rotate(" + ((ease * targetIrs * 180) - 90) + "deg)";
+                    if (p < 1) requestAnimationFrame(step);
+                }}
+                requestAnimationFrame(step);
+            }})();
+        </script>
+    </div>
+    """
+    components.html(html_code, height=340)
+
 
 def render(profil):
     ctx = get_context()
@@ -57,16 +139,33 @@ def render(profil):
     T = ctx["T"]
     p50, p75, p90 = ctx["p50"], ctx["p75"], ctx["p90"]
 
-    # ── Header & Sélecteur (Synchronisé avec bloc3) ───────────────────────────
-    ch1, ch2 = st.columns([2.4, 1])
-    with ch1:
+    # ── Header & Sélecteurs ───────────────────────────
+    c1, c2, c3 = st.columns([2.6, 0.7, 0.7])
+    with c1:
         banner(IMAGES["alertes_banner"], 120,
                T['bloc4_label'],
                profil.upper(), th,
                accent=th["teal"], tint_hex="#00d4b1", tint_strength=0.28)
 
+    with c2:
+        st.markdown('<div style="margin-top:34px;"></div>', unsafe_allow_html=True)
+        profil_options = [
+            T["sidebar_profile_citizen"],
+            T["sidebar_profile_health"],
+            T["sidebar_profile_mayor"],
+            T["sidebar_profile_researcher"],
+        ]
+        p_lbl = ":material/person: " + ("**MON PROFIL :**" if ctx["lang"] == "fr" else "**MY PROFILE :**")
+        
+        def _update_profil_4():
+            st.session_state["global_profil"] = st.session_state["profil_sel_4"]
 
-    with ch2:
+        if st.session_state.get("profil_sel_4") != profil:
+            st.session_state["profil_sel_4"] = profil
+            
+        st.selectbox(p_lbl, profil_options, key="profil_sel_4", on_change=_update_profil_4)
+
+    with c3:
         st.markdown('<div style="margin-top:34px;"></div>', unsafe_allow_html=True)
         villes = sorted(df_brut["ville"].unique().tolist())
         sel_lbl = ":material/location_on: " + ("**SÉLECTIONNER UNE VILLE :**" if ctx["lang"] == "fr" else "**SELECT A CITY :**")
@@ -83,16 +182,8 @@ def render(profil):
     snc, snt, snk = irs_level(irs_val, p50, p75, p90, T, th)
 
     # ── Jauge de Risque (Prend toute la largeur ou large centré) ─────────────
-    st.markdown(f"""
-        <div style="text-align:center; margin-bottom:-45px;">
-            <div style="font-size:26px; font-weight:950; color:{th['text']}; 
-                        letter-spacing:0.1em; text-transform:uppercase;
-                        text-shadow: 0px 4px 12px {th['text']}33;">
-                NIVEAU D'IRS
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
-    st.plotly_chart(_render_irs_gauge(irs_val, ctx, th, T), width='stretch', config={'displayModeBar': False}, key="gauge_v4_fluid")
+    # Le titre est désormais inclus dans la jauge pour un meilleur contrôle du design
+    _render_irs_gauge_animated(irs_val, ctx, th, T)
 
     # ── Matrice des Risques (Structure originale préservée) ──────────────────
     st.markdown("<div style='height:20px;'></div>", unsafe_allow_html=True)

@@ -596,8 +596,8 @@ TRANSLATIONS = {
         "en": "Anticipate. Alert. Protect",
     },
     "landing_desc": {
-        "fr": "Aide à la décision sanitaire par l'IA<br>40 villes · 10 régions · 50 760 observations",
-        "en": "AI health decision support system<br>40 cities · 10 regions · 50,760 observations",
+        "fr": "Aide à la décision sanitaire par l'IA",
+        "en": "AI health decision support system",
     },
     "landing_count_villes":  {"fr": "villes",      "en": "cities"},
     "landing_count_regions": {"fr": "régions",     "en": "regions"},

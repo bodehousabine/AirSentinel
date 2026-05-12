@@ -28,13 +28,31 @@ def render(profil):
         .stMultiSelect label {{
             font-size: 14px !important;
             font-weight: 900 !important;
-            color: #f0f9ff !important;
+            color: {th['text']} !important;
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }}
+        /* Ajout du chevron robuste via pseudo-élément */
+        [data-testid="stMultiSelect"] [data-baseweb="select"] {{
+            position: relative;
+        }}
+        [data-testid="stMultiSelect"] [data-baseweb="select"]::after {{
+            content: "";
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='{th['text'].replace('#', '%23')}' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-size: contain;
+            pointer-events: none;
+            z-index: 10;
+        }}
         /* Style des options (tags) DEJA selectionnées */
         .stMultiSelect [data-baseweb="tag"] {{
-            background-color: #0ea5e9 !important;
+            background-color: {th['blue']} !important;
         }}
         .stMultiSelect [data-baseweb="tag"] span {{
             color: #ffffff !important;
@@ -148,23 +166,39 @@ def render(profil):
 
     st.markdown("<div style='margin-top:15px;'></div>", unsafe_allow_html=True)
 
+    # ── Textes des infobulles (Tooltips) ───────────────────────────────────────
+    if lang == "fr":
+        info_pm25 = "Moyenne des particules fines PM2.5. L'OMS recommande < 15 µg/m³ en moyenne annuelle."
+        info_irs  = "Indice de Risque Sanitaire (0 à 1). Combine plusieurs polluants pour évaluer le danger global."
+        info_cit  = "Nombre de villes dépassant le seuil OMS de 15 µg/m³ sur le total des villes analysées."
+        info_pol  = "Le polluant le plus fréquemment responsable de la mauvaise qualité de l'air sur la période."
+        info_tnd  = "Évolution de la concentration de PM2.5 par rapport à l'année précédente."
+        info_obs  = "Nombre total de relevés journaliers consolidés pour générer ces statistiques."
+    else:
+        info_pm25 = "Average of fine particulate matter PM2.5. WHO recommends < 15 µg/m³ annually."
+        info_irs  = "Health Risk Index (0 to 1). Combines multiple pollutants to assess overall danger."
+        info_cit  = "Number of cities exceeding the WHO threshold of 15 µg/m³ out of the total analyzed."
+        info_pol  = "The pollutant most frequently responsible for poor air quality over the period."
+        info_tnd  = "Evolution of PM2.5 concentration compared to the previous year."
+        info_obs  = "Total number of daily records consolidated to generate these statistics."
+
     # ── KPIs Affichage ─────────────────────────────────────────────────────────
     cols = st.columns(6)
     with cols[0]: kpi_box(f"{pm25_moy:.1f} µg/m³", T["bloc2_kpi_pm25_label"],
         f"{T['bloc2_kpi_pm25_sub']} · {scope_annees}",
-        th["red"] if pm25_moy>15 else th["green"], th)
+        th["red"] if pm25_moy>15 else th["green"], th, icon="pm25", info_text=info_pm25)
     with cols[1]: kpi_box(f"{irs_moy:.3f}", T["bloc2_kpi_irs_label"],
-        T["bloc2_kpi_irs_sub"].format(level=irs_label), irs_col, th)
+        T["bloc2_kpi_irs_sub"].format(level=irs_label), irs_col, th, icon="irs", info_text=info_irs)
     with cols[2]: kpi_box(f"{n_dep_oms}/{n_villes}", T["bloc2_kpi_cities_label"],
-        f"{n_dep_oms/max(n_villes,1)*100:.0f}% · {scope_annees}", th["amber"], th)
+        f"{n_dep_oms/max(n_villes,1)*100:.0f}% · {scope_annees}", th["amber"], th, icon="cities", info_text=info_cit)
     with cols[3]: kpi_box(poll_dom, T["bloc2_kpi_pollutant_label"],
-        T["bloc2_kpi_pollutant_sub"], th["blue"], th)
+        T["bloc2_kpi_pollutant_sub"], th["blue"], th, icon="pollutant", info_text=info_pol)
     with cols[4]: kpi_box(tendance,
         T["bloc2_kpi_trend_label"].format(year=an_max-1),
         T["bloc2_kpi_trend_sub"].format(y1=an_max-1, y2=an_max),
-        tend_color, th)
-    with cols[5]: kpi_box(f"{len(df_local):,}", T["bloc2_kpi_obs_label"],
-        T["bloc2_kpi_obs_sub"], th["purple"], th)
+        tend_color, th, icon="trend", info_text=info_tnd)
+    with cols[5]: kpi_box(f"{len(df_local)}", T["bloc2_kpi_obs_label"],
+        T["bloc2_kpi_obs_sub"], th["purple"], th, icon="obs", info_text=info_obs)
 
     st.markdown("<div style='margin-top:25px;'></div>", unsafe_allow_html=True)
 

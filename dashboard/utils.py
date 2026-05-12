@@ -3,12 +3,12 @@ utils.py — AirSentinel Cameroun
 get_context() avec lang + theme, composants visuels adaptatifs.
 OPTIMISÉ : lecture parquet (5-10x plus rapide que xlsx)
 """
-global VILLES, REGIONS
 import streamlit as st
+from streamlit.components.v1 import html as st_html
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
-import joblib, os, base64
+import joblib, os, base64, re
 from themes import get_theme, THEMES
 from translations import get_t
 import time
@@ -304,7 +304,6 @@ def get_context():
 
     villes_sel  = st.session_state.get("ville_sel_list",  "ALL")
     regions_sel = st.session_state.get("region_sel_list", "ALL")
-    an_max_data = df_brut["date"].dt.year.max()
     an_max_data = int(df_brut["date"].dt.year.max())
     an_min_data = int(df_brut["date"].dt.year.min())
     annee_sel   = st.session_state.get("annee_sel", (an_min_data, an_max_data))
@@ -412,6 +411,21 @@ def _rgb(hex_color):
     h = hex_color.lstrip("#")
     return int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
 
+# ── Icônes SVG inline Premium ───────────────────────────────────────────────
+ICONS_SVG = {
+    "pm25": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+    "irs": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 12-4-4-4 4"/><path d="M12 8v8"/></svg>',
+    "cities": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M3 7v1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7m0 1a3 3 0 0 0 6 0V7H3Z"/><path d="M5 21V10.85"/><path d="M19 21V10.85"/><path d="M9 21v-4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v4"/></svg>',
+    "pollutant": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v10"/><path d="M18 9l-6 6-6-6"/><path d="M22 19H2"/></svg>',
+    "trend": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>',
+    "obs": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+    "wind": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>',
+    "temp": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>',
+    "rain": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/><path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"/></svg>',
+    "fire": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>',
+    "dust": '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg>',
+}
+
 
 def banner(img_url, height, title, subtitle, th, accent=None, tint_hex=None, tint_strength=0.32, no_frame=False):
     ac = accent or th["teal"]; tint = tint_hex or ac; r, g, b = _rgb(tint)
@@ -506,26 +520,202 @@ def season_card(img_url, periode, titre, detail, accent, th, tint_hex=None):
     """, unsafe_allow_html=True)
 
 
-def kpi_box(value, label, sublabel, color, th):
+def kpi_box(value, label, sublabel, color, th, icon=None, animate=True, info_text=None):
+    """
+    Rendu Premium d'un KPI avec animation de comptage (Count-up) et effets de lueur.
+    Support optionnel d'une icône SVG et d'une infobulle (tooltip) discrète.
+    """
     r, g, b = _rgb(color)
-    st.markdown(f"""
-    <div style="background:linear-gradient(165deg,{th['bg_tertiary']} 0%,{th['bg_elevated']} 100%);
-                border:1px solid rgba({r},{g},{b},0.3);border-top:3px solid {color};
-                border-radius:14px;padding:20px 12px;text-align:center;height:120px;
-                display:flex;flex-direction:column;justify-content:center;
-                box-shadow:0 4px 20px rgba(0,0,0,0.2), 0 0 15px rgba({r},{g},{b},0.12);
-                transition: transform 0.2s ease-in-out;">
-        <div style="font-size:clamp(22px, 4vw, 28px);font-weight:800;color:{color};
-                    margin-bottom:6px;line-height:1.2;
-                    text-shadow: 0 0 12px rgba({r},{g},{b},0.4);
-                    font-family:'Inter', sans-serif;">{value}</div>
-        <div style="font-size:12px;font-weight:600;color:{th['text']};
-                    text-transform:uppercase;letter-spacing:0.05em;">{label}</div>
-        <div style="font-size:10px;color:{th['text3']};margin-top:5px;
-                    opacity:0.8;">{sublabel}</div>
-    </div>
-    """, unsafe_allow_html=True)
+    is_numeric = False
+    target_val = 0
+    prefix = ""
+    suffix = ""
 
+    # Extraction de la valeur numérique pour l'animation
+    try:
+        clean_val = str(value).replace(',', '').replace(' ', '')
+        nums = re.findall(r"[-+]?\d*\.\d+|\d+", clean_val)
+        if nums:
+            target_val = float(nums[0])
+            is_numeric = True
+            parts = re.split(r"[-+]?\d*\.\d+|\d+", str(value), 1)
+            prefix = parts[0] if len(parts) > 0 else ""
+            suffix = parts[1] if len(parts) > 1 else ""
+    except Exception:
+        is_numeric = False
+
+    icon_html = ""
+    if icon and icon in ICONS_SVG:
+        icon_html = f'<div class="icon-box" style="color: {color}; opacity: 0.9; margin-bottom: 8px;">{ICONS_SVG[icon]}</div>'
+
+    info_html = ""
+    tooltip_html = ""
+    if info_text:
+        info_icon_svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>'
+        info_html = f"""
+        <div class="info-icon" tabindex="0">
+            {info_icon_svg}
+        </div>
+        """
+        tooltip_html = f'<div class="tooltip">{info_text}</div>'
+
+    # Design CSS Premium
+    html_code = f"""
+    <div id="container" style="font-family: 'Inter', sans-serif; text-align: center; overflow: visible; padding: 10px 1px;">
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=DM+Mono&display=swap');
+            
+            .kpi-container {{
+                background: {th['bg_card']};
+                border: 1px solid rgba({r},{g},{b}, 0.45);
+                border-radius: 12px;
+                padding: 6px 4px;
+                height: 130px;
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                position: relative;
+                cursor: default;
+            }}
+            
+            .kpi-container:hover {{
+                transform: translateY(-4px);
+                border-color: rgba({r},{g},{b}, 0.8) !important;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.3), 0 0 15px rgba({r},{g},{b}, 0.2) !important;
+            }}
+            
+            .value {{
+                font-size: 24px;
+                font-weight: 800;
+                color: {color};
+                margin-bottom: 5px;
+                line-height: 1.1;
+                text-shadow: 0 0 12px rgba({r},{g},{b},0.35);
+                letter-spacing: -0.5px;
+            }}
+            
+            .label {{
+                font-size: 10.5px;
+                font-weight: 700;
+                color: {th['text']};
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                margin-bottom: 3px;
+            }}
+            
+            .sublabel {{
+                font-size: 10px;
+                color: {th['text2']};
+                opacity: 1;
+                font-weight: 600;
+            }}
+            
+            .icon-box svg {{
+                width: 20px;
+                height: 20px;
+            }}
+
+            .info-icon {{
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                width: 16px;
+                height: 16px;
+                color: {th['text3']};
+                cursor: pointer;
+                transition: color 0.2s;
+                z-index: 10;
+            }}
+            
+            .info-icon:hover {{
+                color: {color};
+            }}
+
+            .tooltip {{
+                visibility: hidden;
+                opacity: 0;
+                position: absolute;
+                top: 135px; /* Placed exactly below the container */
+                left: 50%; /* Centered horizontally */
+                width: 96%; /* Responsive width to avoid clipping */
+                box-sizing: border-box;
+                background-color: {th['bg_elevated']};
+                color: {th['text']};
+                text-align: center;
+                padding: 6px 8px;
+                border-radius: 8px;
+                border: 1px solid rgba({r},{g},{b}, 0.4);
+                box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+                font-size: 9.5px;
+                font-weight: 600;
+                line-height: 1.35;
+                z-index: 9999;
+                transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0.3s;
+                transform: translate(-50%, 5px);
+                pointer-events: none;
+                word-wrap: break-word;
+                white-space: normal;
+            }}
+
+            .info-icon:hover ~ .tooltip,
+            .info-icon:focus ~ .tooltip {{
+                visibility: visible;
+                opacity: 1;
+                transform: translate(-50%, 0);
+                transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s;
+            }}
+        </style>
+
+        <div class="kpi-container">
+            {info_html}
+            {tooltip_html}
+            {icon_html}
+            <div class="value">
+                {prefix}<span id="count-up">0</span>{suffix}
+            </div>
+            <div class="label">{label}</div>
+            <div class="sublabel">{sublabel}</div>
+        </div>
+
+        <script>
+            function animateValue(obj, start, end, duration) {{
+                let startTimestamp = null;
+                const step = (timestamp) => {{
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    const val = progress * (end - start) + start;
+                    
+                    if (end % 1 === 0) {{
+                        obj.innerHTML = Math.floor(val).toLocaleString();
+                    }} else {{
+                        obj.innerHTML = val.toFixed(end.toString().split('.')[1]?.length || 1);
+                    }}
+                    
+                    if (progress < 1) {{
+                        window.requestAnimationFrame(step);
+                    }}
+                }};
+                window.requestAnimationFrame(step);
+            }}
+
+            const el = document.getElementById("count-up");
+            const target = {target_val if is_numeric else 0};
+            
+            if ({'true' if animate and is_numeric else 'false'}) {{
+                setTimeout(() => {{
+                    animateValue(el, 0, target, 1500);
+                }}, 200);
+            }} else {{
+                el.innerHTML = "{value}".replace("{prefix}", "").replace("{suffix}", "");
+            }}
+        </script>
+    </div>
+    """
+    st_html(html_code, height=250)
 
 def sources_bar(text, th):
     st.markdown(f"""

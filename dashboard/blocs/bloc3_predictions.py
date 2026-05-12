@@ -7,6 +7,7 @@ import joblib
 import os
 from datetime import date, timedelta
 from utils import get_context, banner, sources_bar, empty_state, irs_level
+import streamlit.components.v1 as components
 from assets import IMAGES
 
 # ── Icônes SVG robustes pour blocs HTML personnalisés ────────────────────────
@@ -55,6 +56,11 @@ def _get_zone(region):
         if region in regions:
             return zone
     return 'Zone équatoriale'
+
+def _rgb(hex_color):
+    h = hex_color.lstrip("#")
+    if len(h) == 3: h = "".join([c*2 for c in h])
+    return int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
 
 @st.cache_resource
 def _load_models():
@@ -318,6 +324,10 @@ def render(profil):
         for col, pred_val, lbl_j, jour in zip([k1, k2, k3], preds, labels_j, jours):
             color = th["green"] if pred_val <= 15 else th["amber"] if pred_val <= 25 \
                     else th["coral"] if pred_val <= 37.5 else th["red"]
+            color_rgb = "16, 185, 129" if pred_val <= 15 else "245, 158, 11" if pred_val <= 25 \
+                        else "249, 115, 22" if pred_val <= 37.5 else "239, 68, 68"
+            tooltip_text = ("Predicted PM2.5 concentration for this day." if lang=="en" 
+                            else "Concentration de PM2.5 prédite pour cette journée.")
             ratio = pred_val / 15
             if   pred_val <= 15:   niv = f"<div style='display:inline-flex;align-items:center;gap:6px;'>{get_icon('check_circle', 15)} Conforme OMS</div>" if lang == "fr" else f"<div style='display:inline-flex;align-items:center;gap:6px;'>{get_icon('check_circle', 15)} WHO Compliant</div>"
             elif pred_val <= 25:   niv = f"<div style='display:inline-flex;align-items:center;gap:6px;'>{get_icon('warning', 15)} Modéré</div>" if lang == "fr" else f"<div style='display:inline-flex;align-items:center;gap:6px;'>{get_icon('warning', 15)} Moderate</div>"
@@ -331,11 +341,13 @@ def render(profil):
                 
                 col_cmr = th.get("teal", "#14b8a6") if ratio_cmr <= 1.0 else th.get("coral", "#f43f5e")
                 col_oms = th.get("green", "#10b981") if ratio <= 1.0 else th.get("red", "#ef4444")
+                r_oms, g_oms, b_oms = _rgb(col_oms)
+                r_cmr, g_cmr, b_cmr = _rgb(col_cmr)
                 
                 ratio_html = (
-                    f'<div style="display:flex; justify-content:center; gap:8px; margin-top:10px;">'
-                    f'<div style="border:1px solid {col_oms}44; color:{col_oms}; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:700; background:rgba(0,0,0,0.15);">{ratio:.1f}x {lbl_oms}</div>'
-                    f'<div style="border:1px solid {col_cmr}44; color:{col_cmr}; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:700; background:rgba(0,0,0,0.15);">{ratio_cmr:.1f}x {lbl_cmr}</div>'
+                    f'<div style="display:flex; justify-content:center; gap:10px; margin-top:14px;">'
+                    f'<div style="border:1.2px solid {col_oms}; color:{col_oms}; padding:4px 10px; border-radius:8px; font-size:11px; font-weight:800; background:rgba({r_oms},{g_oms},{b_oms},0.08); font-family:\'DM Mono\', monospace;">{ratio:.1f}x {lbl_oms}</div>'
+                    f'<div style="border:1.2px solid {col_cmr}; color:{col_cmr}; padding:4px 10px; border-radius:8px; font-size:11px; font-weight:800; background:rgba({r_cmr},{g_cmr},{b_cmr},0.08); font-family:\'DM Mono\', monospace;">{ratio_cmr:.1f}x {lbl_cmr}</div>'
                     f'</div>'
                 )
             else:
@@ -343,24 +355,64 @@ def render(profil):
                 ratio_html = f'<div style="font-size:10px;color:{th["text3"]};margin-top:8px;">{ratio:.1f}x {lbl_oms}</div>'
 
             with col:
-                st.markdown(
-                    f'<div style="background:linear-gradient(145deg,{th["bg_tertiary"]},{th["bg_elevated"]});'
-                    f'border:1px solid {color}55;border-top:4px solid {color};'
-                    f'border-radius:14px;padding:18px 14px;text-align:center;'
-                    f'box-shadow:0 4px 20px {color}22;">'
-                    f'<div style="font-size:11px;color:{th["text3"]};margin-bottom:6px;'
-                    f'text-transform:uppercase;letter-spacing:.08em;">'
-                    f'{lbl_j}</div>'
-                    f'<div style="font-size:13px;color:{th["text3"]};margin-bottom:8px;">'
-                    f'{jour.strftime("%d %B %Y")}</div>'
-                    f'<div style="font-size:34px;font-weight:800;color:{color};'
-                    f'line-height:1;text-shadow:0 0 20px {color}44;">{pred_val:.1f}</div>'
-                    f'<div style="font-size:11px;color:{th["text3"]};margin-top:4px;">µg/m³</div>'
-                    f'<div style="font-size:12px;color:{color};margin-top:8px;font-weight:600;">{niv}</div>'
-                    f'{ratio_html}'
-                    f'</div>',
-                    unsafe_allow_html=True
-                )
+                html_card = f"""
+                <div id="container" style="font-family: 'Inter', sans-serif; text-align: center; overflow: hidden;">
+                    <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=DM+Mono&display=swap');
+                        body {{ margin: 0; padding: 0; background: transparent; }}
+                        .card {{
+                            background: {th["bg_elevated"]};
+                            border: 1px solid {th["border_soft"]};
+                            border-top: 3px solid {color};
+                            border-radius: 18px;
+                            padding: 22px 16px;
+                            text-align: center;
+                            box-shadow: 0 10px 30px rgba(0,0,0,0.1), 0 0 15px {color}11;
+                            box-sizing: border-box;
+                            height: 200px;
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: center;
+                            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+                        }}
+                        .label-j {{ font-size: 10px; color: {th["text3"]}; margin-bottom: 8px; text-transform: uppercase; letter-spacing: .15em; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; }}
+                        .date-v {{ font-size: 13px; color: {th["text2"]}; margin-bottom: 12px; font-weight: 500; }}
+                        .val-v {{ font-size: 42px; font-weight: 900; color: {color}; line-height: 1; text-shadow: 0 0 25px {color}33; }}
+                        .unit {{ font-size: 11px; color: {th["text3"]}; margin-top: 4px; font-weight: 600; }}
+                        .niv-v {{ font-size: 13px; color: {color}; margin-top: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; }}
+                        .ratio-box {{ display: flex; justify-content: center; gap: 10px; margin-top: 14px; }}
+                        .ratio-tag {{ border: 1px solid; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; background: {th["bg_tertiary"]}; }}
+                        #container {{ padding-top: 10px; }}
+                    </style>
+                    <div class="card">
+
+                        <div class="label-j">{lbl_j}</div>
+                        <div class="date-v">{jour.strftime("%d %B %Y")}</div>
+                        <div class="val-v"><span id="count-up">0</span></div>
+                        <div class="unit">µg/m³</div>
+                        <div class="niv-v">{niv}</div>
+                        {ratio_html}
+                    </div>
+                    <script>
+                        (function() {{
+                            const obj = document.getElementById("count-up");
+                            const target = {pred_val};
+                            let startTimestamp = null;
+                            const step = (timestamp) => {{
+                                if (!startTimestamp) startTimestamp = timestamp;
+                                const progress = Math.min((timestamp - startTimestamp) / 1500, 1);
+                                const easeOut = 1 - Math.pow(1 - progress, 3);
+                                obj.innerText = (easeOut * target).toFixed(1);
+                                if (progress < 1) {{
+                                    window.requestAnimationFrame(step);
+                                }}
+                            }};
+                            window.requestAnimationFrame(step);
+                        }})();
+                    </script>
+                </div>
+                """
+                components.html(html_card, height=215)
 
         st.markdown(
             f'<div style="font-size:10px;color:{th["text3"]};margin-top:10px;'
@@ -490,233 +542,195 @@ def render(profil):
             st.warning("Modèles non disponibles — vérifier le dossier models/")
 
     # ══════════════════════════════════════════════════════════════════════════
-    # ONGLET 3 — Simulateur avec vrai modèle
+    # ONGLET 3 — Simulateur interactif IA (Version Formulaire & Jauge Alerte)
     # ══════════════════════════════════════════════════════════════════════════
     with tabs[2]:
         def _m(col, fb):
             return float(df[col].mean()) if col in df.columns and len(df) > 0 else fb
 
-        # En-tête (Filtre ville retiré icic car on utilise celui du haut désormais)
-        v_all = T["all_cities"]
-        if v == v_all:
-             # Le simulateur nécessite une ville de référence pour le contexte zones
-             # On prend la première ville disponible si "Toutes villes" est sélectionné
-             ville_sim = sorted(df["ville"].unique().tolist())[0]
-             st.info(f":material/lightbulb: Simulation basée sur le contexte de {ville_sim} (par défaut)." if lang == "fr" else 
-                     f":material/lightbulb: Simulation based on context: {ville_sim} (default).")
-        else:
-             ville_sim = v
+        # Style pour le bouton en bleu et professionnel
+        st.markdown(f"""
+            <style>
+            div[data-testid="stForm"] button {{
+                background-color: {th['blue']} !important;
+                color: white !important;
+                border-radius: 8px !important;
+                border: none !important;
+                font-weight: 800 !important;
+                letter-spacing: 0.1em !important;
+                text-transform: uppercase !important;
+                padding: 10px 20px !important;
+            }}
+            div[data-testid="stForm"] button:hover {{
+                background-color: {th['blue']}cc !important;
+                box-shadow: 0 4px 15px {th['blue']}44 !important;
+            }}
+            </style>
+        """, unsafe_allow_html=True)
 
-        df_sim    = df[df["ville"] == ville_sim].sort_values("date")
+        # Initialisation de l'état de simulation
+        if "sim_res" not in st.session_state:
+            st.session_state.sim_res = {
+                "pm25_s": 15.0, "irs_s": 0.12, "source": "Prêt pour simulation" if lang=="fr" else "Ready for simulation",
+                "temp": 30, "vent": 15, "dust": 80, "precip": 2, "harm": False, "feux": False
+            }
 
-        # ── Layout UNIQUE : sliders (gauche) | jauge (droite) ───────────────
-        col_sliders, col_gauge = st.columns([3, 2])
+        # ── DISPOSITION 2 COLONNES (Formulaire à gauche, Jauge à droite) ──────
+        col_form, col_gauge = st.columns([1.1, 1], gap="large")
 
-        # Sliders dans la colonne gauche
-        with col_sliders:
-            st.markdown(
-                f'<div style="font-size:11px;font-weight:700;color:{th["text3"]};'
-                f'text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;display:flex;align-items:center;gap:6px;">'
-                f'{get_icon("thermostat", 14)} '
-                + ("Weather conditions" if lang=="en" else "Conditions météorologiques")
-                + "</div>",
-                unsafe_allow_html=True
-            )
-            c1, c2 = st.columns(2)
-            with c1:
-                st.markdown(f"<div style='display:flex;align-items:center;gap:6px;font-size:13px;color:{th['text']}'>{get_icon('thermostat', 16)} " + ("Temperature (°C)" if lang=="en" else "Température (°C)") + "</div>", unsafe_allow_html=True)
-                temp = st.slider("label_t", 20, 45, int(min(45, max(20, _m("temperature_2m_max", 30)))), key="s_t", label_visibility="collapsed")
+        with col_form:
+            with st.form("simulateur_form", clear_on_submit=False):
+                st.markdown(
+                    f'<div style="font-size:13px;font-weight:800;color:{th["amber"]};'
+                    f'text-transform:uppercase;letter-spacing:.1em;margin-bottom:20px;display:flex;align-items:center;gap:8px;">'
+                    f'{get_icon("science", 20)} '
+                    + ("CONFIGURATION DU SCÉNARIO" if lang=="fr" else "SCENARIO CONFIGURATION")
+                    + "</div>",
+                    unsafe_allow_html=True
+                )
                 
-                st.markdown(f"<div style='display:flex;align-items:center;gap:6px;font-size:13px;color:{th['text']}'>{get_icon('air', 16)} " + ("Wind (km/h)" if lang=="en" else "Vent (km/h)") + "</div>", unsafe_allow_html=True)
-                vent = st.slider("label_v", 0, 60, int(min(60, max(0, _m("wind_speed_10m_max", 15)))), key="s_v", label_visibility="collapsed")
-            with c2:
-                st.markdown(f"<div style='display:flex;align-items:center;gap:6px;font-size:13px;color:{th['text']}'>{get_icon('grain', 16)} Dust (µg/m³)</div>", unsafe_allow_html=True)
-                dust = st.slider("label_d", 0, 300, int(min(300, max(0, _m("dust_moyen", 80)))), key="s_d", label_visibility="collapsed")
+                c1, c2 = st.columns(2)
+                with c1:
+                    temp = st.slider("**Température (°C)**" if lang=="fr" else "**Temperature (°C)**", 15, 50, st.session_state.sim_res["temp"])
+                    dust = st.slider("**Poussière (µg/m³)**" if lang=="fr" else "**Dust (µg/m³)**", 0, 500, st.session_state.sim_res["dust"])
+                    st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
+                    harm = st.checkbox("**Harmattan intense**" if lang=="fr" else "**Intense Harmattan**", value=st.session_state.sim_res["harm"])
+                with c2:
+                    vent = st.slider("**Vent (km/h)**" if lang=="fr" else "**Wind (km/h)**", 0, 80, st.session_state.sim_res["vent"])
+                    precip = st.slider("**Précipitations (mm)**" if lang=="fr" else "**Precipitation (mm)**", 0, 100, st.session_state.sim_res["precip"])
+                    st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
+                    feux = st.checkbox("**Épisode de feux**" if lang=="fr" else "**Fire episode**", value=st.session_state.sim_res["feux"])
                 
-                st.markdown(f"<div style='display:flex;align-items:center;gap:6px;font-size:13px;color:{th['text']}'>{get_icon('rainy', 16)} " + ("Precipitation (mm)" if lang=="en" else "Précipitations (mm)") + "</div>", unsafe_allow_html=True)
-                precip = st.slider("label_p", 0, 50, int(min(50, max(0, _m("precipitation_sum", 2)))), key="s_p", label_visibility="collapsed")
-            st.markdown("<div style='margin-top:12px;'></div>", unsafe_allow_html=True)
-            st.markdown(
-                f'<div style="font-size:11px;font-weight:700;color:{th["text3"]};'
-                f'text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;display:flex;align-items:center;gap:6px;">'
-                f'{get_icon("thunderstorm", 14)} '
-                + ("Climate episodes" if lang=="en" else "Épisodes climatiques")
-                + "</div>",
-                unsafe_allow_html=True
-            )
-            c3, c4 = st.columns(2)
-            with c3:
-                st.markdown(f"<div style='display:flex;align-items:center;gap:6px;font-size:13px;color:{th['text']}'>{get_icon('cyclone', 16)} " + ("Intense Harmattan" if lang=="en" else "Harmattan intense") + "</div>", unsafe_allow_html=True)
-                harm = st.checkbox("label_h", key="s_harm", label_visibility="collapsed",
-                                   help="Dust > p90 AND precipitation < p10 · Schepanski et al. (2007)")
-            with c4:
-                st.markdown(f"<div style='display:flex;align-items:center;gap:6px;font-size:13px;color:{th['text']}'>{get_icon('local_fire_department', 16)} " + ("Fire episode" if lang=="en" else "Épisode feux") + "</div>", unsafe_allow_html=True)
-                feux = st.checkbox("label_f", key="s_feux", label_visibility="collapsed",
-                                   help="CO > p90 in dry season · Barker et al. (2020)")
+                st.markdown("<div style='height:25px;'></div>", unsafe_allow_html=True)
+                submit_sim = st.form_submit_button("LANCER LA SIMULATION" if lang=="fr" else "RUN SIMULATION", width='stretch')
 
-        # ── Calcul vrai modèle (avant d'afficher la jauge) ────────────────
-        if modeles_ok and len(df_sim) > 0:
-            try:
-                last_row = df_sim[features].fillna(df_sim[features].median()).tail(1).copy()
-                for col_feat in features:
-                    if 'temperature_2m_max' in col_feat:    last_row[col_feat] = temp
-                    elif 'wind_speed_10m_max' in col_feat:  last_row[col_feat] = vent
-                    elif 'dust_moyen' in col_feat:          last_row[col_feat] = dust
-                    elif 'precipitation_sum' in col_feat:   last_row[col_feat] = precip
-                    elif 'harmattan_intense' in col_feat:   last_row[col_feat] = int(harm)
-                    elif 'episode_feux' in col_feat:        last_row[col_feat] = int(feux)
-                last_s     = scaler.transform(last_row)
-                p_rl       = modele.predict(last_s)[0]
-                region_sim = df_sim['region'].iloc[-1]
-                zone_sim   = _get_zone(region_sim)
-                p_arima    = arima[zone_sim].forecast(steps=1).iloc[-1]
-                pm25_s     = max(0, p_rl + p_arima)
-                source_sim = f'<div style="display:inline-flex;align-items:center;gap:4px;">{get_icon("check_circle", 12)} Modèle Hybride RL+ARIMA · {zone_sim}</div>'
-            except:
-                pm25_s     = max(5, 10 + 0.4*temp - 0.3*vent + 0.05*dust
-                                 + (15 if harm else 0) + (20 if feux else 0))
-                source_sim = f'<div style="display:inline-flex;align-items:center;gap:4px;">{get_icon("warning", 12)} Fallback formule approx.</div>'
-        else:
-            pm25_s     = max(5, 10 + 0.4*temp - 0.3*vent + 0.05*dust
-                             + (15 if harm else 0) + (20 if feux else 0))
-            source_sim = f'<div style="display:inline-flex;align-items:center;gap:4px;">{get_icon("warning", 12)} Modèle non disponible · formule approx.</div>'
+        # ── LOGIQUE DE CALCUL (Seulement au clic) ─────────────────────────────
+        if submit_sim:
+            v_sim = v if v != T["all_cities"] else sorted(df["ville"].unique().tolist())[0]
+            df_v_sim = df[df["ville"] == v_sim].sort_values("date")
+            
+            if modeles_ok and len(df_v_sim) > 0:
+                try:
+                    last_row = df_v_sim[features].fillna(df_v_sim[features].median()).tail(1).copy()
+                    for col_feat in features:
+                        if 'temperature_2m_max' in col_feat:    last_row[col_feat] = temp
+                        elif 'wind_speed_10m_max' in col_feat:  last_row[col_feat] = vent
+                        elif 'dust_moyen' in col_feat:          last_row[col_feat] = dust
+                        elif 'precipitation_sum' in col_feat:   last_row[col_feat] = precip
+                        elif 'harmattan_intense' in col_feat:   last_row[col_feat] = int(harm)
+                        elif 'episode_feux' in col_feat:        last_row[col_feat] = int(feux)
+                    
+                    last_s = scaler.transform(last_row)
+                    p_rl   = modele.predict(last_s)[0]
+                    reg_s  = df_v_sim['region'].iloc[-1]
+                    z_s    = _get_zone(reg_s)
+                    p_ari  = arima[z_s].forecast(steps=1).iloc[-1]
+                    
+                    pm25_s = max(0, p_rl + p_ari)
+                    source_s = f"Modèle Hybride · {z_s}"
+                except:
+                    pm25_s = max(5, 10 + 0.4*temp - 0.3*vent + 0.05*dust + (15 if harm else 0))
+                    source_s = "Calcul IA échoué · Fallback"
+            else:
+                pm25_s = max(5, 10 + 0.4*temp - 0.3*vent + 0.05*dust + (15 if harm else 0))
+                source_s = "Mode démo (Formule approx.)"
 
-        irs_s     = min(1.0, pm25_s/80*0.35 + dust/300*0.25 + 0.10)
-        nc, nt, _ = irs_level(irs_s, ctx["p50"], ctx["p75"], ctx["p90"], T, th)
-        ecart     = irs_s - ctx["irs_moy"]
-        ecart_sgn = get_icon("trending_up", 28) if ecart > 0 else get_icon("trending_down", 28)
-        ecart_col = th["red"] if ecart > 0 else th["green"]
-        if   pm25_s <= 15:   oms_niv = f'<div style="display:inline-flex;align-items:center;gap:4px;">{get_icon("check_circle", 15)} ' + ("WHO Compliant" if lang=="en" else "Conforme OMS") + "</div>"
-        elif pm25_s <= 25:   oms_niv = f'<div style="display:inline-flex;align-items:center;gap:4px;">{get_icon("warning", 15)} ' + ("IT4 exceeded" if lang=="en" else "IT4 dépassé") + "</div>"
-        elif pm25_s <= 37.5: oms_niv = f'<div style="display:inline-flex;align-items:center;gap:4px;">{get_icon("error", 15)} ' + ("IT3 exceeded" if lang=="en" else "IT3 dépassé") + "</div>"
-        elif pm25_s <= 50:   oms_niv = f'<div style="display:inline-flex;align-items:center;gap:4px;">{get_icon("dangerous", 15)} ' + ("IT2 exceeded" if lang=="en" else "IT2 dépassé") + "</div>"
-        else:                oms_niv = f'<div style="display:inline-flex;align-items:center;gap:4px;">{get_icon("block", 15)} ' + ("Critical" if lang=="en" else "Critique") + "</div>"
+            # Calcul IRS simulé
+            irs_s = min(1.0, pm25_s/100*0.4 + dust/400*0.3 + 0.1)
+            
+            # Mise à jour session_state
+            st.session_state.sim_res = {
+                "pm25_s": pm25_s, "irs_s": irs_s, "source": source_s,
+                "temp": temp, "vent": vent, "dust": dust, "precip": precip, "harm": harm, "feux": feux
+            }
 
-        # Jauge dans la colonne droite — même bloc que les sliders
+        # ── AFFICHAGE DES RÉSULTATS (DANS LA COLONNE DE DROITE) ───────────────
         with col_gauge:
-            # Plotly gauge : 0 = bas-gauche (225°), 100 = bas-droite (-45°=315°)
-            # Angle trigonométrique standard : 0°=droite, 90°=haut, 180°=gauche
-            # La jauge couvre 270° de 225° à -45° (sens antihoraire)
-            # Pour val dans [0,100] : angle = 225° - val/100 * 270°
-            val_norm  = min(pm25_s, 100) / 100
-            angle_deg = 225 - val_norm * 270
-            angle_rad = np.radians(angle_deg)
+            res = st.session_state.sim_res
+            pm_v  = res["pm25_s"]
+            
+            # Logique de couleur unifiée
+            if pm_v <= 15:
+                res_col, res_lab = th["green"], "CONFORME OMS"
+            elif pm_v <= 25:
+                res_col, res_lab = th["amber"], "MODÉRÉ"
+            elif pm_v <= 37.5:
+                res_col, res_lab = th["coral"], "ÉLEVÉ"
+            else:
+                res_col, res_lab = th["red"], "CRITIQUE"
+                
+            c_g, c_a, c_c, c_r = "#10b981", "#f59e0b", "#f97316", "#ef4444"
+            html_gauge = f"""
+            <div id="gauge-container" style="width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; background: {th['bg_card']}; border-radius: 16px; border: 1px solid {th['border_soft']}; padding: 30px 10px;">
+                <style>
+                    @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@900&display=swap');
+                    .pm-value {{ font-size: 56px; font-family: 'DM Serif Display', serif; fill: {res_col}; text-anchor: middle; }}
+                    .pm-unit {{ font-size: 16px; font-weight: 700; fill: {th['text3']}; font-family: 'Inter', sans-serif; text-anchor: middle; }}
+                    .needle {{ transition: transform 2s cubic-bezier(0.19, 1, 0.22, 1); transform-origin: 250px 210px; }}
+                </style>
+                <div style="font-family:'Inter',sans-serif; color:{th['text']}; font-size:15px; font-weight:900; letter-spacing:0.1em; margin-bottom:8px; text-transform:uppercase;">PM2.5 SIMULÉ</div>
+                <div style="font-family:'Inter',sans-serif; color:{res_col}; font-size:18px; font-weight:900; letter-spacing:0.05em; margin-bottom:25px; text-transform:uppercase;">{res_lab}</div>
+                <svg viewBox="0 0 500 260" style="width: 100%; max-width: 450px;">
+                    <path id="arc-green" fill="none" stroke="{c_g}" stroke-width="45" />
+                    <path id="arc-amber" fill="none" stroke="{c_a}" stroke-width="45" />
+                    <path id="arc-coral" fill="none" stroke="{c_c}" stroke-width="45" />
+                    <path id="arc-red"   fill="none" stroke="{c_r}" stroke-width="45" />
+                    
+                    <text x="250" y="195" class="pm-value" id="sim-pm-text">0.0</text>
+                    <text x="250" y="225" class="pm-unit">µg/m³</text>
 
-            cx, cy = 0.5, 0.30   # centre pivot
-            L      = 0.36        # longueur aiguille
+                    <g id="sim-needle" class="needle" style="transform: rotate(-90deg);">
+                        <rect x="247" y="35" width="6" height="50" fill="{th['text']}" filter="drop-shadow(0 0 5px {th['text']}55)" rx="3" />
+                    </g>
+                </svg>
+                <script>
+                    (function() {{
+                        const R = 150;
+                        const CX = 250; const CY = 210;
+                        
+                        function getPoint(angle, radius) {{
+                            const rad = angle * Math.PI / 180;
+                            return (CX + radius * Math.cos(Math.PI - rad)) + " " + (CY - radius * Math.sin(Math.PI - rad));
+                        }}
+                        
+                        function setArc(id, startAngle, endAngle) {{
+                            const d = "M " + getPoint(startAngle, R) + " A " + R + " " + R + " 0 0 1 " + getPoint(endAngle, R);
+                            document.getElementById(id).setAttribute("d", d);
+                        }}
 
-            # Dans paper coords : Y diminue vers le haut → inverser sin
-            tip_x  = cx + L * np.cos(angle_rad)
-            tip_y  = cy - L * np.sin(angle_rad)
+                        // Seuils PM2.5
+                        const maxVal = 100;
+                        const s1 = 15 / maxVal;
+                        const s2 = 25 / maxVal;
+                        const s3 = 37.5 / maxVal;
+                        
+                        setArc("arc-green", 0, s1 * 180);
+                        setArc("arc-amber", s1 * 180, s2 * 180);
+                        setArc("arc-coral", s2 * 180, s3 * 180);
+                        setArc("arc-red",   s3 * 180, 180);
 
-            back_x = cx - 0.06 * np.cos(angle_rad)
-            back_y = cy + 0.06 * np.sin(angle_rad)
-
-            fig_gauge = go.Figure(go.Indicator(
-                mode="gauge+number",
-                value=pm25_s,
-                number=dict(
-                    suffix=" µg/m³",
-                    font=dict(color=nc, size=18, family="DM Mono")
-                ),
-                title=dict(
-                    text=f"{'Predicted PM2.5' if lang=='en' else 'PM2.5 Prédit'} · {ville_sim}",
-                    font=dict(color="#94a3b8", size=11)
-                ),
-                gauge=dict(
-                    axis=dict(
-                        range=[0, 100],
-                        tickwidth=2,
-                        tickcolor="#94a3b8",
-                        tickvals=[0, 15, 25, 37.5, 75, 100],
-                        ticktext=["0", "<b>15</b>", "<b>25</b>", "<b>37</b>", "<b>75</b>", "100"],
-                        tickfont=dict(size=13, color=th["text2"], family="Arial Black, sans-serif")
-                    ),
-                    bar=dict(color=nc, thickness=0.04),
-                    bgcolor="#1e293b",
-                    borderwidth=2,
-                    bordercolor="#334155",
-                    steps=[
-                        dict(range=[0, 15],    color="#10b981"),
-                        dict(range=[15, 25],   color="#f59e0b"),
-                        dict(range=[25, 37.5], color="#f97316"),
-                        dict(range=[37.5, 75], color="#ef4444"),
-                        dict(range=[75, 100],  color="#7f1d1d"),
-                    ],
-                    threshold=dict(
-                        line=dict(color="white", width=2),
-                        thickness=0.8, value=15
-                    )
-                ),
-            ))
-            fig_gauge.update_layout(
-                paper_bgcolor="#0f172a",
-                font=dict(color="#e2e8f0"),
-                height=300,
-                margin=dict(l=50, r=50, t=30, b=10)
-            )
-            st.plotly_chart(fig_gauge, width="stretch")
-
-
-
-        # ── Cadre résultat PLEINE LARGEUR en bas ──────────────────────────
-        st.markdown("<div style='margin-top:12px;'></div>", unsafe_allow_html=True)
-        st.markdown(
-            f'<div style="background:linear-gradient(135deg,#0f172a,#1e293b);'
-            f'border:2px solid {nc};border-radius:16px;padding:20px 28px;'
-            f'box-shadow:0 8px 32px {nc}33;">'
-
-            f'<div style="display:grid;grid-template-columns:1fr 1px 1fr 1px 1fr 1px 1fr;'
-            f'align-items:center;gap:0;">'
-
-            # PM2.5
-            f'<div style="text-align:center;padding:0 20px;">'
-            f'<div style="font-size:10px;color:#64748b;text-transform:uppercase;'
-            f'letter-spacing:.1em;margin-bottom:6px;">{"Predicted PM2.5" if lang=="en" else "PM2.5 prédit"}</div>'
-            f'<div style="font-size:38px;font-weight:900;color:{nc};'
-            f'text-shadow:0 0 20px {nc}55;line-height:1;">{pm25_s:.1f}</div>'
-            f'<div style="font-size:11px;color:#94a3b8;margin-top:2px;">µg/m³</div>'
-            f'</div>'
-
-            f'<div style="height:60px;background:{nc}33;width:1px;"></div>'
-
-            # IRS
-            f'<div style="text-align:center;padding:0 20px;">'
-            f'<div style="font-size:10px;color:#64748b;text-transform:uppercase;'
-            f'letter-spacing:.1em;margin-bottom:6px;">{"Simulated IRS" if lang=="en" else "IRS simulé"}</div>'
-            f'<div style="font-size:32px;font-weight:800;color:{nc};line-height:1;">{irs_s:.3f}</div>'
-            f'<div style="font-size:12px;font-weight:600;color:{nc};margin-top:4px;">{nt}</div>'
-            f'</div>'
-
-            f'<div style="height:60px;background:{nc}33;width:1px;"></div>'
-
-            # Niveau OMS
-            f'<div style="text-align:center;padding:0 20px;">'
-            f'<div style="font-size:10px;color:#64748b;text-transform:uppercase;'
-            f'letter-spacing:.1em;margin-bottom:6px;">{"WHO Level" if lang=="en" else "Niveau OMS"}</div>'
-            f'<div style="font-size:18px;font-weight:700;color:{nc};line-height:1.2;">{oms_niv}</div>'
-            f'<div style="font-size:11px;color:#94a3b8;margin-top:4px;">{pm25_s/15:.1f}x {"AQG threshold 2021" if lang=="en" else "seuil AQG 2021"}</div>'
-            f'</div>'
-
-            f'<div style="height:60px;background:{nc}33;width:1px;"></div>'
-
-            # Écart vs moyenne
-            f'<div style="text-align:center;padding:0 20px;">'
-            f'<div style="font-size:10px;color:#64748b;text-transform:uppercase;'
-            f'letter-spacing:.1em;margin-bottom:6px;">{"vs Average" if lang=="en" else "vs Moyenne"}</div>'
-            f'<div style="font-size:32px;font-weight:800;color:{ecart_col};line-height:1;display:flex;align-items:center;justify-content:center;gap:4px;">'
-            f'{ecart_sgn} {abs(ecart):.3f}</div>'
-            f'<div style="font-size:11px;color:#94a3b8;margin-top:4px;">{ctx["scope_annees"]}</div>'
-            f'</div>'
-
-            f'</div>'
-
-            f'<div style="font-size:9px;color:#475569;margin-top:14px;padding-top:10px;'
-            f'border-top:1px solid #1e293b;font-family:DM Mono,monospace;text-align:center;">'
-            f'<div style="display:inline-flex;align-items:center;gap:4px;">{source_sim}</div> · WHO AQG 2021 · NCBI NBK574591</div>'
-            f'</div>',
-            unsafe_allow_html=True
-        )
+                        const target = {pm_v};
+                        const text = document.getElementById("sim-pm-text");
+                        const needle = document.getElementById("sim-needle");
+                        let start = null;
+                        function step(ts) {{
+                            if (!start) start = ts;
+                            const p = Math.min((ts - start) / 2000, 1);
+                            const ease = 1 - Math.pow(1 - p, 4);
+                            const val = ease * target;
+                            text.textContent = val.toFixed(1);
+                            
+                            const ratio = Math.min(val / maxVal, 1.0);
+                            needle.style.transform = "rotate(" + ((ratio * 180) - 90) + "deg)";
+                            
+                            if (p < 1) requestAnimationFrame(step);
+                        }}
+                        requestAnimationFrame(step);
+                    }})();
+                </script>
+            </div>
+            """
+            components.html(html_gauge, height=350)
 
     # ══════════════════════════════════════════════════════════════════════════
     # ONGLET 4 — Calendrier mensuel impressionnant

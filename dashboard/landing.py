@@ -132,6 +132,30 @@ button[data-testid*="stBaseButton"]:hover {
 .brand-air { color: #FFFFFF; }
 .brand-sentinel { color: #00d4b1; }
 
+/* --- ANIMATIONS LOGO LANDING --- */
+@keyframes logo-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+@keyframes logo-glow {
+    0%, 100% { filter: drop-shadow(0 0 20px rgba(0,212,177,0.2)); }
+    50% { filter: drop-shadow(0 0 45px rgba(0,212,177,0.6)); }
+}
+@keyframes logo-entrance {
+    0% { opacity: 0; transform: scale(0.8) translateY(20px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.landing-logo {
+    animation: 
+        logo-entrance 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards,
+        logo-float 5s ease-in-out infinite 1.2s,
+        logo-glow 4s ease-in-out infinite;
+    border-radius: 24px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    border: 1px solid rgba(0,212,177,0.2);
+}
+
 /* Chatbox */
 iframe[title="chatbox.render_chatbox"] {
     position: fixed !important; bottom: 20px !important; right: 20px !important; z-index: 1000000 !important;
@@ -169,7 +193,7 @@ iframe[title="chatbox.render_chatbox"] {
     st.markdown(f"""
     <div style="text-align:center; padding-top: 0; margin-bottom: 10px;">
         <div style="margin-bottom:20px; display:flex; justify-content:center;">
-            <img src="data:image/jpeg;base64,{logo_b64}" 
+            <img src="data:image/jpeg;base64,{logo_b64}" class="landing-logo"
                  style="width:100%; max-width:180px; height:auto; display:block;">
         </div>
         <div class="brand-title">
@@ -198,14 +222,15 @@ iframe[title="chatbox.render_chatbox"] {
     with col2:
         enter = st.button(T["landing_btn_enter"], key="enter_dashboard_btn", width='stretch')
 
-    # 5. Description et Footer
+    # 5. Description et Footer (IndabaX uniquement)
+    footer_text = T["sidebar_footer"].splitlines()[0]
     st.markdown(f"""
     <div style="text-align:center; margin-top: 25px; padding: 0 15px;">
         <div style="font-size:16px;color:{th['text2']};line-height:1.6;max-width:580px;margin:0 auto;">
             {T["landing_desc"]}
         </div>
-        <div style="margin-top:10px;font-size:11px;color:rgba(248,250,252,0.3);font-family:'DM Mono',monospace;letter-spacing:0.15em;">
-            {T["sidebar_footer"].splitlines()[0]}
+        <div style="margin-top:10px;font-size:11px;color:{th['text3']};opacity:0.7;font-family:'DM Mono',monospace;letter-spacing:0.15em;text-transform:uppercase;">
+            {footer_text}
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -260,6 +285,21 @@ def get_themed_about_html(th, lang="fr"):
     
     for old, new in replacements.items():
         content = content.replace(old, new)
+
+    from utils import load_data
+    df_brut = load_data()
+    obs_count = len(df_brut)
+    
+    # Remplacement dynamique du nombre d'observations pour l'animation
+    content = content.replace("OBS_COUNT_PLACEHOLDER", str(obs_count))
+    
+    # Rétrocompatibilité si d'anciens textes hardcodés traînent
+    if lang == "en":
+        obs_str = f"{obs_count:,}"
+        content = content.replace("50,760", obs_str).replace("87,240", obs_str)
+    else:
+        obs_str = f"{obs_count:,}".replace(",", " ")
+        content = content.replace("50 760", obs_str).replace("87 240", obs_str)
 
     # Images locales -> Base64
     for img_name in ["about_us.png", "our_mission.png", "air_quality.png", "bsd.png", "fma.png", "fah.png", "prf.png"]:

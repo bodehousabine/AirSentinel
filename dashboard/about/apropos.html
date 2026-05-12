@@ -573,19 +573,19 @@
                     <div class="number-card-icon">
                         <i class="fa-solid fa-city"></i>
                     </div>
-                    <h3>40 Villes</h3>
+                    <h3><span class="count-up" data-target="40">0</span> Villes</h3>
                 </div>
                 <div class="number-card">
                     <div class="number-card-icon">
                         <i class="fa-solid fa-map"></i>
                     </div>
-                    <h3>10 Régions</h3>
+                    <h3><span class="count-up" data-target="10">0</span> Régions</h3>
                 </div>
                 <div class="number-card">
                     <div class="number-card-icon">
                         <i class="fa-solid fa-chart-bar"></i>
                     </div>
-                    <h3>50 760 Observations</h3>
+                    <h3><span class="count-up" data-target="OBS_COUNT_PLACEHOLDER">0</span> Observations</h3>
                 </div>
             </div>
         </div>
@@ -706,6 +706,44 @@
                     dot.classList.add('active');
                 }
             });
+        }
+
+        // --- Number Animation ---
+        function animateNumbers() {
+            const counters = document.querySelectorAll('.count-up');
+            counters.forEach(counter => {
+                const target = +counter.getAttribute('data-target');
+                const duration = 2000;
+                let startTimestamp = null;
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    const easeOut = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+                    const current = Math.floor(easeOut * target);
+                    // Use space as thousands separator for FR
+                    counter.innerHTML = current.toLocaleString('fr-FR');
+                    if (progress < 1) {
+                        window.requestAnimationFrame(step);
+                    } else {
+                        counter.innerHTML = target.toLocaleString('fr-FR');
+                    }
+                };
+                window.requestAnimationFrame(step);
+            });
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateNumbers();
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.3 });
+
+        const numbersSection = document.querySelector('.numbers-section');
+        if (numbersSection) {
+            observer.observe(numbersSection);
         }
     </script>
 </body>
